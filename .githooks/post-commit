@@ -1,0 +1,11 @@
+#!/bin/sh
+# After each commit, push the current branch to origin (GitHub).
+# One-time setup: git config core.hooksPath .githooks
+# To skip auto-push for one commit: SKIP_AUTO_PUSH=1 git commit ...
+
+if [ -n "$SKIP_AUTO_PUSH" ]; then
+  exit 0
+fi
+
+branch=$(git symbolic-ref --short HEAD 2>/dev/null) || exit 0
+git push origin "$branch"
