@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>信箱驗證處理中｜imMBA</title>
+  <style>
+    body {
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f0f4fa;
+      color: #24303d;
+    }
+    #msg { font-size: 15px; padding: 24px; text-align: center; max-width: 420px; line-height: 1.55; }
+  </style>
+</head>
+<body>
+  <p id="msg">正在完成信箱驗證，請稍候…</p>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-auth.js"></script>
+  <script>
+    (function () {
+      function goLogin(qs) {
+        location.replace("login.html" + (qs || ""));
+      }
+      (async function () {
+        try {
+          if (window.AdminAuth && window.AdminAuth.diagnoseSupabaseEnv()) {
+            goLogin("?callback=error&reason=" + encodeURIComponent(window.AdminAuth.diagnoseSupabaseEnv()));
+            return;
+          }
+          var sb = window.AdminAuth && window.AdminAuth.getClient();
+          if (!sb) {
+            goLogin("?callback=error&reason=no_client");
+            return;
+          }
+          for (var i = 0; i < 40; i++) {
+            var r = await sb.auth.getSession();
+            if (r.data && r.data.session) {
+              goLogin("?email_verified=1");
+              return;
+            }
+            await new Promise(function (x) { setTimeout(x, 120); });
+          }
+          var hash = (location.hash || "").replace(/^#/, "");
+          if (hash.indexOf("access_token") !== -1 || hash.indexOf("error=") !== -1 || (location.search || "").indexOf("code=") !== -1) {
+            goLogin("?callback=error&reason=no_session");
+            return;
+          }
+          goLogin("");
+        } catch (e) {
+          goLogin("?callback=error&reason=" + encodeURIComponent((e && e.message) || "unknown"));
+        }
+      })();
+    })();
+  </script>
+</body>
+</html>

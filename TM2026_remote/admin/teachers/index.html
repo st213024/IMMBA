@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>師資介紹管理｜imMBA 後台</title>
+  <link rel="stylesheet" href="../admin-shell.css" />
+  <style>
+    :root {
+      --line: #c9d0dc;
+      --text: #1a2332;
+      --muted: #5a6575;
+      --primary-deep: #24303d;
+      --primary: #4a5f72;
+      --panel: #ffffff;
+      --danger: #b65e5e;
+      --surface: #f0f4fa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    body { margin: 0; background: #e8ebf0; color: var(--text); }
+    .admin-main__inner { max-width: 1180px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(15, 52, 96, 0.12);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 26px; color: var(--primary-deep); margin-bottom: 10px; }
+    h2 { font-size: 19px; color: #0f3460; margin-bottom: 12px; }
+    .hint { color: var(--muted); font-size: 14px; margin-bottom: 8px; line-height: 1.65; }
+    .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    label { font-size: 14px; color: #3d4f63; font-weight: 600; }
+    input[type="text"], input[type="email"], input[type="url"], textarea, select {
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbfe;
+      color: var(--text);
+      font-size: 14px;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+      color: #fff;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+      font-size: 14px;
+    }
+    .btn.secondary { background: var(--surface); color: #243652; border: 1px solid var(--line); }
+    .btn.danger { background: var(--danger); }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border-top: 1px solid #dde3ec; padding: 10px 8px; text-align: left; vertical-align: top; font-size: 14px; }
+    th { color: #3d5266; font-weight: 700; }
+    .thumb {
+      width: 56px;
+      height: 56px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .hide { display: none !important; }
+    .shell-hide { display: none !important; }
+    .top-actions { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+    .notice {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #e8f2fc;
+      color: #0f3460;
+      font-size: 14px;
+      border: 1px solid #b8d4f0;
+    }
+    .notice.is-warn { background: #fff8e6; border-color: #f0d896; color: #7a5a1a; }
+    .bilingual-edit {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: start;
+      margin-top: 12px;
+    }
+    .lang-panel {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px 16px;
+      background: #fafcfe;
+      min-width: 0;
+    }
+    .lang-panel--zh { border-left: 4px solid #4a6fa5; }
+    .lang-panel--en { border-left: 4px solid #3d6b58; }
+    .lang-panel h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--primary-deep); }
+    @media (max-width: 920px) {
+      .row { grid-template-columns: 1fr; }
+      .bilingual-edit { grid-template-columns: 1fr; }
+    }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; background: var(--surface); border: 1px solid var(--line); }
+    .mono { font-family: ui-monospace, monospace; font-size: 13px; }
+  </style>
+</head>
+<body data-admin-page="teachers">
+  <div class="admin-app shell-hide" id="teachers-admin-root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main">
+      <div class="admin-main__inner">
+  <main id="teachers-admin-main">
+    <section class="card" id="admin-card">
+      <div class="top-actions">
+        <div>
+          <h1>師資介紹管理</h1>
+          <p class="hint" style="margin:4px 0 0;">
+            狀態：<span id="data-source-label"></span>。資料儲於瀏覽器 <span class="mono">localStorage</span>（<span class="mono">immba_teacher_store_v1</span>）；建議定期匯出 JSON 備份。
+          </p>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" id="new-btn" type="button">新增教師</button>
+          <button class="btn secondary" id="export-btn" type="button">匯出 JSON</button>
+          <button class="btn secondary" id="import-btn" type="button">匯入 JSON</button>
+          <input id="import-file" class="hide" type="file" accept=".json,application/json" />
+          <button class="btn secondary" id="reset-bundled-btn" type="button">還原內建師資</button>
+        </div>
+      </div>
+
+      <div id="notice" class="notice hide"></div>
+
+      <h2>編輯內容</h2>
+      <p class="hint" id="edit-mode-hint">新增模式中。儲存後會出現在下方列表與前台師資頁。</p>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-id">ID（英數／連字，網址用）</label>
+          <input id="f-id" type="text" class="mono" placeholder="例：tu-yining" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="f-group">類別</label>
+          <select id="f-group">
+            <option value="fulltime">專任教師</option>
+            <option value="parttime">兼任教師</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-photo">照片網址</label>
+          <input id="f-photo" type="text" placeholder="https://… 或 images/…" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="bilingual-edit">
+        <div class="lang-panel lang-panel--zh">
+          <h3>中文</h3>
+          <div class="field"><label for="f-zh-name">姓名</label><input id="f-zh-name" type="text" /></div>
+          <div class="field"><label for="f-zh-dept">系所／單位（選填）</label><input id="f-zh-dept" type="text" /></div>
+          <div class="field"><label for="f-zh-title">職稱</label><input id="f-zh-title" type="text" /></div>
+          <div class="field"><label for="f-zh-education">學歷</label><textarea id="f-zh-education" rows="2"></textarea></div>
+          <div class="field"><label for="f-zh-specialties">研究領域</label><textarea id="f-zh-specialties" rows="2"></textarea></div>
+          <div class="field"><label for="f-zh-website">個人網站</label><input id="f-zh-website" type="url" placeholder="https://" /></div>
+          <div class="field"><label for="f-zh-tel">聯絡電話</label><input id="f-zh-tel" type="text" /></div>
+          <div class="field"><label for="f-zh-email">聯絡信箱</label><input id="f-zh-email" type="email" /></div>
+        </div>
+        <div class="lang-panel lang-panel--en">
+          <h3>English</h3>
+          <div class="field"><label for="f-en-name">Name</label><input id="f-en-name" type="text" /></div>
+          <div class="field"><label for="f-en-dept">Department（optional）</label><input id="f-en-dept" type="text" /></div>
+          <div class="field"><label for="f-en-title">Title</label><input id="f-en-title" type="text" /></div>
+          <div class="field"><label for="f-en-education">Education</label><textarea id="f-en-education" rows="2"></textarea></div>
+          <div class="field"><label for="f-en-specialties">Specialties</label><textarea id="f-en-specialties" rows="2"></textarea></div>
+          <div class="field"><label for="f-en-website">Website</label><input id="f-en-website" type="url" placeholder="https://" /></div>
+          <div class="field"><label for="f-en-tel">Phone</label><input id="f-en-tel" type="text" /></div>
+          <div class="field"><label for="f-en-email">E-mail</label><input id="f-en-email" type="email" /></div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:14px;">
+        <button class="btn" id="save-btn" type="button">儲存此位教師</button>
+        <button class="btn secondary" id="clear-btn" type="button">清除表單</button>
+      </div>
+
+      <h2 style="margin-top:22px;">師資列表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>照片</th>
+            <th>類別</th>
+            <th>中文姓名</th>
+            <th>職稱</th>
+            <th>ID</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </section>
+  </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../teacher-data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="../supabase-auth.js"></script>
+  <script src="../require-auth.js"></script>
+  <script src="../admin-sidebar.js"></script>
+  <script src="../admin-readonly.js"></script>
+  <script>
+    (function () {
+      const tbody = document.getElementById("tbody");
+      const notice = document.getElementById("notice");
+      const editHint = document.getElementById("edit-mode-hint");
+      const dataSourceLabel = document.getElementById("data-source-label");
+
+      /** @type {{id:string,group:string,photo:string,zh:any,en:any}[]} */
+      let teachers = [];
+      /** @type {string|null} id being edited; null = new */
+      let editingId = null;
+
+      function showNotice(msg, isWarn) {
+        notice.textContent = msg;
+        notice.classList.toggle("is-warn", Boolean(isWarn));
+        notice.classList.remove("hide");
+      }
+      function hideNotice() {
+        notice.classList.add("hide");
+      }
+
+      function loadListFromApi() {
+        teachers = window.TeacherData.all();
+        dataSourceLabel.textContent = window.TeacherData.hasCustomData()
+          ? "已使用自訂資料（localStorage）"
+          : "目前為內建預設（尚未自訂儲存）";
+      }
+
+      function slugify(s) {
+        return String(s ?? "")
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, "-")
+          .replace(/[^a-z0-9\u4e00-\u9fff-]/gi, "")
+          .slice(0, 48) || "teacher-" + Math.random().toString(36).slice(2, 8);
+      }
+
+      function clearForm() {
+        editingId = null;
+        editHint.textContent = "新增模式中。儲存後會出現在列表與前台。";
+        document.getElementById("f-id").value = "";
+        document.getElementById("f-id").removeAttribute("readonly");
+        document.getElementById("f-group").value = "fulltime";
+        document.getElementById("f-photo").value = "";
+        ["zh", "en"].forEach((lang) => {
+          ["name", "dept", "title", "education", "specialties", "website", "tel", "email"].forEach((k) => {
+            const el = document.getElementById(`f-${lang}-${k}`);
+            if (el) el.value = "";
+          });
+        });
+        hideNotice();
+      }
+
+      function formToRecord() {
+        const idRaw = document.getElementById("f-id").value.trim();
+        const id = idRaw || slugify(document.getElementById("f-zh-name").value || document.getElementById("f-en-name").value);
+        const group = document.getElementById("f-group").value === "parttime" ? "parttime" : "fulltime";
+        const photo = document.getElementById("f-photo").value.trim();
+        const zh = {
+          name: document.getElementById("f-zh-name").value.trim(),
+          dept: document.getElementById("f-zh-dept").value.trim(),
+          title: document.getElementById("f-zh-title").value.trim(),
+          education: document.getElementById("f-zh-education").value.trim(),
+          specialties: document.getElementById("f-zh-specialties").value.trim(),
+          website: document.getElementById("f-zh-website").value.trim(),
+          tel: document.getElementById("f-zh-tel").value.trim(),
+          email: document.getElementById("f-zh-email").value.trim()
+        };
+        const en = {
+          name: document.getElementById("f-en-name").value.trim(),
+          dept: document.getElementById("f-en-dept").value.trim(),
+          title: document.getElementById("f-en-title").value.trim(),
+          education: document.getElementById("f-en-education").value.trim(),
+          specialties: document.getElementById("f-en-specialties").value.trim(),
+          website: document.getElementById("f-en-website").value.trim(),
+          tel: document.getElementById("f-en-tel").value.trim(),
+          email: document.getElementById("f-en-email").value.trim()
+        };
+        return { id, group, photo, zh, en };
+      }
+
+      function fillForm(t) {
+        editingId = t.id;
+        editHint.textContent = `編輯中：${t.zh.name || t.en.name || t.id}（ID 可改，若與他人重複將合併為同一筆）`;
+        document.getElementById("f-id").value = t.id;
+        document.getElementById("f-id").readOnly = true;
+        document.getElementById("f-group").value = t.group === "parttime" ? "parttime" : "fulltime";
+        document.getElementById("f-photo").value = t.photo || "";
+        const z = t.zh || {};
+        const e = t.en || {};
+        document.getElementById("f-zh-name").value = z.name || "";
+        document.getElementById("f-zh-dept").value = z.dept || "";
+        document.getElementById("f-zh-title").value = z.title || "";
+        document.getElementById("f-zh-education").value = z.education || "";
+        document.getElementById("f-zh-specialties").value = z.specialties || "";
+        document.getElementById("f-zh-website").value = z.website || "";
+        document.getElementById("f-zh-tel").value = z.tel || "";
+        document.getElementById("f-zh-email").value = z.email || "";
+        document.getElementById("f-en-name").value = e.name || "";
+        document.getElementById("f-en-dept").value = e.dept || "";
+        document.getElementById("f-en-title").value = e.title || "";
+        document.getElementById("f-en-education").value = e.education || "";
+        document.getElementById("f-en-specialties").value = e.specialties || "";
+        document.getElementById("f-en-website").value = e.website || "";
+        document.getElementById("f-en-tel").value = e.tel || "";
+        document.getElementById("f-en-email").value = e.email || "";
+        hideNotice();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function renderTable() {
+        const sorted = teachers.slice().sort((a, b) => {
+          const g = (a.group === b.group ? 0 : a.group === "fulltime" ? -1 : 1);
+          if (g !== 0) return g;
+          return (a.zh.name || "").localeCompare(b.zh.name || "", "zh-Hant");
+        });
+        tbody.innerHTML = sorted
+          .map((t) => {
+            const ph = t.photo || "";
+            const gLabel = t.group === "parttime" ? "兼任" : "專任";
+            return `<tr>
+              <td><img class="thumb" src="${escapeAttr(ph)}" alt="" loading="lazy" onerror="this.src='../../images/avatar-placeholder.svg'" /></td>
+              <td><span class="badge">${gLabel}</span></td>
+              <td>${escapeHtml(t.zh.name || "—")}</td>
+              <td>${escapeHtml((t.zh.title || "").slice(0, 48))}${(t.zh.title || "").length > 48 ? "…" : ""}</td>
+              <td class="mono">${escapeHtml(t.id)}</td>
+              <td class="actions">
+                <button class="btn secondary btn-edit" type="button" data-id="${escapeAttr(t.id)}">編輯</button>
+                <button class="btn danger btn-del" type="button" data-id="${escapeAttr(t.id)}">刪除</button>
+              </td>
+            </tr>`;
+          })
+          .join("");
+      }
+
+      function escapeHtml(s) {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      function escapeAttr(s) {
+        return escapeHtml(s).replace(/'/g, "&#39;");
+      }
+
+      function persistAndRefresh(msg) {
+        window.TeacherData.saveAll(teachers);
+        loadListFromApi();
+        renderTable();
+        if (msg) showNotice(msg);
+      }
+
+      tbody.addEventListener("click", (ev) => {
+        const editBtn = ev.target.closest(".btn-edit");
+        const delBtn = ev.target.closest(".btn-del");
+        if (editBtn) {
+          const id = editBtn.getAttribute("data-id");
+          const t = teachers.find((x) => x.id === id);
+          if (t) fillForm(t);
+          return;
+        }
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-id");
+          if (!confirm(`確定刪除「${id}」？`)) return;
+          teachers = teachers.filter((x) => x.id !== id);
+          persistAndRefresh("已刪除並儲存。");
+          if (editingId === id) clearForm();
+        }
+      });
+
+      document.getElementById("save-btn").addEventListener("click", () => {
+        const rec = formToRecord();
+        if (!rec.zh.name && !rec.en.name) {
+          showNotice("請至少填寫中文或英文姓名。", true);
+          return;
+        }
+        const dupIndex = teachers.findIndex((t) => t.id === rec.id);
+        if (editingId && editingId !== rec.id) {
+          showNotice("編輯時請勿手動改動 ID；若要新 ID 請用「新增教師」。", true);
+          return;
+        }
+        if (dupIndex === -1) {
+          teachers.push(rec);
+        } else {
+          teachers[dupIndex] = rec;
+        }
+        persistAndRefresh("已儲存。");
+        clearForm();
+      });
+
+      document.getElementById("new-btn").addEventListener("click", () => clearForm());
+      document.getElementById("clear-btn").addEventListener("click", () => clearForm());
+
+      document.getElementById("export-btn").addEventListener("click", () => {
+        const blob = new Blob([window.TeacherData.exportJson()], { type: "application/json;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "immba-teachers.json";
+        a.click();
+        URL.revokeObjectURL(a.href);
+        showNotice("已下載 immba-teachers.json");
+      });
+
+      document.getElementById("import-btn").addEventListener("click", () => document.getElementById("import-file").click());
+      document.getElementById("import-file").addEventListener("change", async (ev) => {
+        const f = ev.target.files?.[0];
+        ev.target.value = "";
+        if (!f) return;
+        try {
+          const text = await f.text();
+          window.TeacherData.importFromJson(text);
+          loadListFromApi();
+          renderTable();
+          clearForm();
+          showNotice("匯入成功并已儲存。");
+        } catch (e) {
+          showNotice("匯入失敗：" + (e.message || String(e)), true);
+        }
+      });
+
+      document.getElementById("reset-bundled-btn").addEventListener("click", () => {
+        if (!confirm("確定清除自訂師資並還原為網站內建資料？此動作無法復原（除非您有 JSON 備份）。")) return;
+        window.TeacherData.resetToBundled();
+        loadListFromApi();
+        renderTable();
+        clearForm();
+        showNotice("已還原為內建師資。");
+      });
+
+
+      (async () => {
+        const ok = await AdminRequireAuth.ensureSession();
+        if (!ok) return;
+        document.getElementById("teachers-admin-root").classList.remove("shell-hide");
+        if (window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.applyIfViewer("#teachers-admin-main");
+        loadListFromApi();
+        renderTable();
+        clearForm();
+      })();
+    })();
+  </script>
+</body>
+</html>

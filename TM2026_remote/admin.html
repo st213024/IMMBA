@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理平台入口｜imMBA</title>
+  <style>
+    :root {
+      --line: #c9d0dc;
+      --text: #1a2332;
+      --muted: #5a6575;
+      --primary-deep: #24303d;
+      --panel: #ffffff;
+      --shadow: rgba(15, 52, 96, 0.12);
+      --surface: #f0f4fa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    body { background: linear-gradient(180deg, #f5f3ed 0%, #e7e9ee 50%, #faf9f6 100%); color: var(--text); }
+    .wrap { width: min(920px, calc(100% - 32px)); margin: 22px auto 40px; }
+    .back-link {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: #243652;
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px var(--shadow);
+      padding: 22px 20px;
+    }
+    h1 { font-size: 26px; color: var(--primary-deep); margin-bottom: 10px; }
+    .hint { color: var(--muted); font-size: 14px; line-height: 1.65; margin-bottom: 18px; max-width: 68ch; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .btn {
+      display: block;
+      text-decoration: none;
+      border-radius: 12px;
+      padding: 18px 16px;
+      border: 1px solid var(--line);
+      background: #f9fbff;
+      color: var(--text);
+      font-weight: 800;
+      font-size: 17px;
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      min-height: 96px;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(15, 52, 96, 0.14);
+    }
+    .btn small {
+      display: block;
+      font-weight: 600;
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
+      color: #f4faf7;
+      border-color: #1e3a30;
+    }
+    @media (max-width: 720px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <a class="back-link" href="index.html">回首頁</a>
+    <section class="card">
+      <h1>管理平台入口</h1>
+      <p class="hint">
+        請先經由 <strong>後台統一登入</strong>（Supabase）驗證身分。登入成功後可管理公告、師資與活動；新帳號預設僅能檢視，須由超級管理員授權為「一般管理者」才可編輯。
+      </p>
+      <div class="grid">
+        <a class="btn btn-primary" href="admin/login.html?next=dashboard.html">
+          後台統一登入
+          <small>註冊、登入、重寄驗證信</small>
+        </a>
+        <a class="btn" href="admin/dashboard.html">
+          後台首頁（已登入）
+          <small>若未登入會自動導向登入頁</small>
+        </a>
+        <a class="btn" href="admin/news/index.html">最新公告管理</a>
+        <a class="btn" href="admin/activities/index.html">活動集錦管理</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

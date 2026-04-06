@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>後台首頁｜imMBA</title>
+  <link rel="stylesheet" href="admin-shell.css" />
+  <style>
+    .dash-meta {
+      font-size: 13px;
+      color: var(--admin-muted);
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body data-admin-page="dashboard">
+  <div class="admin-app shell-hide" id="admin-root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main">
+      <div class="admin-main__inner">
+        <header class="dash-head">
+          <h1>後台首頁</h1>
+          <p>登入帳號：<strong id="dash-user-email">—</strong>（<span id="dash-user-role">—</span>）</p>
+          <p class="dash-meta">
+            公告／活動／師資內容存在<strong>本機瀏覽器</strong>；權限由 Supabase <code>admin_users</code> 管理。
+            <strong id="dash-viewer-note" style="display:none;color:#8a5a1a;">您為僅檢視身分，無法儲存變更。</strong>
+          </p>
+        </header>
+
+        <div class="dash-grid">
+          <article class="dash-card">
+            <h2 class="dash-card__title">最新公告管理</h2>
+            <p class="dash-card__desc">維護首頁與列表顯示之最新消息，支援草稿與發布。</p>
+            <div class="dash-card__stats">
+              <span>已發布 <strong id="stat-news-published">—</strong> 筆</span>
+              <span>草稿 <strong id="stat-news-draft">—</strong> 筆</span>
+            </div>
+            <div class="dash-card__loading" id="stat-news-loading">讀取中…</div>
+            <div class="dash-card__actions">
+              <a class="dash-card__btn" href="news/index.html">前往管理</a>
+            </div>
+          </article>
+
+          <article class="dash-card">
+            <h2 class="dash-card__title">師資介紹管理</h2>
+            <p class="dash-card__desc">專任與兼任教師資料，與前台師資頁同步。</p>
+            <div class="dash-card__stats">
+              <span>目前 <strong id="stat-teachers-count">—</strong> 位教師</span>
+            </div>
+            <div class="dash-card__loading" id="stat-teachers-loading">讀取中…</div>
+            <div class="dash-card__actions">
+              <a class="dash-card__btn" href="teachers/index.html">前往管理</a>
+            </div>
+          </article>
+
+          <article class="dash-card">
+            <h2 class="dash-card__title">活動集錦管理</h2>
+            <p class="dash-card__desc">活動花絮內容，中英對照與發布狀態。</p>
+            <div class="dash-card__stats">
+              <span>已發布 <strong id="stat-act-published">—</strong> 筆</span>
+              <span>草稿 <strong id="stat-act-draft">—</strong> 筆</span>
+            </div>
+            <div class="dash-card__loading" id="stat-act-loading">讀取中…</div>
+            <div class="dash-card__actions">
+              <a class="dash-card__btn" href="activities/index.html">前往管理</a>
+            </div>
+          </article>
+
+          <article class="dash-card" id="dash-card-admins">
+            <h2 class="dash-card__title">管理員權限管理</h2>
+            <p class="dash-card__desc">超級管理員可新增 Email、調整角色（viewer／admin／super_admin）。</p>
+            <div class="dash-card__stats">
+              <span>目前 <strong id="stat-admin-count">—</strong> 位</span>
+            </div>
+            <div class="dash-card__loading" id="stat-admin-loading">…</div>
+            <div class="dash-card__actions">
+              <a class="dash-card__btn dash-card__btn--muted" href="admin-users.html">前往管理</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../activity-pages.js"></script>
+  <script src="../activity-store.js"></script>
+  <script src="../news-store.js"></script>
+  <script src="../teacher-data.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-auth.js"></script>
+  <script src="require-auth.js"></script>
+  <script src="admin-sidebar.js"></script>
+  <script>
+    function hideLoading(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = "none";
+    }
+
+    function refreshLocalStats() {
+      try {
+        const news = window.NewsStore?.listAll?.() || [];
+        let pub = 0;
+        let draft = 0;
+        for (const n of news) {
+          if (n && n.status === "published") pub++;
+          else draft++;
+        }
+        document.getElementById("stat-news-published").textContent = String(pub);
+        document.getElementById("stat-news-draft").textContent = String(draft);
+      } catch (e) {
+        document.getElementById("stat-news-published").textContent = "?";
+        document.getElementById("stat-news-draft").textContent = "?";
+      }
+      hideLoading("stat-news-loading");
+
+      try {
+        const acts = window.ActivityStore?.listAll?.() || [];
+        let ap = 0;
+        let ad = 0;
+        for (const a of acts) {
+          if (a && a.status === "draft") ad++;
+          else ap++;
+        }
+        document.getElementById("stat-act-published").textContent = String(ap);
+        document.getElementById("stat-act-draft").textContent = String(ad);
+      } catch (e) {
+        document.getElementById("stat-act-published").textContent = "?";
+        document.getElementById("stat-act-draft").textContent = "?";
+      }
+      hideLoading("stat-act-loading");
+
+      try {
+        const teachers = window.TeacherData?.all?.() || [];
+        document.getElementById("stat-teachers-count").textContent = String(teachers.length);
+      } catch (e) {
+        document.getElementById("stat-teachers-count").textContent = "?";
+      }
+      hideLoading("stat-teachers-loading");
+    }
+
+    (async function () {
+      const ok = await AdminRequireAuth.ensureSession();
+      if (!ok) return;
+      document.getElementById("admin-root").classList.remove("shell-hide");
+      const sess = window.AdminAuth.getLocalSession();
+      if (sess) {
+        document.getElementById("dash-user-email").textContent = sess.email || "—";
+        const r = sess.role || "";
+        document.getElementById("dash-user-role").textContent =
+          r === "super_admin" ? "超級管理員" : r === "admin" ? "一般管理者" : r === "viewer" ? "僅檢視" : "—";
+        if (r === "viewer") document.getElementById("dash-viewer-note").style.display = "inline";
+      }
+      const adminsCard = document.getElementById("dash-card-admins");
+      if (adminsCard) adminsCard.style.display = window.AdminAuth.isSuperAdmin() ? "" : "none";
+      refreshLocalStats();
+      const adminLoadingEl = document.getElementById("stat-admin-loading");
+      if (window.AdminAuth.isSuperAdmin()) {
+        try {
+          const admins = await window.AdminAuth.listAdminUsers();
+          document.getElementById("stat-admin-count").textContent = String(admins.length);
+        } catch (e) {
+          document.getElementById("stat-admin-count").textContent = "—";
+        }
+        if (adminLoadingEl) adminLoadingEl.style.display = "none";
+      } else {
+        document.getElementById("stat-admin-count").textContent = "—";
+        if (adminLoadingEl) {
+          adminLoadingEl.textContent = "僅超級管理員可檢視";
+          adminLoadingEl.style.fontSize = "12px";
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

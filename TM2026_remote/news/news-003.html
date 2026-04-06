@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新聞詳情 | 輔大開箱日回顧</title>
+  <style>
+    :root {
+      --line: #d8e5de;
+      --text: #2f3f38;
+      --muted: #60756a;
+      --primary: #8cae9f;
+      --primary-deep: #6f9382;
+      --panel: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    body { background: linear-gradient(180deg, #f7fbf9 0%, #eef5f1 50%, #fbfdfc 100%); color: var(--text); }
+    .wrap { width: min(920px, calc(100% - 32px)); margin: 24px auto 40px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 24px rgba(80, 113, 98, 0.14);
+    }
+    .hero {
+      min-height: 280px;
+      background:
+        linear-gradient(130deg, rgba(229, 240, 234, 0.68), rgba(246, 251, 248, 0.9)),
+        url("https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+    }
+    .body { padding: 22px; }
+    h1 { font-size: 30px; margin-bottom: 8px; color: #355046; }
+    .date { color: var(--muted); margin-bottom: 16px; font-size: 14px; }
+    p { line-height: 1.85; margin-top: 10px; color: #395147; }
+    .back {
+      display: inline-block;
+      margin-top: 18px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <article class="card">
+      <div class="hero"></div>
+      <div class="body">
+        <h1>【上週末的輔大開箱日，你也來逛校園了嗎？】</h1>
+        <div class="date">發布日期：2026/03/11</div>
+        <p>上週末開箱日活動吸引眾多參與者到場交流，現場安排課程介紹、學長姐經驗分享與校園導覽，讓訪客更了解國際經管學習環境。</p>
+        <p>透過面對面交流，參與者能掌握課程特色、師資資源與未來職涯發展方向。歡迎持續關注後續活動與招生公告。</p>
+        <a class="back" href="../index.html">返回首頁</a>
+      </div>
+    </article>
+  </main>
+</body>
+</html>

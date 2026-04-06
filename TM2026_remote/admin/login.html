@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>後台統一登入｜imMBA</title>
+  <style>
+    :root {
+      --line: #c9d0dc;
+      --text: #1a2332;
+      --muted: #5a6575;
+      --deep: #24303d;
+      --panel: #fff;
+      --surface: #f0f4fa;
+      --ink: #1e3a30;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f5f3ed 0%, #e7e9ee 50%, #faf9f6 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+    .wrap { width: min(440px, 100%); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(15, 52, 96, 0.12);
+      padding: 26px 22px;
+    }
+    .brand { text-align: center; margin-bottom: 14px; }
+    .brand h1 { font-size: 22px; color: var(--deep); margin-bottom: 6px; font-weight: 800; }
+    .brand p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .sb-status { margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.45; white-space: pre-wrap; }
+    .sb-status.ok { color: #1e6b4a; }
+    .sb-status.err { color: #b65e5e; font-weight: 600; }
+    .top-links { display: flex; justify-content: center; margin-bottom: 14px; }
+    .top-links a {
+      color: #4a5f72;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .top-links a:hover { text-decoration: underline; }
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 4px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    .auth-tab {
+      flex: 1;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+    }
+    .auth-tab--active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(15, 52, 96, 0.08);
+    }
+    .auth-panel[hidden] { display: none !important; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 14px; color: #3d4f63; font-weight: 600; margin-bottom: 6px; }
+    .field-pwd {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fafbfe;
+    }
+    .field-pwd input {
+      flex: 1;
+      border: 0;
+      border-radius: 0;
+      padding: 12px 14px;
+      background: transparent;
+      font-size: 15px;
+      min-width: 0;
+    }
+    .pwd-toggle {
+      border: 0;
+      border-left: 1px solid var(--line);
+      padding: 0 12px;
+      background: #eef2f8;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .pwd-toggle:hover { background: #e2e8f2; }
+    input:not(.field-pwd input) {
+      width: 100%;
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fafbfe;
+      font-size: 15px;
+    }
+    .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, #2a4a3e 0%, var(--ink) 100%);
+      color: #f4faf7;
+    }
+    .btn-secondary { background: var(--surface); border: 1px solid var(--line); color: #243652; }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .notice {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fde8e8;
+      border: 1px solid #f0b4b4;
+      color: #7a2e2e;
+      font-size: 14px;
+      display: none;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .notice.ok { background: #e8f7ef; border-color: #9dcbb0; color: #1e4d32; }
+    .setup-hint {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #e8f7ef;
+      border: 1px solid #9dcbb0;
+      font-size: 13px;
+      line-height: 1.55;
+      color: #1e4d32;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="top-links">
+        <a href="../index.html">返回官網首頁</a>
+      </div>
+      <div class="brand">
+        <h1>後台統一登入</h1>
+        <p>使用 Supabase Auth。首位「完成驗證並登入」者為<strong>超級管理員</strong>；其餘新帳號預設<strong>僅檢視</strong>，須由超級管理員升級為一般管理者後才可編輯內容。</p>
+        <p id="sb-status" class="sb-status" aria-live="polite">正在檢查設定…</p>
+        <p class="brand" style="margin-top:8px;font-size:11px;color:#7a8698;">除錯：網址加上 <code>?debug=1</code></p>
+      </div>
+
+      <div id="setup-hint" class="setup-hint"></div>
+
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab auth-tab--active" id="tab-login" role="tab">登入</button>
+        <button type="button" class="auth-tab" id="tab-register" role="tab">註冊</button>
+      </div>
+
+      <div class="auth-panel" id="panel-login" role="tabpanel">
+        <form id="login-form" autocomplete="on">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="username" required placeholder="name@example.com" />
+          </div>
+          <div class="field">
+            <label for="password">密碼</label>
+            <div class="field-pwd">
+              <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="密碼" />
+              <button type="button" class="pwd-toggle" id="toggle-login-pwd" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="login-btn" type="submit">登入後台</button>
+            <button class="btn btn-secondary" id="resend-btn" type="button">重寄驗證信</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="auth-panel" id="panel-register" role="tabpanel" hidden>
+        <form id="register-form" autocomplete="on">
+          <div class="field">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" autocomplete="email" required placeholder="name@example.com" />
+          </div>
+          <div class="field">
+            <label for="reg-password">密碼</label>
+            <div class="field-pwd">
+              <input id="reg-password" type="password" autocomplete="new-password" required placeholder="至少 6 字" minlength="6" />
+              <button type="button" class="pwd-toggle" id="toggle-reg-pwd" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="reg-password2">確認密碼</label>
+            <div class="field-pwd">
+              <input id="reg-password2" type="password" autocomplete="new-password" required placeholder="再次輸入" />
+              <button type="button" class="pwd-toggle" id="toggle-reg-pwd2" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="register-btn" type="submit">註冊並寄送驗證信</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="notice" class="notice" role="alert"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-auth.js"></script>
+  <script src="require-auth.js"></script>
+  <script>
+    (function () {
+      function bindPwdToggle(btnId, inputId) {
+        var btn = document.getElementById(btnId);
+        var input = document.getElementById(inputId);
+        if (!btn || !input) return;
+        btn.addEventListener("click", function () {
+          var show = input.type === "password";
+          input.type = show ? "text" : "password";
+          btn.setAttribute("aria-label", show ? "隱藏密碼" : "顯示密碼");
+          btn.textContent = show ? "🙈" : "👁";
+        });
+      }
+      bindPwdToggle("toggle-login-pwd", "password");
+      bindPwdToggle("toggle-reg-pwd", "reg-password");
+      bindPwdToggle("toggle-reg-pwd2", "reg-password2");
+
+      var statusEl = document.getElementById("sb-status");
+      var notice = document.getElementById("notice");
+      var setupHint = document.getElementById("setup-hint");
+      var form = document.getElementById("login-form");
+      var regForm = document.getElementById("register-form");
+      var emailEl = document.getElementById("email");
+      var pwdEl = document.getElementById("password");
+      var loginBtn = document.getElementById("login-btn");
+      var registerBtn = document.getElementById("register-btn");
+      var regEmailEl = document.getElementById("reg-email");
+      var regPwdEl = document.getElementById("reg-password");
+      var regPwd2El = document.getElementById("reg-password2");
+      var tabLogin = document.getElementById("tab-login");
+      var tabRegister = document.getElementById("tab-register");
+      var panelLogin = document.getElementById("panel-login");
+      var panelRegister = document.getElementById("panel-register");
+
+      function showNotice(msg, isOk) {
+        notice.textContent = msg;
+        notice.classList.toggle("ok", Boolean(isOk));
+        notice.style.display = msg ? "block" : "none";
+      }
+      function hideNotice() {
+        notice.style.display = "none";
+        notice.textContent = "";
+      }
+
+      function formatErr(err, fallback) {
+        var msg = (err && err.message) || fallback || "發生錯誤。";
+        if (new URLSearchParams(location.search).get("debug") === "1") {
+          if (err && err.supabaseRaw) {
+            msg += "\n\n[debug] supabaseRaw:\n" + JSON.stringify(err.supabaseRaw, null, 2);
+          }
+        }
+        return msg;
+      }
+
+      function getSafeNext() {
+        var q = new URLSearchParams(location.search).get("next");
+        if (window.AdminRequireAuth && window.AdminRequireAuth.safeNext) {
+          return window.AdminRequireAuth.safeNext(q);
+        }
+        var n = String(q || "").trim();
+        if (!n || n.indexOf("..") !== -1) return "dashboard.html";
+        return n;
+      }
+
+      (function readUrlNotice() {
+        var q = new URLSearchParams(location.search);
+        if (q.get("email_verified") === "1") {
+          showNotice("信箱驗證已完成，請登入。", true);
+          var clean = "login.html";
+          if (q.get("debug") === "1") clean += "?debug=1";
+          try {
+            history.replaceState(null, "", clean);
+          } catch (_) {}
+        } else if (q.get("callback") === "error") {
+          var reason = q.get("reason") || "未知";
+          try {
+            reason = decodeURIComponent(reason);
+          } catch (_) {}
+          showNotice("驗證連結處理失敗（" + reason + "）。可改按「重寄驗證信」。", false);
+        }
+      })();
+
+      function showLoginTab() {
+        tabLogin.classList.add("auth-tab--active");
+        tabRegister.classList.remove("auth-tab--active");
+        panelLogin.hidden = false;
+        panelRegister.hidden = true;
+      }
+      function showRegTab() {
+        tabRegister.classList.add("auth-tab--active");
+        tabLogin.classList.remove("auth-tab--active");
+        panelRegister.hidden = false;
+        panelLogin.hidden = true;
+      }
+      tabLogin.addEventListener("click", function () {
+        hideNotice();
+        showLoginTab();
+      });
+      tabRegister.addEventListener("click", function () {
+        hideNotice();
+        showRegTab();
+      });
+
+      async function refreshStatusHint() {
+        var env = window.AdminAuth && window.AdminAuth.diagnoseSupabaseEnv ? window.AdminAuth.diagnoseSupabaseEnv() : null;
+        if (env) {
+          statusEl.textContent = env + "\n（仍可嘗試登入／註冊／重寄信：錯誤將顯示於下方。）";
+          statusEl.className = "sb-status err";
+        } else {
+          try {
+            if (window.AdminAuth.checkConnection) {
+              await window.AdminAuth.checkConnection();
+            }
+            var host = window.AdminAuth.getConfigDisplayHost ? window.AdminAuth.getConfigDisplayHost() : "";
+            statusEl.textContent = host
+              ? "已連線 Supabase（" + host + "）"
+              : "Supabase client 就緒";
+            statusEl.className = "sb-status ok";
+          } catch (e) {
+            statusEl.textContent =
+              (e && e.message ? String(e.message) : "連線檢查失敗") +
+              "\n（登入／註冊／重寄信仍可直接操作，由 Supabase 回應結果為準。）";
+            statusEl.className = "sb-status err";
+          }
+        }
+        try {
+          if (window.AdminAuth.adminUsersIsEmpty && (await window.AdminAuth.adminUsersIsEmpty())) {
+            setupHint.style.display = "block";
+            setupHint.textContent =
+              "目前尚無任何管理者列：您註冊並完成信箱驗證後，「第一位成功登入」者將自動成為超級管理員。";
+          }
+        } catch (_) {}
+      }
+
+      async function tryRedirectIfAlreadyIn() {
+        try {
+          await window.AdminAuth.bootstrapFromSupabase();
+          if (window.AdminAuth.hasLocalSession()) {
+            location.replace(getSafeNext());
+          }
+        } catch (_) {}
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        hideNotice();
+        loginBtn.disabled = true;
+        try {
+          await window.AdminAuth.signInAdmin(emailEl.value, pwdEl.value);
+          showNotice("登入成功…", true);
+          location.replace(getSafeNext());
+        } catch (err) {
+          showNotice(formatErr(err, "登入失敗。"), false);
+        } finally {
+          loginBtn.disabled = false;
+        }
+      });
+
+      regForm.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        hideNotice();
+        if (regPwdEl.value !== regPwd2El.value) {
+          showNotice("兩次密碼不一致。", false);
+          return;
+        }
+        registerBtn.disabled = true;
+        try {
+          var res = await window.AdminAuth.signUp(regEmailEl.value, regPwdEl.value);
+          var msg = "已送出註冊，請至信箱點驗證連結後再回「登入」。";
+          if (res && res.needsEmailVerification) {
+            msg += "\n若收不到信請用「重寄驗證信」或至 Supabase Dashboard 手動確認 Email。";
+          }
+          showNotice(msg, true);
+          emailEl.value = regEmailEl.value.trim();
+        } catch (err) {
+          showNotice((err && err.message) || "註冊失敗。", false);
+        } finally {
+          registerBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("resend-btn").addEventListener("click", async function () {
+        hideNotice();
+        try {
+          await window.AdminAuth.resendSignupEmail(emailEl.value);
+          showNotice("已向 Supabase 送出重寄驗證信請求。請查收件匣與垃圾信。", true);
+        } catch (err) {
+          showNotice(formatErr(err, "重寄失敗。"), false);
+        }
+      });
+
+      refreshStatusHint();
+      tryRedirectIfAlreadyIn();
+    })();
+  </script>
+</body>
+</html>

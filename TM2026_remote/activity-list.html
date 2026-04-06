@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>活動集錦</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-wrap-2col {
+      width: min(1180px, calc(100% - 32px));
+      margin: 18px auto 40px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0px;
+    }
+
+    .side-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #FFFFFF;
+      padding: 14px;
+      box-shadow: 0 8px 20px var(--shadow);
+      height: fit-content;
+    }
+
+    .side-card h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .side-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .side-card a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 10px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    }
+
+    .side-card a:hover {
+      background: #F4F8FF;
+      border-color: var(--line);
+      color: var(--primary-deep);
+    }
+
+    .side-card a.is-active {
+      background: #EAF3FF;
+      border-color: #C7D9F5;
+      color: var(--primary-deep);
+    }
+
+    .content-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #FFFFFF;
+      box-shadow: 0 8px 20px var(--shadow);
+      overflow: hidden;
+    }
+
+    .content-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #F4F8FF;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .activity-row-list {
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .activity-row {
+      display: grid;
+      grid-template-columns: minmax(0, 332px) 1fr;
+      gap: 18px;
+      align-items: stretch;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 14px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 4px 14px rgba(15, 52, 96, 0.07);
+      transition:
+        transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 220ms ease,
+        border-color 220ms ease;
+    }
+
+    .activity-row:hover {
+      transform: translateY(-6px);
+      border-color: rgba(63, 106, 165, 0.4);
+      box-shadow:
+        0 14px 28px rgba(63, 106, 165, 0.14),
+        0 28px 48px rgba(15, 52, 96, 0.1);
+    }
+
+    .activity-row:focus-visible {
+      outline: 2px solid var(--accent-muted);
+      outline-offset: 3px;
+    }
+
+    .activity-row-media {
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #e8eef6;
+      width: 100%;
+      max-width: 332px;
+      aspect-ratio: 332 / 217;
+      position: relative;
+      align-self: start;
+    }
+
+    .activity-row-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .activity-row-body {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 0;
+      padding: 4px 4px 4px 0;
+    }
+
+    .activity-row .title {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.35;
+    }
+
+    .activity-row .date {
+      font-size: 13px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    .activity-row .excerpt {
+      font-size: 15px;
+      line-height: 1.75;
+      color: #334a70;
+      margin: 0;
+    }
+
+    .activity-readmore {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 14px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      background: #e8f2fc;
+      color: var(--primary-deep);
+      border: 1px solid #c7d9f5;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+      box-shadow: none;
+      transition:
+        background 200ms ease,
+        color 200ms ease,
+        border-color 200ms ease,
+        box-shadow 200ms ease;
+    }
+
+    .activity-row:hover .activity-readmore {
+      background: linear-gradient(180deg, #3d6b58 0%, #2a4a3e 55%, #1e3a30 100%);
+      color: #f4faf7;
+      border-color: rgba(255, 255, 255, 0.18);
+      box-shadow:
+        0 4px 12px rgba(30, 58, 48, 0.35),
+        0 2px 4px rgba(20, 40, 32, 0.25);
+    }
+
+    @media (max-width: 720px) {
+      .page-wrap-2col {
+        grid-template-columns: 1fr;
+      }
+      .activity-row {
+        grid-template-columns: 1fr;
+      }
+      .activity-row-media {
+        width: min(332px, 100%);
+        margin-inline: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="announcement-bar" role="region" aria-label="網站公告">
+    <div class="container announcement-bar-inner">
+      <p class="announcement-bar-text">
+        <span class="announcement-bar-lead">林軒如科技管理作業｜正式網站請參考：</span>
+        <a
+          class="announcement-bar-program"
+          href="https://www.management.fju.edu.tw/subweb/immba/subindex.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="輔仁大學國際經營管理碩士班 (imMBA) 官方入口"
+        >輔仁大學國際經營管理碩士班(imMBA)</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-brand">
+        <span
+          class="topbar-logo-wrap"
+          id="topbar-logo-admin-trigger"
+          role="button"
+          tabindex="0"
+          title="連按兩下滑鼠左鍵可開啟後台管理"
+          aria-label="系所識別標誌。連按兩下可開啟後台管理。"
+        >
+          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <span class="topbar-logo-wordmark">imMBA</span>
+        </span>
+        <a
+          class="topbar-name"
+          href="index.html"
+          title="回到首頁"
+          aria-label="回到首頁：輔仁大學國際經營管理碩士班 (imMBA)"
+        >
+          <span class="topbar-name-zh">輔仁大學國際經營管理碩士<span class="topbar-name-inline">班<span class="topbar-name-abbr">(imMBA)</span></span></span>
+        </a>
+      </div>
+      <nav class="topbar-links" aria-label="快速連結">
+        <a href="news-list.html">公告</a>
+        <a href="https://www.management.fju.edu.tw/" target="_blank" rel="noopener noreferrer">輔大管理學院</a>
+        <a href="index-en.html" class="topbar-lang" lang="en">EN</a>
+      </nav>
+    </div>
+  </div>
+
+  <nav class="main-nav" aria-label="主要導覽">
+    <div class="container nav-row">
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">簡介</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">招生資訊</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">課程資訊</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+        </div>
+      </div>
+      <div class="nav-item"><a class="nav-link" href="teacher.html">師資介紹</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=243" target="_blank" rel="noopener noreferrer">imMBA全攻略</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=48" target="_blank" rel="noopener noreferrer">畢業與離校</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=79" target="_blank" rel="noopener noreferrer">跨國雙碩士</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=142" target="_blank" rel="noopener noreferrer">海外交換</a></div>
+      <div class="nav-item"><a class="nav-link" href="activity-list.html" aria-current="page">活動集錦</a></div>
+    </div>
+  </nav>
+
+  <main class="page-wrap-2col">
+    <section class="content-card">
+      <div class="content-header">活動集錦（列表）</div>
+      <div id="activity-row-list" class="activity-row-list"></div>
+    </section>
+  </main>
+
+  <script src="activity-pages.js"></script>
+  <script src="activity-store.js"></script>
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      const container = document.getElementById("activity-row-list");
+      const items = window.activityPages?.activities || [];
+      const excerptMaxChars = 150;
+      const isEn = document.documentElement.lang === "en";
+      const readMoreLabel = "Read More";
+
+      function escapeHtml(s) {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function stripNewlines(s) {
+        return String(s || "").replace(/\s+/g, " ").trim();
+      }
+
+      function excerptFromText(text) {
+        const t = stripNewlines(text);
+        const truncated = t.length > excerptMaxChars;
+        const shown = truncated ? t.slice(0, excerptMaxChars) + "..." : t;
+        return { shown, truncated };
+      }
+
+      const published = items.filter((x) => (x.status ?? "published") === "published");
+
+      container.innerHTML = published
+        .map((item) => {
+          const title = isEn
+            ? item.titleEn || item.titleZh || item.title
+            : item.titleZh || item.title;
+          const href = isEn
+            ? `activity-detail-en.html?idx=${encodeURIComponent(item.idx)}`
+            : `activity-detail.html?idx=${encodeURIComponent(item.idx)}`;
+
+          const date = isEn ? item.dateEn || item.date : item.date;
+          const summaryText = isEn
+            ? item.summaryEn || (Array.isArray(item.contentEn) ? item.contentEn.join(" ") : item.paragraphsEn)
+            : item.summaryZh || (Array.isArray(item.contentZh) ? item.contentZh.join(" ") : item.paragraphs);
+          const { shown, truncated } = excerptFromText(summaryText);
+          const safeTitle = escapeHtml(title);
+          const safeDate = escapeHtml(date);
+          const safeShown = escapeHtml(shown);
+          const imgSrc =
+            item.imageUrl ||
+            item.imageSrc ||
+            "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80";
+
+          return `
+            <a class="activity-row" href="${href}">
+              <div class="activity-row-media">
+                <img src="${escapeHtml(imgSrc)}" alt="${safeTitle}" loading="lazy" decoding="async" />
+              </div>
+              <div class="activity-row-body">
+                <div class="title">${safeTitle}</div>
+                <time class="date">${safeDate}</time>
+                <p class="excerpt">${safeShown}</p>
+                ${truncated ? `<span class="activity-readmore">${escapeHtml(readMoreLabel)}</span>` : ""}
+              </div>
+            </a>
+          `;
+        })
+        .join("");
+    })();
+  </script>
+</body>
+</html>
+

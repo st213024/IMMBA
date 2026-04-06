@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity Highlights (Details)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* Two-column layout for activity detail page */
+    .activity-detail-wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 18px auto 40px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0px;
+    }
+
+    .activity-detail-nav {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #FFFFFF;
+      padding: 14px;
+      box-shadow: 0 8px 20px var(--shadow);
+      height: fit-content;
+      display: none; /* Remove Navigation sidebar */
+    }
+
+    .activity-detail-nav h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .activity-detail-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .activity-detail-nav a {
+      display: block;
+      padding: 9px 10px;
+      border-radius: 10px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: background 120ms ease, border-color 120ms ease;
+    }
+
+    .activity-detail-nav a:hover {
+      background: #F4F8FF;
+      border-color: var(--line);
+      color: var(--primary-deep);
+    }
+
+    .activity-detail-nav a.is-active {
+      background: #EAF3FF;
+      border-color: #C7D9F5;
+      color: var(--primary-deep);
+    }
+
+    .activity-detail-content {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #FFFFFF;
+      box-shadow: 0 8px 20px var(--shadow);
+      overflow: hidden;
+    }
+
+    .activity-detail-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: #F4F8FF;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .activity-detail-body {
+      padding: 26px 26px 30px;
+    }
+
+    .activity-post {
+      border-top: 1px dashed var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
+    }
+
+    .activity-post:first-child {
+      border-top: 0;
+      padding-top: 0;
+      margin-top: 0;
+    }
+
+    .activity-post h3 {
+      font-size: 22px;
+      margin-bottom: 4px;
+      color: var(--text);
+    }
+
+    .activity-post .post-date {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .activity-post p {
+      font-size: 16.5px;
+      line-height: 1.9;
+      color: #334a70;
+      margin-bottom: 10px;
+    }
+
+    .activity-post figure {
+      margin: 18px auto;
+      width: 332px;
+      max-width: 100%;
+    }
+
+    .activity-post figure img {
+      width: 100%;
+      aspect-ratio: 332 / 217;
+      height: auto;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      display: block;
+    }
+
+    .activity-post figcaption {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .activity-detail-wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="announcement-bar announcement-bar--en" role="region" aria-label="Site notice">
+    <div class="container announcement-bar-inner">
+      <p class="announcement-bar-text">
+        <span class="announcement-bar-lead">Technology management assignment (Lin Hsuan-Ju) | Official site: </span>
+        <a
+          class="announcement-bar-program"
+          href="https://www.management.fju.edu.tw/subweb/immba/subindex.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Official imMBA program portal (Fu Jen Catholic University)"
+        >International MBA (imMBA)</a><span class="announcement-bar-sep" aria-hidden="true">｜</span><span class="announcement-bar-rest">College of Management, Fu Jen Catholic University｜Official announcements and admissions information on this website</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-brand">
+        <span
+          class="topbar-logo-wrap"
+          id="topbar-logo-admin-trigger"
+          role="button"
+          tabindex="0"
+          title="Double-click to open admin"
+          aria-label="Program mark. Double-click to open admin."
+        >
+          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <span class="topbar-logo-wordmark">imMBA</span>
+        </span>
+        <a
+          class="topbar-name"
+          href="index-en.html"
+          title="Home"
+          aria-label="Home: International MBA (imMBA), Fu Jen Catholic University"
+        >
+          <span class="topbar-name-zh">Fu Jen Catholic University</span>
+          <span class="topbar-name-abbr">International MBA (imMBA)</span>
+        </a>
+      </div>
+      <nav class="topbar-links" aria-label="Quick links">
+        <a href="news-list-en.html">News</a>
+        <a href="https://www.management.fju.edu.tw/" target="_blank" rel="noopener noreferrer">College of Management</a>
+        <a href="index.html" class="topbar-lang" lang="zh-Hant">中文</a>
+      </nav>
+    </div>
+  </div>
+
+  <nav class="main-nav" aria-label="Main navigation">
+    <div class="container nav-row">
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Overview</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Admissions</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Academics</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+        </div>
+      </div>
+      <div class="nav-item"><a class="nav-link" href="teacher-en.html">Faculty</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=243" target="_blank" rel="noopener noreferrer">Program Guide</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=48" target="_blank" rel="noopener noreferrer">Graduation</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=79" target="_blank" rel="noopener noreferrer">Double Master</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=142" target="_blank" rel="noopener noreferrer">Exchange</a></div>
+      <div class="nav-item"><a class="nav-link" href="activity-list-en.html" aria-current="page">Activities</a></div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="activity-detail-wrap">
+      <section class="activity-detail-content">
+        <div class="activity-detail-header" id="activity-detail-header">
+          <span id="activity-detail-title">Activity Highlights (Details)</span>
+          <a id="activity-lang-switch" href="#" style="margin-left:12px;font-size:12px;font-weight:800;color:var(--primary-deep);text-decoration:none;">中文</a>
+        </div>
+        <div class="activity-detail-body"></div>
+      </section>
+    </div>
+  </main>
+
+  <script src="activity-pages.js"></script>
+  <script src="activity-store.js"></script>
+  <script>
+    (function () {
+      const headerEl = document.getElementById("activity-detail-header");
+      const bodyEl = document.querySelector(".activity-detail-body");
+      const activities = window.activityPages?.activities || [];
+      if (!headerEl || !bodyEl || !activities.length) return;
+
+      const isEn = document.documentElement.lang === "en";
+      const params = new URLSearchParams(window.location.search);
+      const idxRaw = params.get("idx");
+      const idx = idxRaw === null ? activities[0].idx : Number(idxRaw);
+      const item = activities.find((x) => x.idx === idx) || activities[0];
+
+      const langSwitch = document.getElementById("activity-lang-switch");
+      const titleSpan = document.getElementById("activity-detail-title");
+
+      const title = isEn ? item.titleEn || item.titleZh || item.title : item.titleZh || item.title;
+      const date = isEn ? item.dateEn || item.date : item.date;
+      const caption = isEn ? item.imageCaptionEn || item.captionEn || item.imageCaptionZh || item.caption : item.imageCaptionZh || item.caption;
+      const paragraphs = isEn ? item.contentEn || item.paragraphsEn || item.paragraphs : item.contentZh || item.paragraphs;
+
+      const escapeHtml = (s) =>
+        String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+
+      if (titleSpan) titleSpan.textContent = title;
+      if (langSwitch) {
+        langSwitch.textContent = isEn ? "中文" : "English";
+        langSwitch.href = isEn
+          ? `activity-detail.html?idx=${encodeURIComponent(item.idx)}`
+          : `activity-detail-en.html?idx=${encodeURIComponent(item.idx)}`;
+      }
+
+      if (item.status && item.status !== "published") {
+        bodyEl.innerHTML = `
+          <article class="activity-post">
+            <h3>${escapeHtml(title)}</h3>
+            <p style="color: var(--muted); margin: 0;">This activity is currently a draft, so full content is not shown on the front end.</p>
+          </article>
+        `;
+        return;
+      }
+
+      bodyEl.innerHTML = `
+        <article class="activity-post">
+          <h3>${escapeHtml(title)}</h3>
+          <time class="post-date">${escapeHtml(date)}</time>
+          <figure>
+            <img
+              src="${escapeHtml(
+                item.imageUrl || item.imageSrc || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80'
+              )}"
+              alt="${escapeHtml(title)}"
+            />
+            ${caption ? `<figcaption>${caption}</figcaption>` : ""}
+          </figure>
+          ${(paragraphs || []).map((p) => `<p>${escapeHtml(p)}</p>`).join("")}
+        </article>
+      `;
+    })();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
+

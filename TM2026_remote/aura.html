@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>能量視覺化（MVP）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="announcement-bar" role="region" aria-label="網站公告">
+    <div class="container announcement-bar-inner">
+      <p class="announcement-bar-text">
+        <span class="announcement-bar-lead">林軒如科技管理作業｜正式網站請參考：</span>
+        <a
+          class="announcement-bar-program"
+          href="https://www.management.fju.edu.tw/subweb/immba/subindex.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="輔仁大學國際經營管理碩士班 (imMBA) 官方入口"
+        >輔仁大學國際經營管理碩士班(imMBA)</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-brand">
+        <span
+          class="topbar-logo-wrap"
+          id="topbar-logo-admin-trigger"
+          role="button"
+          tabindex="0"
+          title="連按兩下滑鼠左鍵可開啟後台管理"
+          aria-label="系所識別標誌。連按兩下可開啟後台管理。"
+        >
+          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <span class="topbar-logo-wordmark">imMBA</span>
+        </span>
+        <a
+          class="topbar-name"
+          href="index.html"
+          title="回到首頁"
+          aria-label="回到首頁：輔仁大學國際經營管理碩士班 (imMBA)"
+        >
+          <span class="topbar-name-zh">輔仁大學國際經營管理碩士<span class="topbar-name-inline">班<span class="topbar-name-abbr">(imMBA)</span></span></span>
+        </a>
+      </div>
+      <nav class="topbar-links" aria-label="快速連結">
+        <a href="news-list.html">公告</a>
+        <a href="https://www.management.fju.edu.tw/" target="_blank" rel="noopener noreferrer">輔大管理學院</a>
+        <a href="index-en.html" class="topbar-lang" lang="en">EN</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="header header--tools">
+    <div class="container header-inner">
+      <p class="header-tagline">本頁為能量視覺化體驗（MVP），僅供示範、不作醫療或診斷用途</p>
+      <div class="header-tools-end" style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; flex: 0 1 auto; justify-content: flex-end">
+        <div class="aura-actions">
+          <button id="aura-start" class="aura-btn" type="button">啟動攝影機</button>
+          <button id="aura-snapshot" class="aura-btn aura-btn-secondary" type="button" disabled>截圖 + 產生報告</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="main-nav" aria-label="主要導覽">
+    <div class="container nav-row">
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">簡介</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">招生資訊</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">課程資訊</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+        </div>
+      </div>
+      <div class="nav-item"><a class="nav-link" href="teacher.html">師資介紹</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=243" target="_blank" rel="noopener noreferrer">imMBA全攻略</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=48" target="_blank" rel="noopener noreferrer">畢業與離校</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=79" target="_blank" rel="noopener noreferrer">跨國雙碩士</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=142" target="_blank" rel="noopener noreferrer">海外交換</a></div>
+      <div class="nav-item"><a class="nav-link" href="activity-list.html">活動集錦</a></div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="section">
+      <div class="aura-grid">
+        <div class="aura-stage" aria-label="即時畫面與能量視覺化">
+          <div class="aura-stage-top">
+            <div class="aura-pill" id="aura-status">狀態：尚未啟動</div>
+            <div class="aura-pill" id="aura-fps">FPS：--</div>
+            <div class="aura-pill" id="aura-score">能量：--</div>
+          </div>
+
+          <div class="aura-canvas-wrap">
+            <video id="aura-video" playsinline muted></video>
+            <canvas id="aura-canvas" width="960" height="540"></canvas>
+          </div>
+
+          <div class="aura-note">
+            這是「視覺化體驗」的 MVP：以影像特徵生成光暈與 7 指標，**不**作醫療或診斷用途。
+          </div>
+        </div>
+
+        <aside class="aura-panel" aria-label="指標儀表板">
+          <h3 class="section-title">七項指標（示意）</h3>
+          <div class="chakra-list" id="chakra-list"></div>
+
+          <div class="aura-controls">
+            <label class="aura-label">
+              光暈強度
+              <input id="aura-intensity" type="range" min="0" max="100" value="62" />
+            </label>
+            <label class="aura-label">
+              色彩偏移
+              <input id="aura-hue" type="range" min="0" max="360" value="210" />
+            </label>
+            <label class="aura-label">
+              平滑度
+              <input id="aura-smoothing" type="range" min="0" max="100" value="78" />
+            </label>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="index.html">首頁</a>
+        <a href="activities.html" target="_blank" rel="noopener noreferrer">活動集錦</a>
+      </div>
+      <div class="copyright">Demo page — generated visualization, not measurement.</div>
+    </div>
+  </footer>
+
+  <script src="aura-app.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
+

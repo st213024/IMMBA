@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>最新公告管理模組</title>
+  <style>
+    :root{
+      --bg:#e8eaee;
+      --panel:#fff;
+      --line:#c9d0dc;
+      --text:#1a2332;
+      --muted:#5a6575;
+      --primary-deep:#24303d;
+      --primary:#4a5f72;
+      --shadow:rgba(15,52,96,.12);
+      --radius:14px;
+      --danger:#b65e5e;
+      --success:#2f8a5d;
+      --surface:#f0f4fa;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;}
+    body{background:linear-gradient(180deg,#f5f3ed 0%,#e7e9ee 44%,#faf9f6 100%);color:var(--text);}
+    .container{width:min(1180px,calc(100% - 32px));margin:18px auto 40px;}
+    .card{
+      background:var(--panel);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:0 10px 24px var(--shadow);
+      overflow:hidden;
+      margin-top:14px;
+    }
+    .card-header{
+      padding:14px 16px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      background:var(--surface);
+    }
+    .title{
+      font-size:18px;
+      font-weight:800;
+      color:var(--primary-deep);
+    }
+    .actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .btn{
+      border:0;
+      border-radius:10px;
+      padding:10px 14px;
+      font-weight:700;
+      cursor:pointer;
+      color:#fff;
+      background:linear-gradient(90deg,var(--primary-deep),var(--primary));
+    }
+    .btn.secondary{background:var(--surface);color:#243652;border:1px solid var(--line);}
+    .btn.danger{background:var(--danger);}
+    .btn.ghost{background:transparent;color:#243652;border:1px solid var(--line);}
+    .hint{color:var(--muted);font-size:13px;margin-top:4px;}
+
+    .table-wrap{padding:14px 16px;}
+    table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    thead th{
+      text-align:left;
+      font-size:13px;
+      color:#3d5266;
+      padding:10px 8px;
+      border-bottom:1px solid #dde3ec;
+      background:#fafbfe;
+      position:sticky;top:0;
+      z-index:1;
+    }
+    tbody td{
+      border-top:1px solid #dde3ec;
+      padding:10px 8px;
+      vertical-align:top;
+      font-size:14px;
+    }
+    .cell-input{
+      width:100%;
+      border:1px solid #b8c4d6;
+      border-radius:10px;
+      padding:9px 10px;
+      background:#fafbfe;
+      color:var(--text);
+      font-size:14px;
+    }
+    select.cell-input{padding:9px 10px;}
+    textarea.cell-input{min-height:72px;resize:vertical;}
+
+    .op-row{display:flex;gap:6px;flex-wrap:wrap;}
+    .op-btn{
+      border:1px solid var(--line);
+      background:var(--surface);
+      color:#243652;
+      border-radius:10px;
+      padding:7px 10px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:12px;
+      transition:transform 120ms ease, background 120ms ease;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .op-btn:hover{background:#e3ebf7;transform:translateY(-1px);}
+    .op-btn.danger{background:#ffecec;border-color:#f0c5c5;color:#9b3f3f;}
+    .error-box{
+      margin:12px 16px 0;
+      border:1px solid #f0c5c5;
+      background:#fff5f5;
+      color:#8b2d2d;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:14px;
+      display:none;
+    }
+    .success-box{
+      margin:12px 16px 0;
+      border:1px solid #bfe7d2;
+      background:#f2fbf6;
+      color:#1f6d46;
+      padding:10px 12px;
+      border-radius:12px;
+      font-size:14px;
+      display:none;
+    }
+
+    .preview-wrap{padding:14px 16px;}
+    .lang-toggle{display:flex;gap:8px;flex-wrap:wrap;}
+    .lang-toggle .btn{padding:9px 12px;font-size:13px;border-radius:999px;}
+    .lang-toggle .btn.secondary{border:1px solid var(--line);}
+
+    .preview-list{
+      margin-top:12px;
+      border:1px solid #c9d0dc;
+      border-radius:12px;
+      overflow:hidden;
+      background:#faf9f6;
+    }
+    .preview-item{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 14px;
+      border-top:1px solid #dde3ec;
+      align-items:flex-start;
+    }
+    .preview-item:first-child{border-top:0;}
+    .preview-date{color:var(--muted);font-size:13px;white-space:nowrap;padding-top:2px;}
+    .preview-title{font-size:15px;font-weight:800;color:var(--primary-deep);line-height:1.35;}
+    .preview-title a:hover{text-decoration:underline;color:var(--primary);}
+    .preview-title a{color:var(--primary-deep);}
+
+    .switch-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    button[disabled]{opacity:.65;cursor:not-allowed;}
+    @media (max-width: 900px){
+      table{display:block;overflow:auto;white-space:nowrap;}
+      thead th{position:relative;}
+      .html-export{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="title">最新公告 News 管理</div>
+        <div class="hint">上方：表格式編輯（新增/刪除/儲存/排序）。下方：即時預覽（可切換中文/英文）。</div>
+        <div class="switch-row" style="margin-top:10px;">
+          <a class="btn ghost" href="index.html">回首頁</a>
+          <a class="btn ghost" href="admin/dashboard.html">Dashboard</a>
+          <a class="btn ghost" href="admin/dashboard.html">返回後台首頁</a>
+          <button class="btn secondary" type="button" disabled>News（公告管理）</button>
+        </div>
+        </div>
+        <div class="actions">
+          <button class="btn secondary" id="btn-add-row" type="button">新增一列公告</button>
+          <button class="btn" id="btn-save" type="button">儲存</button>
+        </div>
+      </div>
+
+      <div class="error-box" id="error-box"></div>
+      <div class="success-box" id="success-box">儲存成功</div>
+
+      <div class="table-wrap">
+        <div style="max-height:420px;overflow:auto;border:1px solid #dde3ec;border-radius:12px;background:#fff;">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:140px;">日期</th>
+                <th style="width:240px;">中文標題</th>
+                <th style="width:240px;">英文標題</th>
+                <th style="width:360px;">連結網址</th>
+                <th style="width:120px;">狀態</th>
+                <th style="width:110px;">排序</th>
+                <th style="width:220px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="news-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="preview-wrap">
+        <div class="card-header" style="border:0;border-bottom:1px solid var(--line);padding:0;background:transparent;margin-bottom:6px;">
+          <div>
+            <div class="title" style="font-size:16px;">最新公告預覽區</div>
+            <div class="hint">可切換中文/英文顯示；預覽僅顯示已發布（published）。</div>
+          </div>
+          <div class="lang-toggle">
+            <button class="btn secondary" type="button" id="lang-zh">中文模式</button>
+            <button class="btn secondary" type="button" id="lang-en">English Mode</button>
+          </div>
+        </div>
+
+        <div class="preview-list" id="preview-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="news-admin-module.js"></script>
+</body>
+</html>
+

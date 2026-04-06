@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理員權限管理｜imMBA</title>
+  <link rel="stylesheet" href="admin-shell.css" />
+  <style>
+    .admin-main__inner { max-width: 900px; }
+    .card {
+      background: #fff;
+      border: 1px solid #c9d0dc;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 10px 24px rgba(15, 52, 96, 0.1);
+    }
+    h1 { font-size: 24px; color: #24303d; margin-bottom: 10px; }
+    .hint { color: #5a6575; font-size: 14px; line-height: 1.6; margin-bottom: 14px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { border-top: 1px solid #dde3ec; padding: 10px 8px; text-align: left; }
+    th { color: #3d5266; }
+    .field { margin-bottom: 12px; }
+    label { display: block; font-weight: 600; margin-bottom: 6px; }
+    input, select { width: 100%; max-width: 400px; padding: 10px; border-radius: 10px; border: 1px solid #b8c4d6; }
+    .btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 0;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
+      color: #f4faf7;
+    }
+    .btn.secondary { background: #f0f4fa; color: #243652; border: 1px solid #c9d0dc; }
+    .notice { margin-top: 12px; padding: 10px; border-radius: 10px; display: none; }
+    .notice.ok { display: block; background: #e8f7ef; border: 1px solid #9dcbb0; color: #1e4d32; }
+    .notice.err { display: block; background: #fde8e8; border: 1px solid #f0b4b4; color: #7a2e2e; }
+    .shell-hide { display: none !important; }
+  </style>
+</head>
+<body data-admin-page="admin-users">
+  <div class="admin-app shell-hide" id="admin-root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main">
+      <div class="admin-main__inner">
+        <div class="card">
+          <h1>管理員權限管理</h1>
+          <p class="hint">
+            僅<strong>超級管理員</strong>可編輯。已註冊但尚未列入表內的帳號，可先用對方 Email 新增列並設為
+            <code>viewer</code> 或 <code>admin</code>；已會自動建立列的帳號可直接改角色。
+          </p>
+          <div id="notice" class="notice"></div>
+          <form id="add-form">
+            <div class="field">
+              <label for="em">Email</label>
+              <input id="em" type="email" required placeholder="name@example.com" />
+            </div>
+            <div class="field">
+              <label for="role">角色</label>
+              <select id="role">
+                <option value="viewer">viewer（僅檢視）</option>
+                <option value="admin">admin（可編輯內容）</option>
+                <option value="super_admin">super_admin（最高權限）</option>
+              </select>
+            </div>
+            <div class="field">
+              <label><input id="active" type="checkbox" checked /> 啟用</label>
+            </div>
+            <button type="submit" class="btn">新增或更新</button>
+          </form>
+        </div>
+        <div class="card">
+          <h2>列表</h2>
+          <div id="table-wrap">讀取中…</div>
+        </div>
+        <a class="btn secondary" href="dashboard.html" style="display:inline-block;text-decoration:none;">回首頁</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-auth.js"></script>
+  <script src="require-auth.js"></script>
+  <script src="admin-sidebar.js"></script>
+  <script>
+    (function () {
+      var notice = document.getElementById("notice");
+      function showNotice(msg, ok) {
+        notice.textContent = msg;
+        notice.className = "notice " + (ok ? "ok" : "err");
+      }
+      async function refresh() {
+        var wrap = document.getElementById("table-wrap");
+        try {
+          var rows = await window.AdminAuth.listAdminUsers();
+          if (!rows.length) {
+            wrap.innerHTML = "<p>尚無列。</p>";
+            return;
+          }
+          var html =
+            "<table><thead><tr><th>Email</th><th>角色</th><th>啟用</th><th></th></tr></thead><tbody>";
+          for (var i = 0; i < rows.length; i++) {
+            var r = rows[i];
+            html +=
+              "<tr><td>" +
+              (r.email || "") +
+              "</td><td>" +
+              (r.role || "") +
+              "</td><td>" +
+              (r.is_active ? "是" : "否") +
+              '</td><td><button type="button" class="del-btn" data-email="' +
+              (r.email || "").replace(/"/g, "&quot;") +
+              '">刪除</button></td></tr>';
+          }
+          html += "</tbody></table>";
+          wrap.innerHTML = html;
+          wrap.querySelectorAll(".del-btn").forEach(function (b) {
+            b.addEventListener("click", async function () {
+              if (!confirm("確定刪除此列？")) return;
+              try {
+                await window.AdminAuth.removeAdminUser(b.getAttribute("data-email"));
+                showNotice("已刪除。", true);
+                await refresh();
+              } catch (e) {
+                showNotice((e && e.message) || "刪除失敗", false);
+              }
+            });
+          });
+        } catch (e) {
+          wrap.innerHTML = "<p>讀取失敗：" + (e && e.message) + "</p>";
+        }
+      }
+      document.getElementById("add-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        try {
+          await window.AdminAuth.upsertAdminUser(
+            document.getElementById("em").value,
+            document.getElementById("role").value,
+            document.getElementById("active").checked
+          );
+          showNotice("已儲存。", true);
+          document.getElementById("em").value = "";
+          await refresh();
+        } catch (err) {
+          showNotice((err && err.message) || "失敗", false);
+        }
+      });
+      (async function () {
+        var ok = await AdminRequireAuth.ensureSession({ requireSuperAdmin: true });
+        if (!ok) return;
+        document.getElementById("admin-root").classList.remove("shell-hide");
+        await refresh();
+      })();
+    })();
+  </script>
+</body>
+</html>

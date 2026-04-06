@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>最新公告管理｜imMBA 後台</title>
+  <link rel="stylesheet" href="../admin-shell.css" />
+  <style>
+    :root {
+      --line: #c9d0dc;
+      --text: #1a2332;
+      --muted: #5a6575;
+      --primary-deep: #24303d;
+      --primary: #4a5f72;
+      --panel: #ffffff;
+      --danger: #b65e5e;
+      --surface: #f0f4fa;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+    body { margin: 0; background: #e8ebf0; color: var(--text); }
+    .admin-main__inner { max-width: 1080px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px rgba(15, 52, 96, 0.12);
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+    h1 { font-size: 26px; color: var(--primary-deep); margin-bottom: 10px; }
+    h2 { font-size: 20px; color: #0f3460; margin-bottom: 10px; }
+    .hint { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    label { font-size: 14px; color: #3d4f63; }
+    input[type="text"], input[type="password"], input[type="number"], input[type="date"], textarea, select {
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      padding: 10px;
+      background: #fafbfe;
+      color: var(--text);
+    }
+    textarea { min-height: 140px; resize: vertical; }
+    .inline { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary-deep), var(--primary));
+      color: #fff;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn.secondary { background: var(--surface); color: #243652; border: 1px solid var(--line); }
+    .btn.danger { background: var(--danger); }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border-top: 1px solid #dde3ec; padding: 10px 6px; text-align: left; vertical-align: top; font-size: 14px; }
+    th { color: #3d5266; font-weight: 700; }
+    .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+    .thumb {
+      width: 72px;
+      height: 52px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .preview-wrap { margin-top: 6px; }
+    .status-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--surface);
+      color: #0f3460;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .notice {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #e8f2fc;
+      color: #0f3460;
+      font-size: 14px;
+      border: 1px solid #b8d4f0;
+    }
+    .hide { display: none; }
+    .top-actions { display: flex; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+    .switch-row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+    }
+    button[disabled]{opacity:.65;cursor:not-allowed;}
+    .shell-hide{display:none !important;}
+    @media (max-width: 760px) {
+      .row { grid-template-columns: 1fr; }
+      table { font-size: 13px; }
+    }
+  </style>
+</head>
+<body data-admin-page="news">
+  <div class="admin-app shell-hide" id="news-admin-root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main">
+      <div class="admin-main__inner">
+  <main id="news-admin-main">
+    <section class="card" id="admin-card">
+      <div class="top-actions">
+        <h1>最新公告管理</h1>
+        <div class="actions">
+          <button class="btn secondary" id="reset-form" type="button">清除表單</button>
+        </div>
+      </div>
+
+      <h2>新增 / 編輯消息</h2>
+      <div class="row">
+        <div class="field">
+          <label for="news-id">消息編號</label>
+          <input id="news-id" type="text" placeholder="例如 n-3261" />
+        </div>
+        <div class="field">
+          <label for="news-date">發布日期</label>
+          <input id="news-date" type="date" />
+        </div>
+      </div>
+      <div class="field">
+        <label for="news-title">消息標題</label>
+        <input id="news-title" type="text" placeholder="請輸入消息標題" />
+      </div>
+      <div class="field">
+        <label for="news-content">文章內容</label>
+        <textarea id="news-content" placeholder="請輸入完整文章內容"></textarea>
+      </div>
+      <div class="field">
+        <label for="news-url">外部連結</label>
+        <input id="news-url" type="text" placeholder="https://www.management.fju.edu.tw/subweb/immba/news-detail.php?NID=xxxx" />
+      </div>
+      <div class="row">
+        <div class="field">
+          <label for="news-order">顯示排序</label>
+          <input id="news-order" type="number" value="1" />
+        </div>
+        <div class="field">
+          <label>文章狀態</label>
+          <div class="inline">
+            <span class="status-badge" id="status-badge">草稿</span>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="news-image">消息圖片</label>
+        <input id="news-image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+        <div class="preview-wrap">
+          <img id="news-image-preview" class="thumb" alt="消息圖片預覽" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn secondary" id="save-draft-btn" type="button">儲存草稿</button>
+        <button class="btn" id="publish-btn" type="button">發布文章</button>
+      </div>
+      <p class="hint" style="margin-top:10px; line-height:1.65;">
+        儲存草稿：寫入列表為草稿，下次登入可繼續編輯，前台最新公告<strong>不會</strong>顯示。<br />
+        發布文章：通過必填檢查後會標示為已發布，與前台首頁／公告列表同步。
+      </p>
+      <div id="form-notice" class="notice hide"></div>
+    </section>
+
+    <section class="card" id="list-card">
+      <h2>消息列表</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>標題</th>
+            <th>日期</th>
+            <th>圖片</th>
+            <th>狀態</th>
+            <th>外部連結</th>
+            <th>排序</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="news-tbody"></tbody>
+      </table>
+    </section>
+  </main>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../news-store.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="../supabase-auth.js"></script>
+  <script src="../require-auth.js"></script>
+  <script src="../admin-sidebar.js"></script>
+  <script src="../admin-readonly.js"></script>
+  <script>
+    const tbody = document.getElementById("news-tbody");
+    const fallbackImage = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=70";
+
+    const inputs = {
+      id: document.getElementById("news-id"),
+      title: document.getElementById("news-title"),
+      content: document.getElementById("news-content"),
+      date: document.getElementById("news-date"),
+      external_url: document.getElementById("news-url"),
+      sort_order: document.getElementById("news-order"),
+      cover_image: "",
+      image_name: "",
+      file: document.getElementById("news-image"),
+      preview: document.getElementById("news-image-preview")
+    };
+    const statusBadge = document.getElementById("status-badge");
+    const noticeEl = document.getElementById("form-notice");
+
+    function showNotice(text) {
+      noticeEl.textContent = text;
+      noticeEl.classList.remove("hide");
+      setTimeout(() => noticeEl.classList.add("hide"), 2000);
+    }
+
+    function setStatusLabel(status) {
+      statusBadge.textContent = status === "published" ? "已發布" : "草稿";
+    }
+
+    function updatePreview(url) {
+      inputs.preview.src = url || fallbackImage;
+    }
+
+    function clearForm() {
+      inputs.id.value = "";
+      inputs.title.value = "";
+      inputs.date.value = "";
+      inputs.content.value = "";
+      inputs.external_url.value = "";
+      inputs.sort_order.value = "1";
+      inputs.cover_image = "";
+      inputs.image_name = "";
+      inputs.file.value = "";
+      setStatusLabel("draft");
+      updatePreview("");
+    }
+
+    function fillForm(item) {
+      inputs.id.value = item.id;
+      inputs.title.value = item.title;
+      inputs.date.value = item.date;
+      inputs.content.value = item.content || "";
+      inputs.external_url.value = item.external_url;
+      inputs.sort_order.value = String(item.sort_order);
+      inputs.cover_image = item.image_url || "";
+      inputs.image_name = item.image_name || "";
+      inputs.file.value = "";
+      setStatusLabel(item.status || "draft");
+      updatePreview(inputs.cover_image);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderTable() {
+      const rows = window.NewsStore.listAll();
+      tbody.innerHTML = rows.map((item) => `
+        <tr>
+          <td>${item.title}</td>
+          <td>${item.date}</td>
+          <td><img class="thumb" src="${item.image_url || fallbackImage}" alt="${item.title}"></td>
+          <td>${item.status === "published" ? "已發布" : "草稿"}</td>
+          <td>${item.external_url ? `<a href="${item.external_url}" target="_blank" rel="noopener noreferrer">${item.external_url}</a>` : "—"}</td>
+          <td>${item.sort_order}</td>
+          <td>
+            <div class="actions">
+              <button class="btn secondary edit-btn" data-id="${item.id}" type="button">編輯</button>
+              <button class="btn danger del-btn" data-id="${item.id}" type="button">刪除</button>
+            </div>
+          </td>
+        </tr>
+      `).join("");
+
+      document.querySelectorAll(".edit-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          const item = window.NewsStore.listAll().find((n) => n.id === id);
+          if (item) fillForm(item);
+        });
+      });
+
+      document.querySelectorAll(".del-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-id");
+          if (!confirm("確定刪除此消息？")) return;
+          window.NewsStore.removeItem(id);
+          renderTable();
+        });
+      });
+    }
+
+    document.getElementById("reset-form").addEventListener("click", clearForm);
+
+    inputs.file.addEventListener("change", () => {
+      const [file] = inputs.file.files || [];
+      if (!file) return;
+      const allow = ["image/jpeg", "image/png", "image/webp"];
+      if (!allow.includes(file.type)) {
+        alert("請上傳 jpg、jpeg、png 或 webp 圖片。");
+        inputs.file.value = "";
+        return;
+      }
+      inputs.image_name = file.name || "";
+      inputs.cover_image = URL.createObjectURL(file);
+      updatePreview(inputs.cover_image);
+    });
+
+    function buildPayload(status) {
+      return {
+        id: inputs.id.value.trim() || `n-${Date.now()}`,
+        title: inputs.title.value.trim(),
+        date: inputs.date.value.trim(),
+        content: inputs.content.value.trim(),
+        external_url: inputs.external_url.value.trim(),
+        image_url: inputs.cover_image || "",
+        image_name: inputs.image_name || "",
+        sort_order: Number(inputs.sort_order.value || 0),
+        status,
+        is_published: status === "published"
+      };
+    }
+
+    function validateCommon(item, status) {
+      if (status === "draft") return true;
+      if (!item.title) {
+        alert("發布前請填寫消息標題");
+        return false;
+      }
+      if (!item.date) {
+        alert("發布前請選擇發布日期");
+        return false;
+      }
+      return true;
+    }
+
+    function saveWithStatus(status) {
+      try {
+        if (!window.NewsStore || typeof window.NewsStore.saveItem !== "function") {
+          showNotice("系統未載入完成，請重新整理後再試一次。");
+          return;
+        }
+
+        const item = buildPayload(status);
+        if (!validateCommon(item, status)) return;
+
+        const saved = window.NewsStore.saveItem(item);
+        renderTable();
+        fillForm(saved);
+        showNotice(
+          status === "published"
+            ? "已發布，前台公告已同步"
+            : "草稿已儲存，可稍後從列表繼續編輯；前台不會顯示"
+        );
+      } catch (err) {
+        console.error("[admin/news] saveWithStatus error:", err);
+        showNotice(`儲存失敗：${err?.message || "未知錯誤"}`);
+      }
+    }
+
+    document.getElementById("save-draft-btn")?.addEventListener("click", () => {
+      saveWithStatus("draft");
+    });
+
+    document.getElementById("publish-btn")?.addEventListener("click", () => {
+      saveWithStatus("published");
+    });
+
+    updatePreview("");
+    setStatusLabel("draft");
+    (async () => {
+      const ok = await AdminRequireAuth.ensureSession();
+      if (!ok) return;
+      document.getElementById("news-admin-root").classList.remove("shell-hide");
+      if (window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.applyIfViewer("#news-admin-main");
+      renderTable();
+    })();
+  </script>
+</body>
+</html>

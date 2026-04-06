@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faculty | imMBA, Fu Jen Catholic University</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="announcement-bar" role="region" aria-label="Site notice">
+    <div class="container announcement-bar-inner">
+      <p class="announcement-bar-text">
+        <span class="announcement-bar-lead">Technology management assignment (Lin Hsuan-Ju) | Official site: </span>
+        <a
+          class="announcement-bar-program"
+          href="https://www.management.fju.edu.tw/subweb/immba/subindex.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Official imMBA program portal (Fu Jen Catholic University)"
+        >International MBA (imMBA)</a>
+      </p>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <div class="topbar-brand">
+        <span
+          class="topbar-logo-wrap"
+          id="topbar-logo-admin-trigger"
+          role="button"
+          tabindex="0"
+          title="Double-click to open admin"
+          aria-label="Program mark. Double-click to open admin."
+        >
+          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <span class="topbar-logo-wordmark">imMBA</span>
+        </span>
+        <a
+          class="topbar-name"
+          href="index-en.html"
+          title="Home"
+          aria-label="Home: International MBA (imMBA), Fu Jen Catholic University"
+        >
+          <span class="topbar-name-zh">Fu Jen Catholic University</span>
+          <span class="topbar-name-abbr">International MBA (imMBA)</span>
+        </a>
+      </div>
+      <nav class="topbar-links" aria-label="Quick links">
+        <a href="news-list-en.html">News</a>
+        <a href="https://www.management.fju.edu.tw/" target="_blank" rel="noopener noreferrer">College of Management</a>
+        <a href="teacher.html" class="topbar-lang" lang="zh-Hant">中文</a>
+      </nav>
+    </div>
+  </div>
+
+  <nav class="main-nav" aria-label="Main navigation">
+    <div class="container nav-row">
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Overview</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Admissions</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+        </div>
+      </div>
+      <div class="nav-item">
+        <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Academics</button>
+        <div class="submenu">
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+        </div>
+      </div>
+      <div class="nav-item"><a class="nav-link is-active" href="teacher-en.html" aria-current="page">Faculty</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=243" target="_blank" rel="noopener noreferrer">Program Guide</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=48" target="_blank" rel="noopener noreferrer">Graduation</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=79" target="_blank" rel="noopener noreferrer">Double Master</a></div>
+      <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=142" target="_blank" rel="noopener noreferrer">Exchange</a></div>
+      <div class="nav-item"><a class="nav-link" href="activity-list-en.html">Activities</a></div>
+    </div>
+  </nav>
+
+  <main class="container teacher-page">
+    <section class="section teacher-hero">
+      <h1 class="teacher-title">Faculty</h1>
+      <div class="teacher-filter-row" aria-label="Faculty filter and search">
+        <div class="teacher-legacy-filter">
+          <h2 class="teacher-legacy-subtitle">Full-time faculty</h2>
+          <span class="teacher-legacy-hint">Please select a category</span>
+          <button class="teacher-tab is-active" type="button" role="tab" aria-selected="true" data-group="fulltime">Full-time faculty</button>
+          <button class="teacher-tab" type="button" role="tab" aria-selected="false" data-group="parttime">Part-time faculty</button>
+        </div>
+        <div class="teacher-actions teacher-actions--row-end">
+          <label class="teacher-search">
+            <span class="sr-only">Search faculty</span>
+            <input id="teacher-q" type="search" placeholder="Search name / specialties / education…" autocomplete="off" />
+          </label>
+        </div>
+      </div>
+
+      <div id="teacher-list" class="teacher-grid" aria-live="polite"></div>
+      <p id="teacher-empty" class="teacher-empty hide">No matching faculty found.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="#">Related Links</a>
+        <a href="#">Photo Highlights</a>
+        <a href="#">Contact Us</a>
+        <a href="admin/login.html?next=dashboard.html">Admin</a>
+      </div>
+      <div>Contact: No. 510, Zhongzheng Rd., Xinzhuang Dist., New Taipei City | Tel: (02) 2905-0000</div>
+      <div class="copyright">Copyright © 2012-2026 College of Management, Fu Jen Catholic University</div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script src="teacher-data.js"></script>
+  <script>
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function renderCard(t) {
+      const en = t.en || {};
+      const href = `teacher-detail-en.html?id=${encodeURIComponent(t.id)}`;
+      const photo = t.photo || "images/avatar-placeholder.svg";
+      const ariaDetail = escapeHtml(`${en.name || "Faculty"} — profile`);
+
+      const deptBlock = en.dept
+        ? `<p class="teacher-card-dept">${escapeHtml(en.dept)}</p>`
+        : "";
+
+      const eduBlock = en.education
+        ? `<section class="teacher-card-section"><h3 class="teacher-section-label">Education</h3><p class="teacher-section-text">${escapeHtml(en.education)}</p></section>`
+        : "";
+
+      const specBlock = en.specialties
+        ? `<section class="teacher-card-section"><h3 class="teacher-section-label">Research / specialties</h3><p class="teacher-section-text">${escapeHtml(en.specialties)}</p></section>`
+        : "";
+
+      const contactRows = [];
+      if (en.website) {
+        contactRows.push(
+          `<div class="teacher-contact-row"><span class="teacher-contact-key">Website</span><span class="teacher-contact-val"><a href="${escapeHtml(en.website)}" target="_blank" rel="noopener noreferrer">${escapeHtml(en.website)}</a></span></div>`
+        );
+      }
+      if (en.tel) {
+        contactRows.push(
+          `<div class="teacher-contact-row"><span class="teacher-contact-key">Phone</span><span class="teacher-contact-val">${escapeHtml(en.tel)}</span></div>`
+        );
+      }
+      if (en.email) {
+        contactRows.push(
+          `<div class="teacher-contact-row"><span class="teacher-contact-key">E-mail</span><span class="teacher-contact-val"><a href="mailto:${escapeHtml(en.email)}">${escapeHtml(en.email)}</a></span></div>`
+        );
+      }
+      const contactBlock = contactRows.length
+        ? `<section class="teacher-card-section"><h3 class="teacher-section-label">Contact</h3><div class="teacher-contact-list">${contactRows.join("")}</div></section>`
+        : "";
+
+      return `
+        <article class="teacher-card teacher-card--list">
+          <a class="teacher-card-hit" href="${href}" aria-label="${ariaDetail}"></a>
+          <div class="teacher-card-photo" aria-hidden="true">
+            <img class="teacher-photo" src="${escapeHtml(photo)}" alt="" loading="lazy" decoding="async" />
+          </div>
+          <div class="teacher-card-body">
+            <header class="teacher-card-head">
+              <h2 class="teacher-name">${escapeHtml(en.name || "")}</h2>
+              ${deptBlock}
+              <p class="teacher-role">${escapeHtml(en.title || "")}</p>
+            </header>
+            ${eduBlock}
+            ${specBlock}
+            ${contactBlock}
+          </div>
+        </article>
+      `;
+    }
+
+    function tokensForTeacher(t) {
+      const en = t.en || {};
+      return [en.name, en.dept, en.title, en.education, en.specialties, en.tel, en.email]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+    }
+
+    const listEl = document.getElementById("teacher-list");
+    const emptyEl = document.getElementById("teacher-empty");
+    const qEl = document.getElementById("teacher-q");
+    const tabEls = Array.from(document.querySelectorAll(".teacher-tab"));
+    let group = "fulltime";
+
+    function setActiveTab(nextGroup) {
+      group = nextGroup;
+      tabEls.forEach((btn) => {
+        const isActive = btn.dataset.group === group;
+        btn.classList.toggle("is-active", isActive);
+        btn.setAttribute("aria-selected", isActive ? "true" : "false");
+      });
+      render();
+    }
+
+    function render() {
+      const q = String(qEl?.value ?? "").trim().toLowerCase();
+      const teachers = window.TeacherData?.byGroup?.(group) || [];
+      const filtered = q ? teachers.filter((t) => tokensForTeacher(t).includes(q)) : teachers;
+      listEl.innerHTML = filtered.map(renderCard).join("");
+      emptyEl.classList.toggle("hide", filtered.length > 0);
+    }
+
+    tabEls.forEach((btn) => btn.addEventListener("click", () => setActiveTab(btn.dataset.group)));
+    qEl?.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
