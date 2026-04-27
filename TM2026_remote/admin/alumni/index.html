@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>????? | imMBA ??</title>
+  <link rel="stylesheet" href="../admin-shell.css" />
+  <style>
+    .admin-main__inner { max-width: 1280px; }
+    .head { margin-bottom: 16px; }
+    .head h1 { font-size: 22px; font-weight: 800; color: #14212f; margin: 0 0 6px; }
+    .head p { margin: 0; font-size: 14px; color: var(--admin-muted); line-height: 1.55; }
+    .card { background: #fff; border: 1px solid var(--admin-line); border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(15, 52, 96, 0.06); }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .btn { border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: var(--admin-font); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn.primary { background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%); color: #f4faf7; }
+    .btn.muted { background: #eef1f6; color: #243652; border: 1px solid var(--admin-line); }
+    .wrap { overflow-x: auto; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
+    th, td { border-top: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; vertical-align: top; }
+    th { background: #f8fafc; color: #334155; font-weight: 700; white-space: nowrap; }
+    td.num { text-align: center; color: #64748b; font-weight: 600; width: 44px; }
+    .notice { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; font-size: 14px; display: none; }
+    .notice.on { display: block; }
+    .msg { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; display: none; }
+    .msg.ok { display: block; background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+    .msg.err { display: block; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .hide { display: none !important; }
+    .back { font-size: 14px; color: #475569; text-decoration: none; margin-right: 12px; }
+    .back:hover { color: #2563eb; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 80; align-items: center; justify-content: center; padding: 20px; }
+    .overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 92vh; overflow: auto; padding: 20px 22px; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
+    .modal h2 { margin: 0 0 14px; font-size: 18px; color: #14212f; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+    @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 13px; font-weight: 700; color: #334155; }
+    .field input, .field select, .field textarea { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; font-size: 14px; font-family: inherit; }
+    .field textarea { min-height: 72px; resize: vertical; }
+    .full { grid-column: 1 / -1; }
+    .actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+    .shell-hide { display: none !important; }
+  </style>
+</head>
+<body data-admin-page="alumni">
+  <div class="admin-app shell-hide" id="root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main"><div class="admin-main__inner">
+      <header class="head">
+        <a class="back" href="../dashboard.html">&larr; ???</a>
+        <h1>?????</h1>
+        <p>????????????????????????????????????????????</p>
+      </header>
+      <div id="viewer" class="notice">?????????????????????</div>
+      <div class="card">
+        <div class="toolbar">
+          <button class="btn primary" id="newBtn" type="button">??</button>
+          <button class="btn muted" id="importBtn" type="button">?? CSV</button>
+          <button class="btn muted" id="downloadTemplateBtn" type="button">??CSV??</button>
+          <button class="btn primary" id="saveBtn" type="button" disabled>????</button>
+          <button class="btn muted" id="reloadBtn" type="button">????</button>
+          <input id="fileInput" class="hide" type="file" accept=".csv,text/csv" />
+        </div>
+        <div id="msg" class="msg"></div>
+        <div class="wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="num">#</th><th>??</th><th>??</th><th>??</th><th>??</th><th>????</th><th>????</th><th>????</th><th>??</th><th>????</th><th>??</th><th>??</th><th>??</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div></div>
+  </div>
+
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <h2 id="modalTitle">????</h2>
+      <form id="form">
+        <input id="f_id" type="hidden" />
+        <div class="grid">
+          <div class="field"><label for="f_name">?? *</label><input id="f_name" required maxlength="80" /></div>
+          <div class="field"><label for="f_sid">?? *</label><input id="f_sid" required maxlength="32" pattern="[0-9A-Za-z-]*" /></div>
+          <div class="field"><label for="f_dept">?? *</label><input id="f_dept" required maxlength="120" /></div>
+          <div class="field"><label for="f_prog">?? *</label><select id="f_prog" required><option value="">???</option><option>???</option><option>???</option><option>???</option><option>??</option></select></div>
+          <div class="field"><label for="f_enroll">???? *</label><input id="f_enroll" required maxlength="4" inputmode="numeric" pattern="[0-9]{2,4}" /></div>
+          <div class="field"><label for="f_grad">????</label><input id="f_grad" maxlength="4" inputmode="numeric" /></div>
+          <div class="field"><label for="f_email">???? *</label><input id="f_email" type="email" required maxlength="120" /></div>
+          <div class="field"><label for="f_phone">??</label><input id="f_phone" maxlength="40" /></div>
+          <div class="field"><label for="f_company">????</label><input id="f_company" maxlength="120" /></div>
+          <div class="field"><label for="f_job">??</label><input id="f_job" maxlength="80" /></div>
+          <div class="field full"><label for="f_remarks">??</label><textarea id="f_remarks" maxlength="2000"></textarea></div>
+        </div>
+        <div class="actions">
+          <button class="btn muted" id="cancelBtn" type="button">??</button>
+          <button class="btn primary" type="submit">????</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../../alumni-store.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="../supabase-auth.js"></script>
+  <script src="../require-auth.js"></script>
+  <script src="../admin-readonly.js"></script>
+  <script src="../admin-sidebar.js"></script>
+  <script>
+    (function () {
+      var TEXT = {
+        title: "\u6821\u53cb\u8cc7\u6599\u5eab | imMBA \u5f8c\u53f0",
+        back: "\u2190 \u63a7\u5236\u53f0",
+        h1: "\u6821\u53cb\u8cc7\u6599\u5eab",
+        desc: "\u6b04\u4f4d\uff1a\u59d3\u540d\u3001\u5b78\u865f\u3001\u7cfb\u6240\u3001\u5b78\u5236\u3001\u5165\u5b78\u5e74\u5ea6\u3001\u7562\u696d\u5e74\u5ea6\u3001\u96fb\u5b50\u90f5\u4ef6\u3001\u96fb\u8a71\u3001\u73fe\u8077\u516c\u53f8\u3001\u8077\u7a31\u3001\u5099\u8a3b\u3002",
+        viewer: "\u6aa2\u8996\u8005\u6b0a\u9650\u4e0d\u53ef\u65b0\u589e\u3001\u7de8\u8f2f\u3001\u522a\u9664\u6216\u532f\u5165\u8cc7\u6599\u3002",
+      };
+
+      function e(id){ return document.getElementById(id); }
+      function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+      function n(v){ return String(v||"").trim(); }
+      function low(v){ return n(v).toLowerCase(); }
+      function ro(){ return !!(window.AdminAuth && window.AdminAuth.isContentReadOnly && window.AdminAuth.isContentReadOnly()); }
+      function clone(rows){ return (rows||[]).map(function(r){ return { ...r }; }); }
+      function now(){ return new Date().toISOString(); }
+      function idGen(){ return "alumni-"+Date.now()+"-"+Math.random().toString(36).slice(2,8); }
+      function key(r){ return [r.id||"",r.name||"",r.student_id||"",r.department||"",r.program||"",r.enroll_year||"",r.grad_year||"",low(r.email),r.phone||"",r.company||"",r.job_title||"",r.remarks||""].join("|"); }
+      function snap(rows){ return clone(rows).sort(function(a,b){ return String(a.id).localeCompare(String(b.id)); }).map(key).join("\n"); }
+      function dirty(){ return snap(draftRows)!==snap(baseRows); }
+      function setMsg(text, ok){ var m=e("msg"); if(!text){ m.className="msg"; m.textContent=""; return; } m.className="msg "+(ok?"ok":"err"); m.textContent=text; }
+      function sync(){ e("saveBtn").disabled = ro() || !dirty(); }
+      function sortRows(rows){ return clone(rows).sort(function(a,b){ var sa=a.student_id||"", sb=b.student_id||""; if(sa!==sb) return sa.localeCompare(sb,"zh-Hant"); return (a.name||"").localeCompare(b.name||"","zh-Hant"); }); }
+      function rowById(rows,id){ return rows.find(function(x){ return x.id===id; }) || null; }
+      function dupSid(rows,sid,ignore){ var s=n(sid); return rows.some(function(x){ return n(x.student_id)===s && x.id!==ignore; }); }
+      function normalizeRow(raw,id){
+        return { id:id||raw.id||idGen(), name:n(raw.name), student_id:n(raw.student_id), department:n(raw.department), program:n(raw.program), enroll_year:n(raw.enroll_year), grad_year:n(raw.grad_year), email:low(raw.email), phone:n(raw.phone), company:n(raw.company), job_title:n(raw.job_title), remarks:n(raw.remarks), created_at:raw.created_at||now(), updated_at:now() };
+      }
+
+      function applyStaticZh() {
+        document.title = TEXT.title;
+        var back = document.querySelector(".back");
+        var h1 = document.querySelector(".head h1");
+        var p = document.querySelector(".head p");
+        if (back) back.textContent = TEXT.back;
+        if (h1) h1.textContent = TEXT.h1;
+        if (p) p.textContent = TEXT.desc;
+        if (e("viewer")) e("viewer").textContent = TEXT.viewer;
+        if (e("newBtn")) e("newBtn").textContent = "\u65b0\u589e";
+        if (e("importBtn")) e("importBtn").textContent = "\u532f\u5165 CSV";
+        if (e("saveBtn")) e("saveBtn").textContent = "\u5132\u5b58\u8b8a\u66f4";
+        if (e("downloadTemplateBtn")) e("downloadTemplateBtn").textContent = "\u4e0b\u8f09CSV\u7bc4\u672c";
+        if (e("reloadBtn")) e("reloadBtn").textContent = "\u91cd\u65b0\u8f09\u5165";
+        if (e("modalTitle")) e("modalTitle").textContent = "\u65b0\u589e\u6821\u53cb";
+        if (e("cancelBtn")) e("cancelBtn").textContent = "\u53d6\u6d88";
+        var submitBtn = document.querySelector("#form button[type='submit']");
+        if (submitBtn) submitBtn.textContent = "\u52a0\u5165\u8349\u7a3f";
+
+        var head = document.querySelectorAll("thead th");
+        var headers = ["#", "\u59d3\u540d", "\u5b78\u865f", "\u7cfb\u6240", "\u5b78\u5236", "\u5165\u5b78\u5e74\u5ea6", "\u7562\u696d\u5e74\u5ea6", "\u96fb\u5b50\u90f5\u4ef6", "\u96fb\u8a71", "\u73fe\u8077\u516c\u53f8", "\u8077\u7a31", "\u5099\u8a3b", "\u64cd\u4f5c"];
+        head.forEach(function(th, i){ if(headers[i]) th.textContent = headers[i]; });
+
+        var labels = {
+          f_name: "\u59d3\u540d *",
+          f_sid: "\u5b78\u865f *",
+          f_dept: "\u7cfb\u6240 *",
+          f_prog: "\u5b78\u5236 *",
+          f_enroll: "\u5165\u5b78\u5e74\u5ea6 *",
+          f_grad: "\u7562\u696d\u5e74\u5ea6",
+          f_email: "\u96fb\u5b50\u90f5\u4ef6 *",
+          f_phone: "\u96fb\u8a71",
+          f_company: "\u73fe\u8077\u516c\u53f8",
+          f_job: "\u8077\u7a31",
+          f_remarks: "\u5099\u8a3b",
+        };
+        Object.keys(labels).forEach(function(id){
+          var lab = document.querySelector("label[for='"+id+"']");
+          if (lab) lab.textContent = labels[id];
+        });
+
+        var sel = e("f_prog");
+        if (sel && sel.options.length >= 5) {
+          sel.options[0].text = "\u8acb\u9078\u64c7";
+          sel.options[1].text = "\u5b78\u58eb\u73ed";
+          sel.options[2].text = "\u78a9\u58eb\u73ed";
+          sel.options[3].text = "\u535a\u58eb\u73ed";
+          sel.options[4].text = "\u5176\u4ed6";
+        }
+      }
+
+      function validate(row){ if(!row.name||!row.student_id||!row.department||!row.program||!row.enroll_year||!row.email) throw new Error("\u5fc5\u586b\u6b04\u4f4d\uff1a\u59d3\u540d\u3001\u5b78\u865f\u3001\u7cfb\u6240\u3001\u5b78\u5236\u3001\u5165\u5b78\u5e74\u5ea6\u3001\u96fb\u5b50\u90f5\u4ef6\u3002"); }
+
+      var baseRows = [];
+      var draftRows = [];
+
+      function render(){
+        var rows = sortRows(draftRows), tb=e("tbody");
+        if(!rows.length){ tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:#64748b;padding:28px;">\u76ee\u524d\u6c92\u6709\u8cc7\u6599\uff0c\u8acb\u6309\u300c\u65b0\u589e\u300d\u6216\u300c\u532f\u5165 CSV\u300d\u3002</td></tr>'; return; }
+        var html="";
+        for(var i=0;i<rows.length;i++){ var r=rows[i];
+          html += "<tr><td class='num'>"+(i+1)+"</td><td>"+esc(r.name)+"</td><td>"+esc(r.student_id)+"</td><td>"+esc(r.department)+"</td><td>"+esc(r.program)+"</td><td>"+esc(r.enroll_year)+"</td><td>"+esc(r.grad_year||"-")+"</td><td>"+esc(r.email)+"</td><td>"+esc(r.phone||"-")+"</td><td>"+esc(r.company||"-")+"</td><td>"+esc(r.job_title||"-")+"</td><td>"+esc(r.remarks||"-")+"</td><td>";
+          if(!ro()){ html += '<button class="btn muted js-edit" data-id="'+esc(r.id)+'" type="button" style="padding:6px 10px;font-size:13px;">\u7de8\u8f2f</button> '; html += '<button class="btn muted js-del" data-id="'+esc(r.id)+'" type="button" style="padding:6px 10px;font-size:13px;color:#b91c1c;border-color:#fecaca;">\u522a\u9664</button>'; }
+          else html += "-";
+          html += "</td></tr>";
+        }
+        tb.innerHTML = html;
+        tb.querySelectorAll(".js-edit").forEach(function(btn){ btn.addEventListener("click", function(){ var row=rowById(draftRows,btn.getAttribute("data-id")); if(!row) return; e("modalTitle").textContent="\u7de8\u8f2f\u6821\u53cb\u8cc7\u6599"; e("f_id").value=row.id; e("f_name").value=row.name||""; e("f_sid").value=row.student_id||""; e("f_dept").value=row.department||""; e("f_prog").value=row.program||""; e("f_enroll").value=row.enroll_year||""; e("f_grad").value=row.grad_year||""; e("f_email").value=row.email||""; e("f_phone").value=row.phone||""; e("f_company").value=row.company||""; e("f_job").value=row.job_title||""; e("f_remarks").value=row.remarks||""; e("overlay").classList.add("open"); }); });
+        tb.querySelectorAll(".js-del").forEach(function(btn){ btn.addEventListener("click", function(){ if(!confirm("\u78ba\u5b9a\u8981\u522a\u9664\u6b64\u7b46\u8cc7\u6599\uff1f")) return; var id=btn.getAttribute("data-id"); draftRows=draftRows.filter(function(x){ return x.id!==id; }); render(); sync(); setMsg("\u5df2\u52a0\u5165\u522a\u9664\u8349\u7a3f\uff08\u5c1a\u672a\u5132\u5b58\uff09\u3002", true); }); });
+      }
+      function parseCsv(text){
+        var rows=[], row=[], cur="", inQ=false;
+        for(var i=0;i<text.length;i++){ var ch=text[i], nx=text[i+1];
+          if(inQ){ if(ch==='\"'&&nx==='\"'){ cur+='\"'; i++; } else if(ch==='\"'){ inQ=false; } else cur+=ch; }
+          else { if(ch==='\"') inQ=true; else if(ch===','){ row.push(cur); cur=""; } else if(ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=""; } else if(ch!=='\r') cur+=ch; }
+        }
+        row.push(cur); if(row.some(function(v){ return v!==""; })) rows.push(row); return rows;
+      }
+      function normalizeHeader(v){
+        return n(v).replace(/^\uFEFF/, "").replace(/\s+/g, " ").trim().toLowerCase();
+      }
+      function firstIndex(header, names){ for(var i=0;i<names.length;i++){ var idx=header.indexOf(names[i]); if(idx>=0) return idx; } return -1; }
+      function importCsv(text){
+        var parsed=parseCsv(String(text||"")); if(!parsed.length) throw new Error("CSV \u5167\u5bb9\u70ba\u7a7a\u3002");
+        var h=parsed[0].map(normalizeHeader);
+        var map={
+          name:firstIndex(h,["name","\u59d3\u540d"]),
+          student_id:firstIndex(h,["student id","student_id","\u5b78\u865f"]),
+          department:firstIndex(h,["department","\u7cfb\u6240"]),
+          program:firstIndex(h,["program","\u5b78\u5236"]),
+          enroll_year:firstIndex(h,["enroll year","enrollment year","enroll_year","\u5165\u5b78\u5e74\u5ea6"]),
+          grad_year:firstIndex(h,["grad year","graduation year","grad_year","\u7562\u696d\u5e74\u5ea6"]),
+          email:firstIndex(h,["email","e-mail","\u96fb\u5b50\u90f5\u4ef6"]),
+          phone:firstIndex(h,["phone","\u96fb\u8a71"]),
+          company:firstIndex(h,["company","\u73fe\u8077\u516c\u53f8"]),
+          job_title:firstIndex(h,["job title","job_title","\u8077\u7a31"]),
+          remarks:firstIndex(h,["remarks","remark","\u5099\u8a3b"])
+        };
+        var required=["name","student_id","department","program","enroll_year","email"];
+        var missing=required.filter(function(k){ return map[k] < 0; });
+        if(missing.length) throw new Error("CSV \u7f3a\u5c11\u6b04\u4f4d\uff1a"+missing.join("\u3001"));
+        var work=clone(draftRows), add=0, upd=0;
+        for(var i=1;i<parsed.length;i++){
+          var r=parsed[i]; if(!r || r.every(function(v){ return n(v)===""; })) continue;
+          var rec=normalizeRow({
+            name: map.name >= 0 ? r[map.name] : "",
+            student_id: map.student_id >= 0 ? r[map.student_id] : "",
+            department: map.department >= 0 ? r[map.department] : "",
+            program: map.program >= 0 ? r[map.program] : "",
+            enroll_year: map.enroll_year >= 0 ? r[map.enroll_year] : "",
+            grad_year: map.grad_year >= 0 ? r[map.grad_year] : "",
+            email: map.email >= 0 ? r[map.email] : "",
+            phone: map.phone >= 0 ? r[map.phone] : "",
+            company: map.company >= 0 ? r[map.company] : "",
+            job_title: map.job_title >= 0 ? r[map.job_title] : "",
+            remarks: map.remarks >= 0 ? r[map.remarks] : ""
+          });
+          validate(rec);
+          var ex=work.find(function(x){ return n(x.student_id)===rec.student_id; });
+          if(ex){ rec.id=ex.id; rec.created_at=ex.created_at||rec.created_at; work[work.findIndex(function(x){ return x.id===ex.id; })]=rec; upd++; }
+          else { if(dupSid(work,rec.student_id,rec.id)) throw new Error("\u5b78\u865f\u91cd\u8907\uff1a"+rec.student_id); work.push(rec); add++; }
+        }
+        draftRows=work; render(); sync(); setMsg("CSV \u532f\u5165\u5b8c\u6210\uff1a\u65b0\u589e "+add+" \u7b46\u3001\u66f4\u65b0 "+upd+" \u7b46\uff08\u50c5\u8349\u7a3f\uff09\u3002", true);
+      }
+      function resetForm(){ e("f_id").value=""; e("f_name").value=""; e("f_sid").value=""; e("f_dept").value=""; e("f_prog").value=""; e("f_enroll").value=""; e("f_grad").value=""; e("f_email").value=""; e("f_phone").value=""; e("f_company").value=""; e("f_job").value=""; e("f_remarks").value=""; }
+
+      e("newBtn").addEventListener("click", function(){ if(ro()) return; e("modalTitle").textContent="\u65b0\u589e\u6821\u53cb"; resetForm(); e("overlay").classList.add("open"); });
+      e("cancelBtn").addEventListener("click", function(){ e("overlay").classList.remove("open"); });
+      e("overlay").addEventListener("click", function(ev){ if(ev.target.id==="overlay") e("overlay").classList.remove("open"); });
+      e("reloadBtn").addEventListener("click", function(){ if(dirty() && !confirm("\u8981\u6368\u68c4\u5c1a\u672a\u5132\u5b58\u7684\u8349\u7a3f\u4e26\u91cd\u65b0\u8f09\u5165\u55ce\uff1f")) return; baseRows=window.AlumniStore.listAll(); draftRows=clone(baseRows); render(); sync(); setMsg("", true); });
+      e("saveBtn").addEventListener("click", function(){ if(ro()) return; try{ window.AlumniStore.replaceAll(draftRows); baseRows=window.AlumniStore.listAll(); draftRows=clone(baseRows); render(); sync(); setMsg("\u5132\u5b58\u5b8c\u6210\u3002", true); } catch(err){ setMsg((err&&err.message)||"\u5132\u5b58\u5931\u6557\u3002", false); } });
+      e("importBtn").addEventListener("click", function(){ if(!ro()) e("fileInput").click(); });
+      e("downloadTemplateBtn").addEventListener("click", function(){
+        var a = document.createElement("a");
+        a.href = "./alumni-import-template.csv";
+        a.download = "alumni-import-template.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+      e("fileInput").addEventListener("change", async function(ev){ var f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return; try{ importCsv(await f.text()); } catch(err){ setMsg((err&&err.message)||"CSV \u532f\u5165\u5931\u6557\u3002", false); } });
+      e("form").addEventListener("submit", function(ev){
+        ev.preventDefault(); if(ro()) return;
+        try{
+          var id=e("f_id").value||idGen();
+          var rec=normalizeRow({ id:id, name:e("f_name").value, student_id:e("f_sid").value, department:e("f_dept").value, program:e("f_prog").value, enroll_year:e("f_enroll").value, grad_year:e("f_grad").value, email:e("f_email").value, phone:e("f_phone").value, company:e("f_company").value, job_title:e("f_job").value, remarks:e("f_remarks").value }, id);
+          validate(rec); if(dupSid(draftRows,rec.student_id,rec.id)) throw new Error("\u5b78\u865f\u4e0d\u53ef\u91cd\u8907\u3002");
+          var old=rowById(draftRows,id); rec.created_at=old?(old.created_at||now()):now();
+          var idx=draftRows.findIndex(function(x){ return x.id===id; }); if(idx>=0) draftRows[idx]=rec; else draftRows.push(rec);
+          e("overlay").classList.remove("open"); render(); sync(); setMsg("\u5df2\u52a0\u5165\u8349\u7a3f\u8b8a\u66f4\u3002", true);
+        } catch(err){ setMsg((err&&err.message)||"\u6b04\u4f4d\u9a57\u8b49\u5931\u6557\u3002", false); }
+      });
+
+      applyStaticZh();
+
+      (async function(){
+        var ok=await AdminRequireAuth.ensureSession(); if(!ok) return;
+        e("root").classList.remove("shell-hide");
+        if(window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.applyIfViewer(".admin-main");
+        if(ro()){ e("viewer").classList.add("on"); e("newBtn").style.display="none"; e("importBtn").style.display="none"; e("saveBtn").style.display="none"; }
+        baseRows=window.AlumniStore.listAll(); draftRows=clone(baseRows); render(); sync();
+      })();
+    })();
+  </script>
+</body>
+</html>

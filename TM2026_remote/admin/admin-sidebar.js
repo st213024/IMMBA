@@ -12,6 +12,7 @@
       { id: "news", label: "最新公告管理", href: H("news/index.html"), superOnly: false },
       { id: "teachers", label: "師資介紹管理", href: H("teachers/index.html"), superOnly: false },
       { id: "activities", label: "活動集錦管理", href: H("activities/index.html"), superOnly: false },
+      { id: "alumni", label: "校友資料庫", href: H("alumni/index.html"), superOnly: false },
       { id: "admin-users", label: "管理員權限管理", href: H("admin-users.html"), superOnly: true }
     ];
 

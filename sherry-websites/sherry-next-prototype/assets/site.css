@@ -1,0 +1,281 @@
+:root {
+  --bg: #fbf6f9;
+  --panel: #ffffff;
+  --text: #3a2d35;
+  --muted: #7d6b74;
+  --line: #ecdfe6;
+  --brand: #b26b87;
+  --brand-deep: #9d5773;
+  --soft: #f7edf2;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Source Han Serif TC", "Noto Serif TC", "PMingLiU", serif;
+  color: var(--text);
+  background: var(--bg);
+  letter-spacing: 0.01em;
+}
+
+a { color: inherit; text-decoration: none; }
+
+.container { width: min(1400px, calc(100% - 64px)); margin: 0 auto; }
+.container-wide { width: min(1400px, calc(100% - 64px)); margin: 0 auto; }
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.header-row {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #7b465f;
+}
+
+.brand::before {
+  content: "";
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: url("/sherry-next-prototype/assets/logo-sherry.png") center/contain no-repeat;
+  flex: 0 0 42px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 9px 12px;
+  border-radius: 999px;
+  transition: color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.nav-link:hover, .nav-item:hover > .nav-link {
+  color: var(--brand);
+  background: #fffafb;
+  box-shadow: 0 6px 14px rgba(178, 107, 135, 0.12);
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 230px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(72, 34, 52, 0.08);
+  display: none;
+}
+
+.dropdown a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.dropdown a:hover {
+  background: var(--soft);
+  color: var(--brand);
+}
+
+.nav-item:hover .dropdown,
+.nav-item:focus-within .dropdown {
+  display: block;
+}
+
+.header-actions { display: flex; gap: 10px; }
+.btn {
+  display: inline-block;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+.btn-primary {
+  background: linear-gradient(180deg, #bf7895 0%, #b26b87 100%);
+  border-color: #b26b87;
+  color: #fff;
+}
+
+main { padding: 34px 0 74px; display: grid; gap: 26px; }
+section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 30px;
+}
+
+.hero-wrap {
+  padding: 52px 0 60px;
+  background:
+    radial-gradient(circle at 12% 20%, rgba(238, 206, 221, 0.26) 0%, rgba(238, 206, 221, 0) 36%),
+    radial-gradient(circle at 84% 14%, rgba(233, 197, 216, 0.2) 0%, rgba(233, 197, 216, 0) 34%),
+    linear-gradient(180deg, #fffafd 0%, #fbf1f7 56%, #fff8fc 100%);
+  border-bottom: 1px solid var(--line);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.08fr 0.92fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.kicker {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9c7688;
+  font-weight: 700;
+}
+
+h1 { margin: 0; font-size: clamp(30px, 4vw, 50px); line-height: 1.3; }
+h2 { margin: 0 0 8px; font-size: clamp(28px, 2.4vw, 36px); line-height: 1.3; }
+h3 { margin: 0; font-size: 21px; }
+p { margin: 0; }
+.muted { color: var(--muted); line-height: 1.8; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+
+.hero img {
+  width: 100%;
+  min-height: 500px;
+  aspect-ratio: 4/5;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.about-plain {
+  padding: 16px 0 10px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.about {
+  display: grid;
+  grid-template-columns: 0.68fr 1.32fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.about img {
+  width: 100%;
+  min-height: 300px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+.chip {
+  padding: 7px 12px;
+  border: 1px solid #eadbe4;
+  border-radius: 999px;
+  color: #7c6471;
+  background: #fff9fc;
+  font-size: 13px;
+}
+
+.grid { display: grid; gap: 12px; margin-top: 16px; }
+.c3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  display: grid;
+  gap: 8px;
+}
+
+.text-link { color: var(--brand-deep); font-weight: 700; }
+
+.cta-wrap {
+  width: 100%;
+  padding: 58px 0 66px;
+  background:
+    radial-gradient(circle at 82% 20%, rgba(231, 198, 217, 0.24) 0%, rgba(231, 198, 217, 0) 36%),
+    linear-gradient(180deg, #fff9fc 0%, #faeef5 100%);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.cta-plain {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.page-hero {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 26px;
+}
+
+footer {
+  width: min(1400px, calc(100% - 64px));
+  margin: 0 auto 28px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 24px;
+  color: var(--muted);
+  display: grid;
+  gap: 8px;
+}
+
+@media (max-width: 1200px) {
+  .container, .container-wide, footer { width: min(1400px, calc(100% - 48px)); }
+}
+
+@media (max-width: 960px) {
+  .hero, .about, .c3 { grid-template-columns: 1fr; }
+  .hero img { min-height: 340px; aspect-ratio: 4/3; }
+  .header-row { flex-wrap: wrap; }
+}
+
+@media (max-width: 640px) {
+  .container, .container-wide, footer { width: min(1400px, calc(100% - 24px)); }
+  .header-row { min-height: unset; align-items: flex-start; }
+  .nav { width: 100%; overflow-x: auto; padding-bottom: 6px; }
+  .header-actions { width: 100%; }
+}

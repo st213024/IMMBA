@@ -5,8 +5,7 @@
  */
 (function () {
   const CACHE_KEY = "immba_admin_session_v4";
-  const ADMIN_USERS_LIST_SELECT =
-    "id, user_id, email, role, is_active, created_at, updated_at";
+  const ADMIN_USERS_LIST_SELECT = "*";
   try {
     localStorage.removeItem("immba_admin_session_v3");
     localStorage.removeItem("immba_admin_session_v2");
@@ -238,8 +237,38 @@
     return Boolean(getLocalSession());
   }
 
+  const LOCKED_SUPER_ADMIN_EMAIL = "st213024@gmail.com";
+
   function normalizeEmail(email) {
     return String(email || "").trim().toLowerCase();
+  }
+
+  function isLockedSuperAdminEmail(email) {
+    return normalizeEmail(email) === LOCKED_SUPER_ADMIN_EMAIL;
+  }
+
+  /**
+   * 儲存單一列的角色／啟用狀態（viewer | admin）。
+   * 固定超級管理員信箱不可於此變更。
+   * role 為 admin 且啟用時會併寫審核欄位（若存在）。
+   */
+  async function saveAdminRow(email, role, isActive) {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase 尚未設定。");
+    const normalized = normalizeEmail(email);
+    if (!normalized) throw new Error("請輸入 Email。");
+    if (isLockedSuperAdminEmail(normalized)) {
+      throw new Error("此帳號為固定超級管理員，無法於此處變更。");
+    }
+    if (!["admin", "viewer"].includes(role)) {
+      throw new Error("僅可選擇一般管理者或僅檢視。");
+    }
+    const active = Boolean(isActive);
+    if (role === "admin" && active) {
+      await approveAsAdminEditor(normalized);
+      return;
+    }
+    await upsertAdminUser(normalized, role, active);
   }
 
   function isContentReadOnly() {
@@ -469,6 +498,32 @@
     return data || [];
   }
 
+  /** 是否為「已進入 admin_users、尚待核定管理／編輯身分」之列（與審核欄位或舊版 viewer 語意相容） */
+  function isPendingManagementReview(row) {
+    if (!row || row.is_active === false) return false;
+    if (row.role === "super_admin") return false;
+    const hasReviewFields =
+      Object.prototype.hasOwnProperty.call(row, "status") ||
+      Object.prototype.hasOwnProperty.call(row, "approved");
+    if (hasReviewFields) {
+      if (row.status === "rejected" || row.status === "disabled") return false;
+      if (row.status === "approved" && row.approved === true) return false;
+      return row.approved === false || row.status === "pending";
+    }
+    return row.role === "viewer" && row.user_id != null;
+  }
+
+  async function listPendingManagementReview() {
+    const rows = await listAdminUsers();
+    return rows
+      .filter(isPendingManagementReview)
+      .sort((a, b) => {
+        const ta = new Date(a.created_at || 0).getTime();
+        const tb = new Date(b.created_at || 0).getTime();
+        return ta - tb;
+      });
+  }
+
   async function upsertAdminUser(email, role, isActive) {
     const sb = getClient();
     if (!sb) throw new Error("Supabase 尚未設定。");
@@ -506,10 +561,35 @@
     return { email: normalized, role, is_active: active };
   }
 
+  /** 將待審帳號核准為可編輯管理者；若資料表有審核欄位一併寫入。 */
+  async function approveAsAdminEditor(email) {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase 尚未設定。");
+    const normalized = normalizeEmail(email);
+    if (!normalized) throw new Error("請輸入 Email。");
+    const me = getLocalSession();
+    const full = {
+      role: "admin",
+      is_active: true,
+      status: "approved",
+      approved: true,
+      approved_at: new Date().toISOString(),
+      approved_by: me?.email || null
+    };
+    let { error } = await sb.from("admin_users").update(full).eq("email", normalized);
+    if (error) {
+      ({ error } = await sb.from("admin_users").update({ role: "admin", is_active: true }).eq("email", normalized));
+    }
+    if (error) throw mapAdminTableError(error);
+  }
+
   async function removeAdminUser(email) {
     const sb = getClient();
     if (!sb) throw new Error("Supabase 尚未設定。");
     const normalized = normalizeEmail(email);
+    if (isLockedSuperAdminEmail(normalized)) {
+      throw new Error("不可刪除此固定超級管理員帳號。");
+    }
     const me = getLocalSession();
     if (me && normalized === me.email) {
       throw new Error("不可刪除目前登入中的自己。");
@@ -541,7 +621,12 @@
     signUp,
     resendSignupEmail,
     listAdminUsers,
+    listPendingManagementReview,
+    isPendingManagementReview,
     upsertAdminUser,
+    approveAsAdminEditor,
+    saveAdminRow,
+    isLockedSuperAdminEmail,
     removeAdminUser,
     isSuperAdmin
   };

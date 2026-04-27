@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>帳號審核中｜imMBA</title>
+  <link rel="stylesheet" href="admin-shell.css" />
+  <style>
+    body { margin: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; }
+    .wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background: linear-gradient(180deg, #f5f3ed 0%, #e7e9ee 50%, #faf9f6 100%);
+    }
+    .card {
+      max-width: 440px;
+      background: #fff;
+      border: 1px solid #c9d0dc;
+      border-radius: 16px;
+      padding: 28px 24px;
+      box-shadow: 0 12px 32px rgba(15, 52, 96, 0.12);
+      color: #24303d;
+    }
+    h1 { font-size: 20px; margin: 0 0 12px; }
+    p { font-size: 15px; line-height: 1.65; color: #5a6575; margin: 0 0 20px; }
+    .btn {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 0;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
+      color: #f4faf7;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .shell-hide { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="wrap shell-hide" id="root">
+    <div class="card">
+      <h1>後台權限審核中</h1>
+      <p>
+        您的帳號已成功登入，但尚未經超級管理員核准後台權限。核准後即可使用管理功能。若長時間未處理，請聯絡專案超級管理員。
+      </p>
+      <button type="button" class="btn" id="logout-btn">登出</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="supabase-auth.js"></script>
+  <script src="require-auth.js"></script>
+  <script>
+    (function () {
+      var root = document.getElementById("root");
+      document.getElementById("logout-btn").addEventListener("click", async function () {
+        if (window.AdminAuth) await window.AdminAuth.signOutAdmin();
+        location.href = window.AdminRequireAuth
+          ? window.AdminRequireAuth.getLoginHref()
+          : "login.html";
+      });
+      (async function () {
+        var ok = await window.AdminRequireAuth.ensureSession();
+        if (!ok) return;
+        root.classList.remove("shell-hide");
+      })();
+    })();
+  </script>
+</body>
+</html>

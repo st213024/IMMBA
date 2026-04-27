@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>??????imMBA ??</title>
+  <link rel="stylesheet" href="../admin-shell.css" />
+  <style>
+    .admin-main__inner { max-width: 1280px; }
+    .alumni-head { margin-bottom: 16px; }
+    .alumni-head h1 { font-size: 22px; font-weight: 800; color: #14212f; margin: 0 0 6px; }
+    .alumni-head p { margin: 0; font-size: 14px; color: var(--admin-muted); line-height: 1.55; }
+    .alumni-card { background: #fff; border: 1px solid var(--admin-line); border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(15, 52, 96, 0.06); }
+    .alumni-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
+    .alumni-btn { border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: var(--admin-font); }
+    .alumni-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .alumni-btn--primary { background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%); color: #f4faf7; }
+    .alumni-btn--muted { background: #eef1f6; color: #243652; border: 1px solid var(--admin-line); }
+    .alumni-table-wrap { overflow-x: auto; margin-top: 8px; }
+    .alumni-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
+    .alumni-table th, .alumni-table td { border-top: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; vertical-align: top; }
+    .alumni-table th { background: #f8fafc; color: #334155; font-weight: 700; white-space: nowrap; }
+    .alumni-table td.num { text-align: center; color: #64748b; font-weight: 600; width: 44px; }
+    .alumni-notice { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; font-size: 14px; display: none; }
+    .alumni-notice.is-on { display: block; }
+    .alumni-msg { margin-top: 10px; padding: 10px 12px; border-radius: 10px; font-size: 14px; display: none; }
+    .alumni-msg.is-ok { display: block; background: #ecfdf5; border: 1px solid #6ee7b7; color: #065f46; }
+    .alumni-msg.is-err { display: block; background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+    .shell-hide { display: none !important; }
+    .alumni-hidden { display: none !important; }
+    .alumni-back { font-size: 14px; color: #475569; text-decoration: none; margin-right: 12px; }
+    .alumni-back:hover { color: #2563eb; }
+    .alumni-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 80; align-items: center; justify-content: center; padding: 20px; }
+    .alumni-modal-overlay.is-open { display: flex; }
+    .alumni-modal { background: #fff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 92vh; overflow: auto; padding: 20px 22px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2); }
+    .alumni-modal h2 { margin: 0 0 14px; font-size: 18px; color: #14212f; }
+    .alumni-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+    @media (max-width: 640px) { .alumni-form-grid { grid-template-columns: 1fr; } }
+    .alumni-field { display: flex; flex-direction: column; gap: 6px; }
+    .alumni-field label { font-size: 13px; font-weight: 700; color: #334155; }
+    .alumni-field input, .alumni-field select, .alumni-field textarea { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; font-size: 14px; font-family: inherit; }
+    .alumni-field textarea { min-height: 72px; resize: vertical; }
+    .alumni-field--full { grid-column: 1 / -1; }
+    .alumni-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+  </style>
+</head>
+<body data-admin-page="alumni">
+  <div class="admin-app shell-hide" id="admin-root">
+    <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
+    <div class="admin-main">
+      <div class="admin-main__inner">
+        <header class="alumni-head">
+          <a class="alumni-back" href="../dashboard.html">? ????</a>
+          <h1>?????</h1>
+          <p>??????????????????????????????????????????</p>
+        </header>
+        <div id="viewer-notice" class="alumni-notice">???????????????????????</div>
+        <div class="alumni-card">
+          <div class="alumni-toolbar">
+            <button type="button" class="alumni-btn alumni-btn--primary" id="btn-new">????</button>
+            <button type="button" class="alumni-btn alumni-btn--muted" id="btn-import">???? CSV</button>
+            <button type="button" class="alumni-btn alumni-btn--muted" id="btn-download-template">??CSV??</button>
+            <button type="button" class="alumni-btn alumni-btn--primary" id="btn-save-page" disabled>????</button>
+            <button type="button" class="alumni-btn alumni-btn--muted" id="btn-refresh">??????</button>
+            <input id="import-file" class="alumni-hidden" type="file" accept=".csv,text/csv" />
+          </div>
+          <div id="msg" class="alumni-msg"></div>
+          <div class="alumni-table-wrap">
+            <table class="alumni-table">
+              <thead>
+                <tr>
+                  <th class="num">??</th><th>??</th><th>??</th><th>??</th><th>??</th><th>????</th><th>????</th><th>????</th><th>??</th><th>????</th><th>??</th><th>??</th><th>??</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alumni-modal-overlay" id="modal" aria-hidden="true">
+    <div class="alumni-modal" role="dialog" aria-labelledby="modal-title">
+      <h2 id="modal-title">????</h2>
+      <form id="form">
+        <input type="hidden" id="f-id" />
+        <div class="alumni-form-grid">
+          <div class="alumni-field"><label for="f-name">?? *</label><input id="f-name" required maxlength="80" /></div>
+          <div class="alumni-field"><label for="f-student_id">?? *</label><input id="f-student_id" required maxlength="32" pattern="[0-9A-Za-z-]*" /></div>
+          <div class="alumni-field"><label for="f-department">?? *</label><input id="f-department" required maxlength="120" /></div>
+          <div class="alumni-field"><label for="f-program">?? *</label><select id="f-program" required><option value="">???</option><option value="???">???</option><option value="???">???</option><option value="???">???</option><option value="??">??</option></select></div>
+          <div class="alumni-field"><label for="f-enroll_year">????????*</label><input id="f-enroll_year" required maxlength="4" inputmode="numeric" pattern="[0-9]{2,4}" /></div>
+          <div class="alumni-field"><label for="f-grad_year">????????</label><input id="f-grad_year" maxlength="4" inputmode="numeric" /></div>
+          <div class="alumni-field"><label for="f-email">???? *</label><input id="f-email" type="email" required maxlength="120" /></div>
+          <div class="alumni-field"><label for="f-phone">??</label><input id="f-phone" maxlength="40" /></div>
+          <div class="alumni-field"><label for="f-company">????</label><input id="f-company" maxlength="120" /></div>
+          <div class="alumni-field"><label for="f-job_title">??</label><input id="f-job_title" maxlength="80" /></div>
+          <div class="alumni-field alumni-field--full"><label for="f-remarks">??</label><textarea id="f-remarks" maxlength="2000"></textarea></div>
+        </div>
+        <div class="alumni-modal-actions">
+          <button type="button" class="alumni-btn alumni-btn--muted" id="btn-cancel">??</button>
+          <button type="submit" class="alumni-btn alumni-btn--primary">????</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../../alumni-store.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="../supabase-auth.js"></script>
+  <script src="../require-auth.js"></script>
+  <script src="../admin-readonly.js"></script>
+  <script src="../admin-sidebar.js"></script>
+  <script>
+    (function () {
+      var editingId = null;
+      var baseRows = [];
+      var draftRows = [];
+      function esc(s) { return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"); }
+      function norm(v) { return String(v || "").trim(); }
+      function lower(v) { return norm(v).toLowerCase(); }
+      function readonly() { return !!(window.AdminAuth && window.AdminAuth.isContentReadOnly && window.AdminAuth.isContentReadOnly()); }
+      function cloneRows(rows) { return (rows || []).map(function (r) { return { ...r }; }); }
+      function nowIso() { return new Date().toISOString(); }
+      function makeId() { return "alumni-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8); }
+      function rowKey(r) { return [r.id||"",r.name||"",r.student_id||"",r.department||"",r.program||"",r.enroll_year||"",r.grad_year||"",lower(r.email),r.phone||"",r.company||"",r.job_title||"",r.remarks||""].join("|"); }
+      function snapshot(rows) { return cloneRows(rows).sort(function(a,b){ return String(a.id).localeCompare(String(b.id)); }).map(rowKey).join("\n"); }
+      function hasPendingChanges() { return snapshot(draftRows) !== snapshot(baseRows); }
+      function syncSaveBtn() { document.getElementById("btn-save-page").disabled = readonly() || !hasPendingChanges(); }
+      function showMsg(text, ok) { var m=document.getElementById("msg"); if(!text){m.className="alumni-msg";m.textContent="";return;} m.className="alumni-msg "+(ok?"is-ok":"is-err"); m.textContent=text; }
+      function getById(list,id){ return list.find(function(x){ return x.id===id; }) || null; }
+      function byStudentThenName(a,b){ var sa=a.student_id||"", sb=b.student_id||""; if(sa!==sb) return sa.localeCompare(sb,"zh-Hant"); return (a.name||"").localeCompare(b.name||"","zh-Hant"); }
+      function findDupStudentId(rows,sid,ignoreId){ var s=norm(sid); return rows.some(function(x){ return norm(x.student_id)===s && x.id!==ignoreId; }); }
+      function sanitizeRecord(raw,id){ return { id:id||raw.id||makeId(), name:norm(raw.name), student_id:norm(raw.student_id), department:norm(raw.department), program:norm(raw.program), enroll_year:norm(raw.enroll_year), grad_year:norm(raw.grad_year), email:lower(raw.email), phone:norm(raw.phone), company:norm(raw.company), job_title:norm(raw.job_title), remarks:norm(raw.remarks), created_at:raw.created_at||nowIso(), updated_at:nowIso() }; }
+      function validateRequired(r){ if(!r.name||!r.student_id||!r.department||!r.program||!r.enroll_year||!r.email) throw new Error("????????????????????????????????"); }
+      function parseCsv(text){ var rows=[],row=[],cur="",inQ=false; for(var i=0;i<text.length;i++){ var ch=text[i],nx=text[i+1]; if(inQ){ if(ch==='\"'&&nx==='\"'){cur+='\"';i++;} else if(ch==='\"'){inQ=false;} else cur+=ch; } else { if(ch==='\"') inQ=true; else if(ch===','){row.push(cur);cur="";} else if(ch==='\n'){row.push(cur);rows.push(row);row=[];cur="";} else if(ch!=='\r') cur+=ch; }} row.push(cur); if(row.some(function(v){return v!=="";})) rows.push(row); return rows; }
+      function normalizeHeader(v){ return norm(v).replace(/^\uFEFF/, "").replace(/\s+/g, " ").trim().toLowerCase(); }
+      function importCsvText(text){
+        var parsed=parseCsv(String(text||"")); if(!parsed.length) throw new Error("CSV ???");
+        var header=parsed[0].map(normalizeHeader), idx={
+          name:-1, student_id:-1, department:-1, program:-1, enroll_year:-1, grad_year:-1, email:-1, phone:-1, company:-1, job_title:-1, remarks:-1
+        };
+        function firstIndex(names){ for(var i=0;i<names.length;i++){ var p=header.indexOf(names[i]); if(p>=0) return p; } return -1; }
+        idx.name=firstIndex(["name","\u59d3\u540d"]);
+        idx.student_id=firstIndex(["student id","student_id","\u5b78\u865f"]);
+        idx.department=firstIndex(["department","\u7cfb\u6240"]);
+        idx.program=firstIndex(["program","\u5b78\u5236"]);
+        idx.enroll_year=firstIndex(["enroll year","enrollment year","enroll_year","\u5165\u5b78\u5e74\u5ea6"]);
+        idx.grad_year=firstIndex(["grad year","graduation year","grad_year","\u7562\u696d\u5e74\u5ea6"]);
+        idx.email=firstIndex(["email","e-mail","\u96fb\u5b50\u90f5\u4ef6"]);
+        idx.phone=firstIndex(["phone","\u96fb\u8a71"]);
+        idx.company=firstIndex(["company","\u73fe\u8077\u516c\u53f8"]);
+        idx.job_title=firstIndex(["job title","job_title","\u8077\u7a31"]);
+        idx.remarks=firstIndex(["remarks","remark","\u5099\u8a3b"]);
+        var required=["name","student_id","department","program","enroll_year","email"];
+        var miss=required.filter(function(k){ return idx[k] < 0; }); if(miss.length) throw new Error("CSV ?????"+miss.join("?"));
+        var work=cloneRows(draftRows), add=0, upd=0;
+        for(var i=1;i<parsed.length;i++){
+          var r=parsed[i]; if(!r || r.every(function(v){ return norm(v)===""; })) continue;
+          var rec=sanitizeRecord({
+            name: idx.name>=0 ? r[idx.name] : "",
+            student_id: idx.student_id>=0 ? r[idx.student_id] : "",
+            department: idx.department>=0 ? r[idx.department] : "",
+            program: idx.program>=0 ? r[idx.program] : "",
+            enroll_year: idx.enroll_year>=0 ? r[idx.enroll_year] : "",
+            grad_year: idx.grad_year>=0 ? r[idx.grad_year] : "",
+            email: idx.email>=0 ? r[idx.email] : "",
+            phone: idx.phone>=0 ? r[idx.phone] : "",
+            company: idx.company>=0 ? r[idx.company] : "",
+            job_title: idx.job_title>=0 ? r[idx.job_title] : "",
+            remarks: idx.remarks>=0 ? r[idx.remarks] : ""
+          });
+          validateRequired(rec);
+          var ex=work.find(function(x){ return norm(x.student_id)===rec.student_id; });
+          if(ex){ rec.id=ex.id; rec.created_at=ex.created_at||rec.created_at; work[work.findIndex(function(x){return x.id===ex.id;})]=rec; upd++; }
+          else { if(findDupStudentId(work,rec.student_id,rec.id)) throw new Error("?????"+rec.student_id); work.push(rec); add++; }
+        }
+        draftRows=work; render(); syncSaveBtn(); showMsg("CSV ??????? "+add+" ???? "+upd+" ????????", true);
+      }
+      function openModal(isNew){ document.getElementById("modal-title").textContent=isNew?"????":"????"; document.getElementById("modal").classList.add("is-open"); }
+      function closeModal(){ document.getElementById("modal").classList.remove("is-open"); }
+      function clearForm(){ editingId=null; ["f-id","f-name","f-student_id","f-department","f-program","f-enroll_year","f-grad_year","f-email","f-phone","f-company","f-job_title","f-remarks"].forEach(function(id){ document.getElementById(id).value=""; }); }
+      function fillForm(r){ editingId=r.id; document.getElementById("f-id").value=r.id||""; document.getElementById("f-name").value=r.name||""; document.getElementById("f-student_id").value=r.student_id||""; document.getElementById("f-department").value=r.department||""; document.getElementById("f-program").value=r.program||""; document.getElementById("f-enroll_year").value=r.enroll_year||""; document.getElementById("f-grad_year").value=r.grad_year||""; document.getElementById("f-email").value=r.email||""; document.getElementById("f-phone").value=r.phone||""; document.getElementById("f-company").value=r.company||""; document.getElementById("f-job_title").value=r.job_title||""; document.getElementById("f-remarks").value=r.remarks||""; }
+      function render(){
+        var rows=cloneRows(draftRows).sort(byStudentThenName), tb=document.getElementById("tbody");
+        if(!rows.length){ tb.innerHTML='<tr><td colspan="13" style="text-align:center;color:#64748b;padding:28px;">??????????????????? CSV??</td></tr>'; return; }
+        var html="";
+        for(var i=0;i<rows.length;i++){ var r=rows[i];
+          html+="<tr><td class='num'>"+(i+1)+"</td><td>"+esc(r.name)+"</td><td>"+esc(r.student_id)+"</td><td>"+esc(r.department)+"</td><td>"+esc(r.program)+"</td><td>"+esc(r.enroll_year)+"</td><td>"+esc(r.grad_year||"?")+"</td><td>"+esc(r.email)+"</td><td>"+esc(r.phone||"?")+"</td><td>"+esc(r.company||"?")+"</td><td>"+esc(r.job_title||"?")+"</td><td>"+esc(r.remarks||"?")+"</td><td>";
+          if(!readonly()){ html+='<button type="button" class="alumni-btn alumni-btn--muted js-edit" data-id="'+esc(r.id)+'" style="padding:6px 10px;font-size:13px;">??</button> '; html+='<button type="button" class="alumni-btn alumni-btn--muted js-del" data-id="'+esc(r.id)+'" style="padding:6px 10px;font-size:13px;color:#b91c1c;border-color:#fecaca;">??</button>'; } else html+="?";
+          html+="</td></tr>";
+        }
+        tb.innerHTML=html;
+        tb.querySelectorAll(".js-edit").forEach(function(b){ b.addEventListener("click",function(){ var row=getById(draftRows,b.getAttribute("data-id")); if(!row) return; fillForm(row); openModal(false); }); });
+        tb.querySelectorAll(".js-del").forEach(function(b){ b.addEventListener("click",function(){ if(!confirm("???????????")) return; var id=b.getAttribute("data-id"); draftRows=draftRows.filter(function(x){return x.id!==id;}); render(); syncSaveBtn(); showMsg("???????????????", true); }); });
+      }
+      document.getElementById("btn-new").addEventListener("click",function(){ if(!readonly()){ clearForm(); openModal(true);} });
+      document.getElementById("btn-cancel").addEventListener("click",function(){ closeModal(); clearForm(); });
+      document.getElementById("modal").addEventListener("click",function(ev){ if(ev.target.id==="modal"){ closeModal(); clearForm(); } });
+      document.getElementById("btn-import").addEventListener("click",function(){ if(!readonly()) document.getElementById("import-file").click(); });
+      document.getElementById("btn-download-template").addEventListener("click",function(){
+        var a=document.createElement("a");
+        a.href="./alumni-import-template.csv";
+        a.download="alumni-import-template.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+      document.getElementById("import-file").addEventListener("change",async function(ev){ var f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return; try{ importCsvText(await f.text()); } catch(e){ showMsg((e&&e.message)||"CSV ?????", false); } });
+      document.getElementById("btn-refresh").addEventListener("click",function(){ if(hasPendingChanges()&&!confirm("?????????????????")) return; baseRows=window.AlumniStore.listAll(); draftRows=cloneRows(baseRows); render(); syncSaveBtn(); showMsg("", true); });
+      document.getElementById("btn-save-page").addEventListener("click",function(){ if(readonly()) return; try{ window.AlumniStore.replaceAll(draftRows); baseRows=window.AlumniStore.listAll(); draftRows=cloneRows(baseRows); render(); syncSaveBtn(); showMsg("????????", true); } catch(e){ showMsg((e&&e.message)||"?????", false); } });
+      document.getElementById("form").addEventListener("submit",function(ev){
+        ev.preventDefault(); if(readonly()) return;
+        try{
+          var id=document.getElementById("f-id").value||makeId();
+          var rec=sanitizeRecord({id:id,name:document.getElementById("f-name").value,student_id:document.getElementById("f-student_id").value,department:document.getElementById("f-department").value,program:document.getElementById("f-program").value,enroll_year:document.getElementById("f-enroll_year").value,grad_year:document.getElementById("f-grad_year").value,email:document.getElementById("f-email").value,phone:document.getElementById("f-phone").value,company:document.getElementById("f-company").value,job_title:document.getElementById("f-job_title").value,remarks:document.getElementById("f-remarks").value},id);
+          validateRequired(rec); if(findDupStudentId(draftRows,rec.student_id,rec.id)) throw new Error("??????????????");
+          var old=getById(draftRows,id); rec.created_at=old?(old.created_at||nowIso()):nowIso();
+          var idx=draftRows.findIndex(function(x){return x.id===id;}); if(idx>=0) draftRows[idx]=rec; else draftRows.push(rec);
+          closeModal(); clearForm(); render(); syncSaveBtn(); showMsg("?????????", true);
+        }catch(e){ showMsg((e&&e.message)||"???????", false); }
+      });
+      (async function(){
+        var ok=await AdminRequireAuth.ensureSession(); if(!ok) return;
+        document.getElementById("admin-root").classList.remove("shell-hide");
+        if(window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.applyIfViewer(".admin-main");
+        if(readonly()){ document.getElementById("viewer-notice").classList.add("is-on"); document.getElementById("btn-new").style.display="none"; document.getElementById("btn-import").style.display="none"; document.getElementById("btn-save-page").style.display="none"; }
+        baseRows=window.AlumniStore.listAll(); draftRows=cloneRows(baseRows); render(); syncSaveBtn();
+      })();
+    })();
+  </script>
+</body>
+</html>

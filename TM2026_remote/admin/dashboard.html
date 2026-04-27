@@ -66,6 +66,18 @@
             </div>
           </article>
 
+          <article class="dash-card">
+            <h2 class="dash-card__title">校友資料庫</h2>
+            <p class="dash-card__desc">校友名冊（姓名、學號、系所、學制、入學／畢業年度、聯絡方式與現職等），資料儲存於本機瀏覽器。</p>
+            <div class="dash-card__stats">
+              <span>目前 <strong id="stat-alumni-count">—</strong> 筆</span>
+            </div>
+            <div class="dash-card__loading" id="stat-alumni-loading">讀取中…</div>
+            <div class="dash-card__actions">
+              <a class="dash-card__btn" href="alumni/index.html">前往管理</a>
+            </div>
+          </article>
+
           <article class="dash-card" id="dash-card-admins">
             <h2 class="dash-card__title">管理員權限管理</h2>
             <p class="dash-card__desc">超級管理員可新增 Email、調整角色（viewer／admin／super_admin）。</p>
@@ -87,6 +99,7 @@
   <script src="../activity-store.js"></script>
   <script src="../news-store.js"></script>
   <script src="../teacher-data.js"></script>
+  <script src="../alumni-store.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js"></script>
   <script src="supabase-auth.js"></script>
@@ -138,6 +151,14 @@
         document.getElementById("stat-teachers-count").textContent = "?";
       }
       hideLoading("stat-teachers-loading");
+
+      try {
+        const alumni = window.AlumniStore?.listAll?.() || [];
+        document.getElementById("stat-alumni-count").textContent = String(alumni.length);
+      } catch (e) {
+        document.getElementById("stat-alumni-count").textContent = "?";
+      }
+      hideLoading("stat-alumni-loading");
     }
 
     (async function () {

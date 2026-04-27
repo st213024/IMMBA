@@ -6,36 +6,343 @@
   <title>管理員權限管理｜imMBA</title>
   <link rel="stylesheet" href="admin-shell.css" />
   <style>
-    .admin-main__inner { max-width: 900px; }
-    .card {
-      background: #fff;
-      border: 1px solid #c9d0dc;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 10px 24px rgba(15, 52, 96, 0.1);
+    .admin-main__inner {
+      max-width: 1280px;
+      margin: 0 auto;
     }
-    h1 { font-size: 24px; color: #24303d; margin-bottom: 10px; }
-    .hint { color: #5a6575; font-size: 14px; line-height: 1.6; margin-bottom: 14px; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    th, td { border-top: 1px solid #dde3ec; padding: 10px 8px; text-align: left; }
-    th { color: #3d5266; }
-    .field { margin-bottom: 12px; }
-    label { display: block; font-weight: 600; margin-bottom: 6px; }
-    input, select { width: 100%; max-width: 400px; padding: 10px; border-radius: 10px; border: 1px solid #b8c4d6; }
-    .btn {
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 0;
+    .um-panel {
+      background: #fff;
+      border: 1px solid #d8dee8;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+    }
+    .um-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid #e8ecf2;
+      flex-wrap: wrap;
+    }
+    .um-title {
+      margin: 0;
+      font-size: 20px;
       font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+    }
+    .um-meta {
+      font-size: 14px;
+      color: #475569;
+      text-align: right;
+    }
+    .um-meta strong {
+      color: #0f172a;
+      font-weight: 700;
+    }
+    .um-meta-sep {
+      margin: 0 6px;
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    .um-badge-warn {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #fef3c7;
+      color: #92400e;
+      vertical-align: middle;
+    }
+    .um-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 22px;
+      background: #fafbfc;
+      border-bottom: 1px solid #e8ecf2;
+      flex-wrap: wrap;
+    }
+    .um-icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
       cursor: pointer;
+      color: #475569;
+      flex-shrink: 0;
+    }
+    .um-icon-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+    .um-search {
+      flex: 1;
+      min-width: 180px;
+      max-width: 420px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .um-search:focus-within {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+    }
+    .um-search input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      font-size: 14px;
+      font-family: inherit;
+      min-width: 0;
+    }
+    .um-search input::placeholder {
+      color: #94a3b8;
+    }
+    .um-btn {
+      height: 38px;
+      padding: 0 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid transparent;
+      flex-shrink: 0;
+    }
+    .um-btn--primary {
+      background: #2563eb;
+      color: #fff;
+      border-color: #1d4ed8;
+    }
+    .um-btn--primary:hover {
+      background: #1d4ed8;
+    }
+    .um-btn-save {
       background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
       color: #f4faf7;
+      border-color: #1a3329;
     }
-    .btn.secondary { background: #f0f4fa; color: #243652; border: 1px solid #c9d0dc; }
-    .notice { margin-top: 12px; padding: 10px; border-radius: 10px; display: none; }
-    .notice.ok { display: block; background: #e8f7ef; border: 1px solid #9dcbb0; color: #1e4d32; }
-    .notice.err { display: block; background: #fde8e8; border: 1px solid #f0b4b4; color: #7a2e2e; }
+    .um-btn-save:hover:not(:disabled) {
+      filter: brightness(1.05);
+    }
+    .um-btn-save:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .um-banner {
+      display: none;
+      margin: 0 22px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .um-banner.is-ok {
+      display: block;
+      background: #ecfdf5;
+      border: 1px solid #6ee7b7;
+      color: #065f46;
+    }
+    .um-banner.is-err {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #991b1b;
+    }
+    .um-table-wrap {
+      overflow-x: auto;
+    }
+    .um-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .um-table th {
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      color: #334155;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      white-space: nowrap;
+    }
+    .um-table th.um-serial-th,
+    .um-table td.um-serial {
+      width: 56px;
+      text-align: center;
+      color: #64748b;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .um-table th.um-serial-th {
+      color: #334155;
+    }
+    .um-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid #eef2f7;
+      color: #1e293b;
+      vertical-align: middle;
+    }
+    .um-table tbody tr:hover {
+      background: #fafbfc;
+    }
+    .um-table tbody tr:last-child td {
+      border-bottom: 0;
+    }
+    .um-link {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .um-link:hover {
+      text-decoration: underline;
+    }
+    .um-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .um-badge--proj {
+      background: #ccfbf1;
+      color: #0f766e;
+    }
+    .um-badge--src {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+    .um-muted {
+      color: #94a3b8;
+    }
+    .um-select {
+      min-width: 148px;
+      max-width: 220px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: #1e293b;
+    }
+    .um-select:disabled {
+      background: #f1f5f9;
+      color: #475569;
+    }
+    .um-readonly-role {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .um-role-cell {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .um-act-del-inline {
+      font-size: 13px;
+      border: 0;
+      background: none;
+      color: #b91c1c;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 4px 0;
+      font-family: inherit;
+    }
+    .um-act-del-inline:hover {
+      color: #991b1b;
+    }
+    .um-act-del-inline:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .um-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 22px 16px;
+      border-top: 1px solid #e8ecf2;
+      background: #fafbfc;
+      flex-wrap: wrap;
+    }
+    .um-back {
+      font-size: 14px;
+      color: #475569;
+      text-decoration: none;
+    }
+    .um-back:hover {
+      color: #2563eb;
+    }
+    .um-pagination {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+    }
+    .um-page-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .um-page-nav button {
+      width: 32px;
+      height: 32px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      color: #475569;
+    }
+    .um-page-nav button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .um-page-nav span {
+      min-width: 28px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .um-page-size {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .um-page-size select {
+      height: 32px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+    }
+    .um-empty td {
+      text-align: center;
+      color: #64748b;
+      padding: 40px 16px;
+    }
     .shell-hide { display: none !important; }
   </style>
 </head>
@@ -44,114 +351,441 @@
     <aside class="admin-sidebar" id="admin-sidebar-mount"></aside>
     <div class="admin-main">
       <div class="admin-main__inner">
-        <div class="card">
-          <h1>管理員權限管理</h1>
-          <p class="hint">
-            僅<strong>超級管理員</strong>可編輯。已註冊但尚未列入表內的帳號，可先用對方 Email 新增列並設為
-            <code>viewer</code> 或 <code>admin</code>；已會自動建立列的帳號可直接改角色。
-          </p>
-          <div id="notice" class="notice"></div>
-          <form id="add-form">
-            <div class="field">
-              <label for="em">Email</label>
-              <input id="em" type="email" required placeholder="name@example.com" />
+        <div class="um-panel">
+          <header class="um-head">
+            <h1 class="um-title">管理員權限管理</h1>
+            <div class="um-meta">
+              全部 <strong id="um-total-count">0</strong> 筆<span class="um-meta-sep">·</span>待審核
+              <strong id="um-pending-count">0</strong>
             </div>
-            <div class="field">
-              <label for="role">角色</label>
-              <select id="role">
-                <option value="viewer">viewer（僅檢視）</option>
-                <option value="admin">admin（可編輯內容）</option>
-                <option value="super_admin">super_admin（最高權限）</option>
-              </select>
+          </header>
+          <div class="um-toolbar">
+            <button type="button" class="um-icon-btn" id="um-filter-btn" title="篩選（聚焦搜尋）" aria-label="篩選">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 4h16M7 12h10M10 20h4" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="um-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4" stroke-linecap="round"/>
+              </svg>
+              <input type="search" id="um-q" placeholder="搜尋 Email" autocomplete="off" />
             </div>
-            <div class="field">
-              <label><input id="active" type="checkbox" checked /> 啟用</label>
+            <button type="button" class="um-btn um-btn-save" id="um-save" disabled>儲存變更</button>
+            <button type="button" class="um-btn um-btn--primary" id="um-refresh">重新整理</button>
+          </div>
+          <div id="um-banner" class="um-banner" role="status"></div>
+          <div class="um-table-wrap" id="um-table-wrap">
+            <p style="margin:0;padding:24px 22px;color:#64748b;">讀取中…</p>
+          </div>
+          <footer class="um-footer">
+            <a class="um-back" href="dashboard.html">← 回首頁</a>
+            <div class="um-pagination">
+              <div class="um-page-nav">
+                <button type="button" id="um-prev" aria-label="上一頁">&lt;</button>
+                <span id="um-page-num">1</span>
+                <button type="button" id="um-next" aria-label="下一頁">&gt;</button>
+              </div>
+              <label class="um-page-size">
+                <select id="um-page-size" aria-label="每頁筆數">
+                  <option value="10">10 / page</option>
+                  <option value="20">20 / page</option>
+                  <option value="50">50 / page</option>
+                </select>
+              </label>
             </div>
-            <button type="submit" class="btn">新增或更新</button>
-          </form>
+          </footer>
         </div>
-        <div class="card">
-          <h2>列表</h2>
-          <div id="table-wrap">讀取中…</div>
-        </div>
-        <a class="btn secondary" href="dashboard.html" style="display:inline-block;text-decoration:none;">回首頁</a>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-config.js"></script>
-  <script src="supabase-auth.js"></script>
-  <script src="require-auth.js"></script>
-  <script src="admin-sidebar.js"></script>
+  <script src="supabase-config.js?v=5"></script>
+  <script src="supabase-auth.js?v=5"></script>
+  <script src="require-auth.js?v=5"></script>
+  <script src="admin-sidebar.js?v=5"></script>
   <script>
     (function () {
-      var notice = document.getElementById("notice");
-      function showNotice(msg, ok) {
-        notice.textContent = msg;
-        notice.className = "notice " + (ok ? "ok" : "err");
+      var LOCKED_EMAIL = "st213024@gmail.com";
+      var allRows = [];
+      var pendingEdits = {};
+      var page = 1;
+      var pageSize = 10;
+      var q = "";
+
+      function normEmail(em) {
+        return String(em || "").trim().toLowerCase();
       }
-      async function refresh() {
-        var wrap = document.getElementById("table-wrap");
-        try {
-          var rows = await window.AdminAuth.listAdminUsers();
-          if (!rows.length) {
-            wrap.innerHTML = "<p>尚無列。</p>";
-            return;
+      function isLockedRow(em) {
+        return normEmail(em) === LOCKED_EMAIL;
+      }
+      function rowIsPendingReview(r) {
+        if (!r || r.is_active === false) return false;
+        if (r.role === "super_admin") return false;
+        var hasReview =
+          Object.prototype.hasOwnProperty.call(r, "status") ||
+          Object.prototype.hasOwnProperty.call(r, "approved");
+        if (hasReview) {
+          if (r.status === "rejected" || r.status === "disabled") return false;
+          if (r.status === "approved" && r.approved === true) return false;
+          return r.approved === false || r.status === "pending";
+        }
+        return r.role === "viewer" && r.user_id != null;
+      }
+      function isPending(r) {
+        var A = window.AdminAuth;
+        if (A && typeof A.isPendingManagementReview === "function") {
+          return A.isPendingManagementReview(r);
+        }
+        return rowIsPendingReview(r);
+      }
+      function initialRoleSelect(r) {
+        var role = r.role || "viewer";
+        if (role === "super_admin") return "admin";
+        if (role === "admin") return "admin";
+        return "viewer";
+      }
+      function snapshotFromRow(r) {
+        if (isLockedRow(r.email)) return null;
+        return { role: initialRoleSelect(r), is_active: !!r.is_active };
+      }
+      function findRowByEmail(emailKey) {
+        var k = normEmail(emailKey);
+        for (var i = 0; i < allRows.length; i++) {
+          if (normEmail(allRows[i].email) === k) return allRows[i];
+        }
+        return null;
+      }
+      function syncSaveBtn() {
+        document.getElementById("um-save").disabled = Object.keys(pendingEdits).length === 0;
+      }
+      function onDraftChange(rowEmail) {
+        var k = normEmail(rowEmail);
+        var r = findRowByEmail(k);
+        if (!r || isLockedRow(r.email)) {
+          delete pendingEdits[k];
+          syncSaveBtn();
+          return;
+        }
+        var wrap = document.getElementById("um-table-wrap");
+        var tr = null;
+        wrap.querySelectorAll("tr[data-row-email]").forEach(function (node) {
+          if (node.getAttribute("data-row-email") === k) tr = node;
+        });
+        if (!tr) {
+          syncSaveBtn();
+          return;
+        }
+        var roleSel = tr.querySelector(".um-sel-role");
+        var actSel = tr.querySelector(".um-sel-active");
+        if (!roleSel || !actSel) {
+          syncSaveBtn();
+          return;
+        }
+        var role = roleSel.value;
+        var isActive = actSel.value === "1";
+        var snap = snapshotFromRow(r);
+        if (role === snap.role && isActive === snap.is_active) {
+          delete pendingEdits[k];
+        } else {
+          pendingEdits[k] = { role: role, is_active: isActive };
+        }
+        syncSaveBtn();
+      }
+
+      /** 超級管理員置頂；固定超級管理員列於超級群組最前；其餘依更新時間新到舊 */
+      function sortRowsForDisplay(rows) {
+        return rows.slice().sort(function (a, b) {
+          var ra = a.role || "";
+          var rb = b.role || "";
+          var aSuper = ra === "super_admin" ? 1 : 0;
+          var bSuper = rb === "super_admin" ? 1 : 0;
+          if (aSuper !== bSuper) return bSuper - aSuper;
+          if (aSuper && bSuper) {
+            var al = isLockedRow(a.email) ? 1 : 0;
+            var bl = isLockedRow(b.email) ? 1 : 0;
+            if (al !== bl) return bl - al;
           }
-          var html =
-            "<table><thead><tr><th>Email</th><th>角色</th><th>啟用</th><th></th></tr></thead><tbody>";
-          for (var i = 0; i < rows.length; i++) {
-            var r = rows[i];
-            html +=
-              "<tr><td>" +
-              (r.email || "") +
-              "</td><td>" +
-              (r.role || "") +
-              "</td><td>" +
-              (r.is_active ? "是" : "否") +
-              '</td><td><button type="button" class="del-btn" data-email="' +
-              (r.email || "").replace(/"/g, "&quot;") +
-              '">刪除</button></td></tr>';
-          }
-          html += "</tbody></table>";
-          wrap.innerHTML = html;
-          wrap.querySelectorAll(".del-btn").forEach(function (b) {
-            b.addEventListener("click", async function () {
-              if (!confirm("確定刪除此列？")) return;
-              try {
-                await window.AdminAuth.removeAdminUser(b.getAttribute("data-email"));
-                showNotice("已刪除。", true);
-                await refresh();
-              } catch (e) {
-                showNotice((e && e.message) || "刪除失敗", false);
-              }
+          var ta = new Date(a.updated_at || a.created_at || 0).getTime();
+          var tb = new Date(b.updated_at || b.created_at || 0).getTime();
+          return tb - ta;
+        });
+      }
+
+      async function fetchAllMembers() {
+        var A = window.AdminAuth;
+        if (!A) throw new Error("AdminAuth 未載入，請強制重新整理（Ctrl+F5）。");
+        if (typeof A.listAdminUsers !== "function") {
+          throw new Error("supabase-auth.js 版本過舊，請強制重新整理。");
+        }
+        var rows = await A.listAdminUsers();
+        return sortRowsForDisplay(rows);
+      }
+
+      function esc(s) {
+        return String(s || "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/"/g, "&quot;");
+      }
+      function setBanner(msg, ok) {
+        var b = document.getElementById("um-banner");
+        if (!msg) {
+          b.className = "um-banner";
+          b.textContent = "";
+          return;
+        }
+        b.textContent = msg;
+        b.className = "um-banner " + (ok ? "is-ok" : "is-err");
+      }
+      function filtered() {
+        var needle = q.trim().toLowerCase();
+        var list = !needle
+          ? allRows.slice()
+          : allRows.filter(function (r) {
+              return String(r.email || "").toLowerCase().indexOf(needle) !== -1;
             });
+        return sortRowsForDisplay(list);
+      }
+      function totalPages(n) {
+        return Math.max(1, Math.ceil(n / pageSize));
+      }
+      function slicePage(arr) {
+        var tp = totalPages(arr.length);
+        if (page > tp) page = tp;
+        var start = (page - 1) * pageSize;
+        return arr.slice(start, start + pageSize);
+      }
+
+      function effectiveDraft(r) {
+        if (isLockedRow(r.email)) return null;
+        var k = normEmail(r.email);
+        if (pendingEdits[k]) return pendingEdits[k];
+        return snapshotFromRow(r);
+      }
+
+      function render() {
+        var arr = filtered();
+        var pendN = 0;
+        for (var pi = 0; pi < allRows.length; pi++) {
+          if (isPending(allRows[pi])) pendN++;
+        }
+        document.getElementById("um-total-count").textContent = String(allRows.length);
+        document.getElementById("um-pending-count").textContent = String(pendN);
+        var tp = totalPages(arr.length);
+        document.getElementById("um-page-num").textContent = String(page);
+        document.getElementById("um-prev").disabled = page <= 1;
+        document.getElementById("um-next").disabled = page >= tp;
+
+        var wrap = document.getElementById("um-table-wrap");
+        if (!arr.length) {
+          wrap.innerHTML =
+            '<table class="um-table"><tbody><tr class="um-empty"><td colspan="10">' +
+            (allRows.length ? "沒有符合搜尋的帳號。" : "尚無任何會員列於權限表。") +
+            "</td></tr></tbody></table>";
+          return;
+        }
+
+        var me = window.AdminAuth.getLocalSession();
+        var meEm = me ? normEmail(me.email) : "";
+
+        var rows = slicePage(arr);
+        var baseIdx = (page - 1) * pageSize;
+        var html =
+          '<table class="um-table"><thead><tr>' +
+          '<th class="um-serial-th">序號</th>' +
+          "<th>帳號</th><th>Email</th><th>帳戶角色</th><th>專案</th><th>登入來源</th><th>MFA</th><th>狀態</th><th>操作</th>" +
+          "</tr></thead><tbody>";
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          var em = r.email || "";
+          var k = normEmail(em);
+          var emEsc = esc(em);
+          var mailHref = "mailto:" + encodeURIComponent(em);
+          var locked = isLockedRow(em);
+          var pend = isPending(r);
+          var draft = effectiveDraft(r);
+          var selRole = locked ? "admin" : draft.role;
+          var selActive = locked ? true : draft.is_active;
+          var serial = baseIdx + i + 1;
+
+          html += '<tr data-row-email="' + esc(k) + '">';
+          html += '<td class="um-serial">' + serial + "</td>";
+          html +=
+            '<td><a class="um-link" href="' +
+            esc(mailHref) +
+            '">' +
+            emEsc +
+            "</a></td>";
+          html += "<td>" + emEsc + "</td>";
+
+          if (locked) {
+            html +=
+              '<td><div class="um-role-cell"><span class="um-readonly-role">超級管理員</span><span class="um-muted">（固定）</span>' +
+              (pend ? '<span class="um-badge-warn">待審核</span>' : "") +
+              "</div></td>";
+          } else {
+            html += '<td><div class="um-role-cell">';
+            html +=
+              '<select class="um-select um-sel-role" aria-label="帳戶角色">' +
+              '<option value="viewer"' +
+              (selRole === "viewer" ? " selected" : "") +
+              ">僅檢視</option>" +
+              '<option value="admin"' +
+              (selRole === "admin" ? " selected" : "") +
+              ">一般管理者</option>" +
+              "</select>";
+            if (pend) html += '<span class="um-badge-warn">待審核</span>';
+            html += "</div></td>";
+          }
+
+          html += '<td><span class="um-badge um-badge--proj">imMBA</span></td>';
+          html += '<td><span class="um-badge um-badge--src">Supabase</span></td>';
+          html += '<td class="um-muted">—</td>';
+
+          if (locked) {
+            html += '<td><span class="um-readonly-role">啟用</span></td>';
+          } else {
+            html +=
+              '<td><select class="um-select um-sel-active" aria-label="狀態">' +
+              '<option value="1"' +
+              (selActive ? " selected" : "") +
+              ">啟用</option>" +
+              '<option value="0"' +
+              (!selActive ? " selected" : "") +
+              ">停用</option>" +
+              "</select></td>";
+          }
+
+          html += "<td>";
+          if (!locked && meEm !== k) {
+            html +=
+              '<button type="button" class="um-act-del-inline" data-row-email="' +
+              emEsc +
+              '">刪除</button>';
+          } else {
+            html += '<span class="um-muted">—</span>';
+          }
+          html += "</td></tr>";
+        }
+        html += "</tbody></table>";
+        wrap.innerHTML = html;
+      }
+
+      async function loadAll(clearDraft) {
+        if (clearDraft !== false && Object.keys(pendingEdits).length) {
+          if (!confirm("有未儲存的變更，確定要重新載入並捨棄？")) return;
+        }
+        if (clearDraft !== false) pendingEdits = {};
+        syncSaveBtn();
+        var wrap = document.getElementById("um-table-wrap");
+        wrap.innerHTML = '<p style="margin:0;padding:24px 22px;color:#64748b;">讀取中…</p>';
+        try {
+          allRows = await fetchAllMembers();
+          Object.keys(pendingEdits).forEach(function (key) {
+            if (!findRowByEmail(key)) delete pendingEdits[key];
           });
+          page = 1;
+          render();
         } catch (e) {
-          wrap.innerHTML = "<p>讀取失敗：" + (e && e.message) + "</p>";
+          wrap.innerHTML =
+            '<table class="um-table"><tbody><tr class="um-empty"><td colspan="10">' +
+            esc((e && e.message) || String(e)) +
+            "</td></tr></tbody></table>";
         }
       }
-      document.getElementById("add-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
+
+      async function saveChanges() {
+        var keys = Object.keys(pendingEdits);
+        if (!keys.length) return;
+        var A = window.AdminAuth;
+        if (typeof A.saveAdminRow !== "function") {
+          setBanner("請重新整理以載入最新 supabase-auth.js（需含 saveAdminRow）。", false);
+          return;
+        }
         try {
-          await window.AdminAuth.upsertAdminUser(
-            document.getElementById("em").value,
-            document.getElementById("role").value,
-            document.getElementById("active").checked
-          );
-          showNotice("已儲存。", true);
-          document.getElementById("em").value = "";
-          await refresh();
-        } catch (err) {
-          showNotice((err && err.message) || "失敗", false);
+          for (var i = 0; i < keys.length; i++) {
+            var k = keys[i];
+            var pe = pendingEdits[k];
+            await A.saveAdminRow(k, pe.role, pe.is_active);
+          }
+          pendingEdits = {};
+          syncSaveBtn();
+          setBanner("已儲存變更。", true);
+          await loadAll(false);
+        } catch (e) {
+          setBanner((e && e.message) || "儲存失敗", false);
+        }
+      }
+
+      document.getElementById("um-filter-btn").addEventListener("click", function () {
+        document.getElementById("um-q").focus();
+      });
+      document.getElementById("um-q").addEventListener("input", function () {
+        q = this.value;
+        page = 1;
+        render();
+      });
+      document.getElementById("um-refresh").addEventListener("click", function () {
+        setBanner("", false);
+        loadAll(true);
+      });
+      document.getElementById("um-save").addEventListener("click", function () {
+        setBanner("", false);
+        saveChanges();
+      });
+      document.getElementById("um-prev").addEventListener("click", function () {
+        if (page > 1) {
+          page--;
+          render();
         }
       });
+      document.getElementById("um-next").addEventListener("click", function () {
+        var arr = filtered();
+        if (page < totalPages(arr.length)) {
+          page++;
+          render();
+        }
+      });
+      document.getElementById("um-page-size").addEventListener("change", function () {
+        pageSize = parseInt(this.value, 10) || 10;
+        page = 1;
+        render();
+      });
+
+      var tableWrap = document.getElementById("um-table-wrap");
+      tableWrap.addEventListener("change", function (ev) {
+        var t = ev.target;
+        if (!t.classList.contains("um-sel-role") && !t.classList.contains("um-sel-active")) return;
+        var tr = t.closest("tr[data-row-email]");
+        if (!tr) return;
+        onDraftChange(tr.getAttribute("data-row-email"));
+      });
+      tableWrap.addEventListener("click", function (ev) {
+        var btn = ev.target.closest(".um-act-del-inline");
+        if (!btn) return;
+        var raw = btn.getAttribute("data-row-email");
+        if (!raw) return;
+        if (!confirm("確定從管理者表刪除此帳號？")) return;
+        (async function () {
+          try {
+            await window.AdminAuth.removeAdminUser(raw);
+            delete pendingEdits[normEmail(raw)];
+            syncSaveBtn();
+            setBanner("已刪除。", true);
+            await loadAll(false);
+          } catch (e) {
+            setBanner((e && e.message) || "刪除失敗", false);
+          }
+        })();
+      });
+
       (async function () {
         var ok = await AdminRequireAuth.ensureSession({ requireSuperAdmin: true });
         if (!ok) return;
         document.getElementById("admin-root").classList.remove("shell-hide");
-        await refresh();
+        await loadAll(false);
       })();
     })();
   </script>
