@@ -1,0 +1,7 @@
+{
+  "name": "immba-site",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/prepare-vercel.js"
+  }
+}

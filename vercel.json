@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "rewrites": [
-    { "source": "/", "destination": "/TM2026_remote/index.html" },
-    { "source": "/(.*)", "destination": "/TM2026_remote/$1" }
-  ]
+  "framework": null,
+  "installCommand": "",
+  "buildCommand": "node scripts/prepare-vercel.js",
+  "outputDirectory": "dist"
 }
