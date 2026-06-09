@@ -1,17 +1,17 @@
 /* Shared admin layout: fixed left sidebar + main content */
 :root {
-  --admin-sidebar-bg: #1e2d3d;
-  --admin-sidebar-text: rgba(255, 255, 255, 0.88);
-  --admin-sidebar-muted: rgba(255, 255, 255, 0.55);
-  --admin-sidebar-active: #e8f4ef;
-  --admin-sidebar-hover: rgba(255, 255, 255, 0.08);
-  --admin-accent: #2e5a47;
-  --admin-line: #c9d0dc;
-  --admin-text: #1a2332;
-  --admin-muted: #5a6575;
+  --admin-sidebar-bg: linear-gradient(180deg, #0284c7 0%, #0369a1 55%, #075985 100%);
+  --admin-sidebar-text: rgba(255, 255, 255, 0.92);
+  --admin-sidebar-muted: rgba(255, 255, 255, 0.62);
+  --admin-sidebar-active: #e0f2fe;
+  --admin-sidebar-hover: rgba(255, 255, 255, 0.12);
+  --admin-accent: #0ea5e9;
+  --admin-line: #bae6fd;
+  --admin-text: #0f2d44;
+  --admin-muted: #3d6b85;
   --admin-panel: #ffffff;
-  --admin-page-bg: #e8ebf0;
-  --admin-danger: #a84848;
+  --admin-page-bg: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  --admin-danger: #dc2626;
   --admin-font: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
 }
 
@@ -30,7 +30,7 @@
 .admin-sidebar {
   width: 228px;
   flex-shrink: 0;
-  background: var(--admin-sidebar-bg);
+  background: linear-gradient(180deg, #0284c7 0%, #0369a1 55%, #075985 100%);
   color: var(--admin-sidebar-text);
   display: flex;
   flex-direction: column;
@@ -85,7 +85,7 @@
 }
 
 .admin-sidebar__nav a[aria-current="page"] {
-  background: rgba(46, 90, 71, 0.35);
+  background: rgba(255, 255, 255, 0.2);
   color: var(--admin-sidebar-active);
 }
 
@@ -145,7 +145,7 @@
 .dash-head h1 {
   font-size: 22px;
   font-weight: 800;
-  color: #14212f;
+  color: #075985;
   margin: 0 0 6px;
 }
 
@@ -182,7 +182,7 @@
 .dash-card__title {
   font-size: 16px;
   font-weight: 800;
-  color: #14212f;
+  color: #075985;
 }
 
 .dash-card__desc {
@@ -202,7 +202,7 @@
 
 .dash-card__stats strong {
   font-weight: 800;
-  color: #2e5a47;
+  color: #0284c7;
 }
 
 .dash-card__actions {
@@ -217,8 +217,8 @@
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
-  background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
-  color: #f4faf7;
+  background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%);
+  color: #f0f9ff;
   border: 0;
   cursor: pointer;
   font-family: var(--admin-font);
@@ -229,8 +229,8 @@
 }
 
 .dash-card__btn--muted {
-  background: #eef1f6;
-  color: #243652;
+  background: #e0f2fe;
+  color: #075985;
   border: 1px solid var(--admin-line);
 }
 

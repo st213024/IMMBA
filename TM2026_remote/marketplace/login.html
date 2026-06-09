@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>賣場會員登入｜imMBA 商品交易平台</title>
+  <style>
+    :root {
+      --line: #bae6fd;
+      --text: #0f2d44;
+      --muted: #3d6b85;
+      --deep: #075985;
+      --panel: #fff;
+      --surface: #f0f9ff;
+      --ink: #0284c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+    .wrap { width: min(440px, 100%); }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(14, 116, 144, 0.12);
+      padding: 26px 22px;
+    }
+    .top-links {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+    .top-links a {
+      color: var(--ink);
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .top-links a:hover { text-decoration: underline; }
+    .brand { text-align: center; margin-bottom: 14px; }
+    .brand h1 { font-size: 21px; color: var(--deep); margin-bottom: 6px; font-weight: 800; }
+    .brand p { font-size: 13px; color: var(--muted); line-height: 1.55; }
+    .sb-status { margin-top: 10px; font-size: 12px; color: var(--muted); line-height: 1.45; white-space: pre-wrap; }
+    .sb-status.err { color: #b65e5e; font-weight: 600; }
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 4px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    .auth-tab {
+      flex: 1;
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      background: transparent;
+      color: var(--muted);
+      font-family: inherit;
+    }
+    .auth-tab--active {
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 2px 8px rgba(14, 116, 144, 0.08);
+    }
+    .auth-panel[hidden] { display: none !important; }
+    .field { margin-bottom: 12px; }
+    .field label { display: block; font-size: 14px; color: #3d4f63; font-weight: 600; margin-bottom: 6px; }
+    .field-pwd {
+      display: flex;
+      align-items: stretch;
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fafbfe;
+    }
+    .field-pwd input {
+      flex: 1;
+      border: 0;
+      padding: 12px 14px;
+      background: transparent;
+      font-size: 15px;
+      min-width: 0;
+    }
+    .pwd-toggle {
+      border: 0;
+      border-left: 1px solid var(--line);
+      padding: 0 12px;
+      background: #eef8ff;
+      cursor: pointer;
+      font-size: 18px;
+    }
+    input:not(.field-pwd input) {
+      width: 100%;
+      border: 1px solid #b8c4d6;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #fafbfe;
+      font-size: 15px;
+    }
+    .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: linear-gradient(180deg, #38bdf8 0%, var(--ink) 100%);
+      color: #f0f9ff;
+    }
+    .btn-secondary { background: var(--surface); border: 1px solid var(--line); color: var(--deep); }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .notice {
+      margin-top: 14px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: #fde8e8;
+      border: 1px solid #f0b4b4;
+      color: #7a2e2e;
+      font-size: 14px;
+      display: none;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .notice.ok { background: #e8f7ef; border-color: #9dcbb0; color: #1e4d32; }
+    .help-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .help-row .btn { flex: 1; min-width: 120px; font-size: 13px; padding: 10px 12px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="card">
+      <div class="top-links">
+        <a href="/marketplace.html">返回賣場</a>
+        <a href="../index.html">官網首頁</a>
+      </div>
+      <div class="brand">
+        <h1>商品交易平台｜會員登入</h1>
+        <p>賣場會員帳號<strong>獨立於後台管理</strong>。註冊並完成信箱驗證後即可瀏覽、下單與切換買家／賣家模式。</p>
+        <p id="sb-status" class="sb-status" aria-live="polite">正在檢查設定…</p>
+      </div>
+
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab auth-tab--active" id="tab-login" role="tab">登入</button>
+        <button type="button" class="auth-tab" id="tab-register" role="tab">註冊</button>
+      </div>
+
+      <div class="auth-panel" id="panel-login" role="tabpanel">
+        <form id="login-form" autocomplete="on">
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" autocomplete="username" required placeholder="name@example.com" />
+          </div>
+          <div class="field">
+            <label for="password">密碼</label>
+            <div class="field-pwd">
+              <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="密碼" />
+              <button type="button" class="pwd-toggle" id="toggle-login-pwd" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="login-btn" type="submit">登入賣場</button>
+            <button class="btn btn-secondary" id="resend-btn" type="button">重寄驗證信</button>
+          </div>
+        </form>
+        <div class="help-row">
+          <button class="btn btn-secondary" id="forgot-btn" type="button">忘記密碼</button>
+        </div>
+      </div>
+
+      <div class="auth-panel" id="panel-register" role="tabpanel" hidden>
+        <form id="register-form" autocomplete="on">
+          <div class="field">
+            <label for="reg-email">Email</label>
+            <input id="reg-email" type="email" autocomplete="email" required placeholder="name@example.com" />
+          </div>
+          <div class="field">
+            <label for="reg-password">密碼</label>
+            <div class="field-pwd">
+              <input id="reg-password" type="password" autocomplete="new-password" required placeholder="至少 6 字" minlength="6" />
+              <button type="button" class="pwd-toggle" id="toggle-reg-pwd" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="reg-password2">確認密碼</label>
+            <div class="field-pwd">
+              <input id="reg-password2" type="password" autocomplete="new-password" required placeholder="再次輸入" />
+              <button type="button" class="pwd-toggle" id="toggle-reg-pwd2" aria-label="顯示或隱藏密碼">👁</button>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn btn-primary" id="register-btn" type="submit">註冊賣場會員</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="notice" class="notice" role="alert"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="marketplace-auth.js"></script>
+  <script>
+    (function () {
+      function bindPwdToggle(btnId, inputId) {
+        var btn = document.getElementById(btnId);
+        var input = document.getElementById(inputId);
+        if (!btn || !input) return;
+        btn.addEventListener("click", function () {
+          var show = input.type === "password";
+          input.type = show ? "text" : "password";
+          btn.textContent = show ? "🙈" : "👁";
+        });
+      }
+      bindPwdToggle("toggle-login-pwd", "password");
+      bindPwdToggle("toggle-reg-pwd", "reg-password");
+      bindPwdToggle("toggle-reg-pwd2", "reg-password2");
+
+      var statusEl = document.getElementById("sb-status");
+      var notice = document.getElementById("notice");
+      var emailEl = document.getElementById("email");
+      var pwdEl = document.getElementById("password");
+      var loginBtn = document.getElementById("login-btn");
+      var registerBtn = document.getElementById("register-btn");
+      var regEmailEl = document.getElementById("reg-email");
+      var regPwdEl = document.getElementById("reg-password");
+      var regPwd2El = document.getElementById("reg-password2");
+      var tabLogin = document.getElementById("tab-login");
+      var tabRegister = document.getElementById("tab-register");
+      var panelLogin = document.getElementById("panel-login");
+      var panelRegister = document.getElementById("panel-register");
+
+      function showNotice(msg, isOk) {
+        notice.textContent = msg;
+        notice.classList.toggle("ok", Boolean(isOk));
+        notice.style.display = msg ? "block" : "none";
+      }
+      function hideNotice() {
+        notice.style.display = "none";
+        notice.textContent = "";
+      }
+
+      function getSafeNext() {
+        var q = new URLSearchParams(location.search).get("next");
+        var n = String(q || "").trim();
+        if (!n || n.indexOf("..") !== -1) return "/marketplace.html";
+        if (n.startsWith("/")) return n;
+        return "/" + n.replace(/^\/+/, "");
+      }
+
+      function showLoginTab() {
+        tabLogin.classList.add("auth-tab--active");
+        tabRegister.classList.remove("auth-tab--active");
+        panelLogin.hidden = false;
+        panelRegister.hidden = true;
+      }
+      function showRegTab() {
+        tabRegister.classList.add("auth-tab--active");
+        tabLogin.classList.remove("auth-tab--active");
+        panelRegister.hidden = false;
+        panelLogin.hidden = true;
+      }
+      tabLogin.addEventListener("click", function () { hideNotice(); showLoginTab(); });
+      tabRegister.addEventListener("click", function () { hideNotice(); showRegTab(); });
+
+      (function readUrlNotice() {
+        var q = new URLSearchParams(location.search);
+        if (q.get("email_verified") === "1") {
+          showNotice("信箱驗證已完成，請登入賣場。", true);
+        }
+      })();
+
+      async function refreshStatusHint() {
+        var why = window.MarketplaceAuth.diagnoseSupabaseEnv();
+        if (why) {
+          statusEl.textContent = why;
+          statusEl.className = "sb-status err";
+          return;
+        }
+        statusEl.textContent = "賣場會員系統已就緒（與後台登入分離）。";
+        statusEl.className = "sb-status";
+      }
+
+      async function tryRedirectIfAlreadyIn() {
+        try {
+          var boot = await window.MarketplaceAuth.bootstrapFromSupabase();
+          if (boot?.user) location.replace(getSafeNext());
+        } catch (_) {}
+      }
+
+      document.getElementById("login-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        hideNotice();
+        loginBtn.disabled = true;
+        try {
+          await window.MarketplaceAuth.signIn(emailEl.value, pwdEl.value);
+          showNotice("登入成功…", true);
+          location.replace(getSafeNext());
+        } catch (err) {
+          showNotice((err && err.message) || "登入失敗。", false);
+        } finally {
+          loginBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("register-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        hideNotice();
+        if (regPwdEl.value !== regPwd2El.value) {
+          showNotice("兩次密碼不一致。", false);
+          return;
+        }
+        registerBtn.disabled = true;
+        try {
+          var res = await window.MarketplaceAuth.signUp(regEmailEl.value, regPwdEl.value);
+          var msg = res.needsEmailVerification
+            ? "已送出註冊，請至信箱點驗證連結後再登入賣場。"
+            : "註冊成功，請登入。";
+          showNotice(msg, true);
+          emailEl.value = regEmailEl.value.trim();
+          showLoginTab();
+        } catch (err) {
+          showNotice((err && err.message) || "註冊失敗。", false);
+        } finally {
+          registerBtn.disabled = false;
+        }
+      });
+
+      document.getElementById("resend-btn").addEventListener("click", async function () {
+        hideNotice();
+        try {
+          await window.MarketplaceAuth.resendSignupEmail(emailEl.value);
+          showNotice("已重寄驗證信，請查收件匣與垃圾信。", true);
+        } catch (err) {
+          showNotice((err && err.message) || "重寄失敗。", false);
+        }
+      });
+
+      document.getElementById("forgot-btn").addEventListener("click", async function () {
+        hideNotice();
+        try {
+          await window.MarketplaceAuth.resetPasswordForEmail(emailEl.value);
+          showNotice("已寄出重設密碼信，請至信箱開啟連結。", true);
+        } catch (err) {
+          showNotice((err && err.message) || "寄送失敗。", false);
+        }
+      });
+
+      refreshStatusHint();
+      tryRedirectIfAlreadyIn();
+    })();
+  </script>
+</body>
+</html>

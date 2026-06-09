@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>會員資料｜imMBA 商品交易平台</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../marketplace.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">
+        <a class="logo-mark-link" href="/marketplace.html" aria-label="返回賣場">
+          <img class="logo-mark" src="../images/logo-immba-icon.svg" alt="FJCU imMBA logo">
+        </a>
+        <div class="logo-text">
+          <span class="logo-main">輔仁大學國際經營管理碩士班（imMBA）</span>
+          <span class="logo-sub">會員資料管理</span>
+        </div>
+      </div>
+      <div class="header-top-right">
+        <a class="top-link" href="/marketplace.html">返回賣場</a>
+        <a class="top-link" href="../index.html">官網首頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section alt">
+    <div class="section-title">
+      <h2>會員中心</h2>
+    </div>
+    <p class="section-intro">在此修改您的顯示名稱與聯絡資料，儲存後將套用至商品交易平台。</p>
+
+    <section class="admin-panel" style="max-width:560px;margin:0 auto;">
+      <h3>基本資料</h3>
+      <form id="member-profile-form" class="admin-form">
+        <div class="admin-form-row">
+          <label>登入 Email
+            <input id="profile-email" class="admin-input" type="email" readonly>
+          </label>
+        </div>
+        <div class="admin-form-row">
+          <label>顯示名稱
+            <input id="profile-display-name" class="admin-input" type="text" maxlength="40" placeholder="例如：王小明" required>
+          </label>
+        </div>
+        <div class="admin-form-row">
+          <label>聯絡電話
+            <input id="profile-phone" class="admin-input" type="tel" maxlength="20" placeholder="例如：0912-345-678">
+          </label>
+        </div>
+        <p class="admin-note">顯示名稱會顯示於賣場頁面與您上架的商品；電話僅供買賣雙方聯繫參考。</p>
+        <p id="profile-message" class="admin-note"></p>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="profile-save-btn" type="submit">儲存資料</button>
+          <a class="btn btn-outline" href="/marketplace.html">返回賣場</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="marketplace-auth.js"></script>
+  <script>
+    (function () {
+      var form = document.getElementById("member-profile-form");
+      var emailEl = document.getElementById("profile-email");
+      var nameEl = document.getElementById("profile-display-name");
+      var phoneEl = document.getElementById("profile-phone");
+      var msgEl = document.getElementById("profile-message");
+      var saveBtn = document.getElementById("profile-save-btn");
+
+      function showMsg(text, ok) {
+        if (!msgEl) return;
+        msgEl.textContent = text;
+        msgEl.style.color = ok ? "#1e6b4a" : "#b65e5e";
+      }
+
+      async function init() {
+        if (window.MarketplaceAuth.diagnoseSupabaseEnv()) {
+          showMsg(window.MarketplaceAuth.diagnoseSupabaseEnv(), false);
+          return;
+        }
+        var boot = await window.MarketplaceAuth.bootstrapFromSupabase();
+        if (!boot || !boot.user) {
+          location.replace("login.html?next=/marketplace/member-center.html");
+          return;
+        }
+        var profile = boot.profile || {};
+        var session = boot.session || {};
+        if (emailEl) emailEl.value = boot.user.email || session.email || "";
+        if (nameEl) nameEl.value = profile.display_name || session.displayName || "";
+        if (phoneEl) phoneEl.value = profile.phone || session.phone || "";
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        showMsg("", true);
+        saveBtn.disabled = true;
+        try {
+          await window.MarketplaceAuth.updateMemberProfile({
+            displayName: nameEl.value,
+            phone: phoneEl.value,
+          });
+          showMsg("會員資料已儲存。", true);
+        } catch (err) {
+          showMsg((err && err.message) || "儲存失敗。", false);
+        } finally {
+          saveBtn.disabled = false;
+        }
+      });
+
+      init();
+    })();
+  </script>
+</body>
+</html>

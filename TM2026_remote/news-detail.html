@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -37,7 +37,7 @@
           title="連按兩下滑鼠左鍵可開啟後台管理"
           aria-label="系所識別標誌。連按兩下可開啟後台管理。"
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a
@@ -101,9 +101,9 @@
     </article>
   </main>
 
-  <script src="news-store.js"></script>
+  <script src="news-store.js?v=20260609-img3"></script>
   <script>
-    const fallbackImage = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=70";
+    const fallbackImage = window.NewsStore.DEFAULT_NEWS_FALLBACK;
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     const item = id ? window.NewsStore.getById(id) : null;
@@ -117,12 +117,12 @@
       titleEl.textContent = "找不到此消息";
       dateEl.textContent = "";
       contentEl.textContent = "請返回首頁重新選擇消息。";
-      coverEl.src = fallbackImage;
+      window.NewsStore.applyNewsImage(coverEl, "", fallbackImage);
     } else {
       titleEl.textContent = item.title || "未命名消息";
       dateEl.textContent = item.date || "";
       contentEl.textContent = item.content || "（尚無文章內容）";
-      coverEl.src = item.image_url || fallbackImage;
+      window.NewsStore.applyNewsImage(coverEl, item.image_url, fallbackImage);
     }
   </script>
   <script src="script.js"></script>

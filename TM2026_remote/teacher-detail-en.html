@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -37,7 +37,7 @@
           title="Double-click to open admin"
           aria-label="Program mark. Double-click to open admin."
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a class="topbar-name" href="index-en.html" title="Home" aria-label="Home: International MBA (imMBA), Fu Jen Catholic University">
@@ -58,22 +58,22 @@
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Overview</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">Features and Rankings</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">Regulations and Procedures</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">Learning Environment</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Admissions</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA Admissions</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">Scholarships and Financial Aid</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Academics</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">Curriculum and Degree Requirements</a>
         </div>
       </div>
       <div class="nav-item"><a class="nav-link is-active" href="teacher-en.html" aria-current="page">Faculty</a></div>
@@ -110,7 +110,7 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="teacher-data.js"></script>
+  <script src="teacher-data.js?v=20260609-photo1"></script>
   <script>
     function escapeHtml(s) {
       return String(s ?? "")
@@ -135,7 +135,7 @@
       missing.classList.remove("hide");
     } else {
       const en = t.en;
-      const photo = t.photo || "images/avatar-placeholder.svg";
+      const photo = window.TeacherData.getDisplayPhotoUrl(t.photo);
       const deptBlock = en.dept ? `<p class="teacher-card-dept">${escapeHtml(en.dept)}</p>` : "";
 
       const eduBlock = en.education

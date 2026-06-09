@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <style>
     /* Two-column layout for activity detail page */
@@ -56,14 +56,14 @@
     }
 
     .activity-detail-nav a:hover {
-      background: #F4F8FF;
+      background: #f0f9ff;
       border-color: var(--line);
       color: var(--primary-deep);
     }
 
     .activity-detail-nav a.is-active {
-      background: #EAF3FF;
-      border-color: #C7D9F5;
+      background: #e0f2fe;
+      border-color: #bae6fd;
       color: var(--primary-deep);
     }
 
@@ -78,7 +78,7 @@
     .activity-detail-header {
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
-      background: #F4F8FF;
+      background: #f0f9ff;
       color: var(--text);
       font-weight: 800;
     }
@@ -115,7 +115,7 @@
     .activity-post p {
       font-size: 16.5px;
       line-height: 1.9;
-      color: #334a70;
+      color: #0369a1;
       margin-bottom: 10px;
     }
 
@@ -176,7 +176,7 @@
           title="連按兩下滑鼠左鍵可開啟後台管理"
           aria-label="系所識別標誌。連按兩下可開啟後台管理。"
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a
@@ -433,7 +433,7 @@
     </div>
   </main>
   <script src="activity-pages.js"></script>
-  <script src="activity-store.js"></script>
+  <script src="activity-store.js?v=20260609-act2"></script>
   <script>
     (function () {
       const headerEl = document.getElementById("activity-detail-header");
@@ -488,7 +488,7 @@
           <figure>
             <img
               src="${escapeHtml(
-                item.imageUrl || item.imageSrc || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80'
+                (window.ActivityStore?.getDisplayImageUrl?.(item.imageUrl || item.imageSrc) || item.imageUrl || item.imageSrc || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80')
               )}"
               alt="${escapeHtml(title)}"
             />

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理員登入</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="section alt">
+    <div class="section-title"><h2>管理後台登入</h2></div>
+    <section class="admin-panel" style="max-width:680px;">
+      <h3>登入 / 註冊</h3>
+      <p id="auth-platform-note" class="admin-note"></p>
+      <form id="auth-form" class="admin-form">
+        <div class="admin-form-row">
+          <label>Email<input name="email" type="email" class="admin-input" required></label>
+        </div>
+        <div class="admin-form-row">
+          <label>密碼<input name="password" type="password" class="admin-input" required></label>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-primary" type="submit" data-action="login">登入</button>
+          <button class="btn btn-outline" style="color:#003366;border-color:#003366;" type="submit" data-action="signup">註冊</button>
+        </div>
+      </form>
+      <section id="auth-help-actions" class="admin-panel" style="display:block;margin-top:12px;">
+        <h3 style="margin-top:0;">登入協助</h3>
+        <p class="admin-note">若密碼錯誤，可使用以下功能（信件會寄到你原本申請的 Email）。</p>
+        <div class="admin-actions">
+          <button class="btn btn-outline" type="button" data-auth-help="forgot-password">忘記密碼</button>
+          <button class="btn btn-outline" type="button" data-auth-help="reset-password">重設密碼</button>
+          <button class="btn btn-outline" type="button" data-auth-help="resend-verify">重寄驗證信</button>
+        </div>
+      </section>
+      <form id="password-reset-form" class="admin-form" style="display:none;margin-top:12px;">
+        <div class="admin-form-row">
+          <label>新密碼<input name="newPassword" type="password" class="admin-input" minlength="6" autocomplete="new-password"></label>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-primary" type="submit">更新密碼</button>
+        </div>
+      </form>
+      <p class="admin-note">第一次申請需經過超級管理員核准並確認email信箱之後才可以登入。</p>
+      <p id="auth-message" class="admin-note"></p>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js?v=20260316-5"></script>
+</body>
+</html>
+

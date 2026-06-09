@@ -144,7 +144,30 @@
 
   function mapSyncError(err) {
     const m = String(err?.message || err?.details || "");
+    if (m.includes("商品交易平台會員")) {
+      return attachSupabaseAuthMeta(new Error(m), err);
+    }
     return attachSupabaseAuthMeta(new Error(m || "無法同步管理者權限，請確認已執行 supabase-schema.sql。"), err);
+  }
+
+  async function getEmailRegistrationHint(email) {
+    const sb = getClient();
+    if (!sb) return null;
+    const normalized = normalizeEmail(email);
+    if (!normalized) return null;
+    try {
+      const { data, error } = await sb.rpc("check_email_registration_hint", { p_email: normalized });
+      if (error) return null;
+      return data && typeof data === "object" ? data : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function throwSignUpConflictError(email) {
+    const hint = await getEmailRegistrationHint(email);
+    if (hint?.message) throw new Error(String(hint.message));
+    throw new Error("此 Email 可能已註冊，請改為「登入」。");
   }
 
   function mapSignUpError(err) {
@@ -428,11 +451,18 @@
       password: String(password || ""),
       ...(redirectTo ? { options: { emailRedirectTo: redirectTo } } : {})
     });
-    if (error) throw mapSignUpError(error);
+    if (error) {
+      const mapped = mapSignUpError(error);
+      const low = String(mapped.message || "").toLowerCase();
+      if (low.includes("已註冊") || low.includes("already")) {
+        await throwSignUpConflictError(normalizedEmail);
+      }
+      throw mapped;
+    }
 
     const identities = data?.user?.identities;
     if (Array.isArray(identities) && identities.length === 0) {
-      throw new Error("此 Email 可能已註冊，請改為「登入」。");
+      await throwSignUpConflictError(normalizedEmail);
     }
 
     return {
@@ -583,6 +613,111 @@
     if (error) throw mapAdminTableError(error);
   }
 
+  function isMissingRpcError(err, rpcName) {
+    const msg = String(err?.message || err?.details || "").toLowerCase();
+    const code = String(err?.code || "");
+    return (
+      msg.includes(rpcName.toLowerCase()) ||
+      msg.includes("could not find the function") ||
+      msg.includes("schema cache") ||
+      code === "PGRST202"
+    );
+  }
+
+  async function listMarketplaceMembersFromTable(sb) {
+    const { data, error } = await sb
+      .from("marketplace_members")
+      .select("id,user_id,email,display_name,phone,status,seller_enabled,created_at,updated_at")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return data || [];
+  }
+
+  async function listMarketplaceMembers() {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase 尚未設定。");
+    if (!isSuperAdmin()) throw new Error("僅超級管理員可檢視賣場會員。");
+    const { data, error } = await sb.rpc("admin_list_marketplace_members");
+    if (!error) return data || [];
+    if (isMissingRpcError(error, "admin_list_marketplace_members")) {
+      try {
+        return await listMarketplaceMembersFromTable(sb);
+      } catch (tblErr) {
+        const rpcMsg = String(error.message || "");
+        const tblMsg = String(tblErr?.message || tblErr || "");
+        throw new Error(
+          "無法讀取賣場會員。\n" +
+            "① 請在 Supabase SQL Editor 執行 admin/supabase-marketplace-isolation-v1.sql（建立查詢功能）\n" +
+            "② 執行後到 Dashboard → Project Settings → API → Reload schema（或等 1～2 分鐘）\n" +
+            "③ 再按「從 Auth 同步會員」\n" +
+            "技術訊息 RPC：" + rpcMsg + (tblMsg ? "\n資料表：" + tblMsg : "")
+        );
+      }
+    }
+    throw error;
+  }
+
+  async function syncMarketplaceFromAuth() {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase 尚未設定。");
+    if (!isSuperAdmin()) throw new Error("僅超級管理員可同步賣場會員。");
+    const { data, error } = await sb.rpc("admin_sync_marketplace_from_auth");
+    if (error) {
+      if (isMissingRpcError(error, "admin_sync_marketplace_from_auth")) {
+        throw new Error(
+          "請在 Supabase SQL Editor 執行 admin/supabase-marketplace-isolation-v1.sql（含 admin_sync_marketplace_from_auth）。"
+        );
+      }
+      throw error;
+    }
+    const synced = Number(data?.synced ?? 0);
+    return { synced, raw: data };
+  }
+
+  async function saveMarketplaceMemberRowFromTable(sb, email, status, sellerEnabled) {
+    const normalized = normalizeEmail(email);
+    const st = status === "suspended" ? "suspended" : "active";
+    const { data, error } = await sb
+      .from("marketplace_members")
+      .update({
+        status: st,
+        seller_enabled: Boolean(sellerEnabled),
+        updated_at: new Date().toISOString()
+      })
+      .eq("email", normalized)
+      .select("email,status,seller_enabled")
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("找不到此賣場會員。");
+    return {
+      email: normalized,
+      status: data.status || st,
+      seller_enabled: data.seller_enabled !== false
+    };
+  }
+
+  async function saveMarketplaceMemberRow(email, status, sellerEnabled) {
+    const sb = getClient();
+    if (!sb) throw new Error("Supabase 尚未設定。");
+    if (!isSuperAdmin()) throw new Error("僅超級管理員可管理賣場會員。");
+    const normalized = normalizeEmail(email);
+    if (!normalized) throw new Error("請輸入 Email。");
+    const st = status === "suspended" ? "suspended" : "active";
+    const seller = Boolean(sellerEnabled);
+    const { error } = await sb.rpc("admin_update_marketplace_member", {
+      p_email: normalized,
+      p_seller_enabled: seller,
+      p_status: st
+    });
+    if (!error) {
+      return { email: normalized, status: st, seller_enabled: seller };
+    }
+    if (isMissingRpcError(error, "admin_update_marketplace_member")) {
+      return saveMarketplaceMemberRowFromTable(sb, normalized, st, seller);
+    }
+    throw error;
+  }
+
   async function removeAdminUser(email) {
     const sb = getClient();
     if (!sb) throw new Error("Supabase 尚未設定。");
@@ -620,7 +755,11 @@
     signOutAdmin,
     signUp,
     resendSignupEmail,
+    getEmailRegistrationHint,
     listAdminUsers,
+    listMarketplaceMembers,
+    syncMarketplaceFromAuth,
+    saveMarketplaceMemberRow,
     listPendingManagementReview,
     isPendingManagementReview,
     upsertAdminUser,

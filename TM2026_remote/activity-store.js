@@ -6,6 +6,154 @@
 (function () {
   const STORAGE_KEY = "immba_activity_items_v1";
   const REMOVED_DEFAULTS_KEY = "immba_activity_removed_defaults_v1";
+  const IMAGES_KEY = "immba_activity_images_v1";
+  const IMAGE_REF_PREFIX = "activityimg:";
+  const DEFAULT_ACTIVITY_FALLBACK =
+    "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80";
+
+  function isLikelyBase64Image(url) {
+    return typeof url === "string" && url.startsWith("data:image/");
+  }
+
+  function readImageMap() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(IMAGES_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeImageMap(map) {
+    try {
+      localStorage.setItem(IMAGES_KEY, JSON.stringify(map));
+    } catch (err) {
+      if (err && (err.name === "QuotaExceededError" || String(err).toLowerCase().includes("quota"))) {
+        throw new Error("圖片儲存空間不足，請改用較小的圖片後再試。");
+      }
+      throw err;
+    }
+  }
+
+  function attachImage(activityIdx, dataUrl) {
+    const id = String(activityIdx ?? "").trim();
+    if (!id || !Number.isFinite(Number(id)) || !isLikelyBase64Image(dataUrl)) return "";
+    const map = readImageMap();
+    map[id] = dataUrl;
+    writeImageMap(map);
+    return `${IMAGE_REF_PREFIX}${id}`;
+  }
+
+  function imageRefExists(ref) {
+    const url = String(ref || "").trim();
+    if (!url.startsWith(IMAGE_REF_PREFIX)) return false;
+    const id = url.slice(IMAGE_REF_PREFIX.length);
+    return Boolean(readImageMap()[id]);
+  }
+
+  function resolveImageUrl(raw) {
+    const url = String(raw || "").trim();
+    if (!url) return "";
+    if (url.startsWith(IMAGE_REF_PREFIX)) {
+      const id = url.slice(IMAGE_REF_PREFIX.length);
+      return readImageMap()[id] || "";
+    }
+    if (url.startsWith("blob:")) return "";
+    if (isLikelyBase64Image(url)) return url;
+    return url;
+  }
+
+  function getDisplayImageUrl(raw, fallback) {
+    const resolved = resolveImageUrl(raw);
+    if (resolved) return resolved;
+    return fallback || DEFAULT_ACTIVITY_FALLBACK;
+  }
+
+  function applyActivityImage(img, raw, fallback) {
+    if (!img) return;
+    const fb = fallback || DEFAULT_ACTIVITY_FALLBACK;
+    const resolved = resolveImageUrl(raw);
+    const chain = resolved ? [resolved, fb] : [fb];
+    let step = 0;
+    const loadNext = () => {
+      if (step >= chain.length) {
+        img.onerror = null;
+        return;
+      }
+      img.src = chain[step++];
+    };
+    img.onload = () => {
+      img.onerror = null;
+    };
+    img.onerror = () => loadNext();
+    loadNext();
+  }
+
+  function persistImageUrl(activityIdx, imageUrl, prevUrl) {
+    const id = String(activityIdx ?? "").trim();
+    const incoming = String(imageUrl || "").trim();
+    const prev = String(prevUrl || "").trim();
+    if (incoming) {
+      if (incoming.startsWith(IMAGE_REF_PREFIX)) {
+        const refId = incoming.slice(IMAGE_REF_PREFIX.length);
+        const map = readImageMap();
+        if (refId !== id && map[refId] && id) {
+          return attachImage(id, map[refId]);
+        }
+        if (refId === id && map[refId]) return incoming;
+        return imageRefExists(incoming) ? incoming : prev || "";
+      }
+      if (isLikelyBase64Image(incoming)) {
+        const ref = attachImage(id, incoming);
+        if (!ref) throw new Error("圖片儲存失敗，請重新上傳。");
+        return ref;
+      }
+      if (incoming.startsWith("blob:")) return prev || "";
+      if (/^https?:\/\//i.test(incoming) || incoming.startsWith("images/")) return incoming;
+      return prev || "";
+    }
+    if (prev) return prev;
+    return "";
+  }
+
+  function removeImage(activityIdx) {
+    const map = readImageMap();
+    const key = String(activityIdx ?? "").trim();
+    if (!map[key]) return;
+    delete map[key];
+    writeImageMap(map);
+  }
+
+  function sanitizeActivityImages(items) {
+    const map = readImageMap();
+    let mapChanged = false;
+    const next = items.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const row = { ...item };
+      const raw = String(row.imageUrl ?? row.imageSrc ?? row.image ?? "").trim();
+      const idx = String(row.idx ?? "").trim();
+      if (isLikelyBase64Image(raw) && idx) {
+        if (!map[idx]) {
+          map[idx] = raw;
+          mapChanged = true;
+        }
+        row.imageUrl = `${IMAGE_REF_PREFIX}${idx}`;
+        row.imageSrc = row.imageUrl;
+      } else if (raw.startsWith("blob:")) {
+        row.imageUrl = "";
+        row.imageSrc = "";
+      }
+      return row;
+    });
+    if (mapChanged) {
+      try {
+        writeImageMap(map);
+      } catch (e) {
+        console.warn("ActivityStore image map write failed", e);
+      }
+    }
+    return next;
+  }
   // Reuse the same auth flag as news-admin pages for consistency.
   const AUTH_KEY = "immba_admin_auth_v1";
 
@@ -86,6 +234,18 @@
     return value === true || value === 1 || value === "1" ? "published" : "published";
   }
 
+  function asPinnedFlag(value) {
+    if (value === true || value === 1 || value === "1" || value === "true" || value === "on") return true;
+    if (value === false || value === 0 || value === "0" || value === "false" || value === "" || value == null) {
+      return false;
+    }
+    return Boolean(value);
+  }
+
+  function isPublishedItem(item) {
+    return item?.status === "published";
+  }
+
   function normalizeItem(item) {
     const now = new Date().toISOString();
     const idxNum = Number(item.idx);
@@ -120,6 +280,9 @@
       idx,
       status,
       sort_order: sortOrder,
+      pinned: asPinnedFlag(item.pinned),
+      pinned_at: item.pinned_at || "",
+      pinned_order: Number(item.pinned_order || 0),
       date: dateZh,
       dateEn,
       titleZh,
@@ -157,7 +320,62 @@
     if (!raw) return [];
     const parsed = safeParseJson(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed;
+    return sanitizeActivityImages(parsed);
+  }
+
+  function bundledIdxSet() {
+    return new Set(
+      getBundledDefaults()
+        .map((d) => Number(d.idx))
+        .filter((n) => Number.isFinite(n))
+    );
+  }
+
+  function itemDiffersFromBundled(item) {
+    const idx = Number(item?.idx);
+    if (!Number.isFinite(idx)) return false;
+    const def = getBundledDefaults().find((d) => Number(d.idx) === idx);
+    if (!def) return true;
+    const a = normalizeItem(item);
+    const b = normalizeItem(def);
+    return (
+      a.status !== b.status ||
+      Number(a.sort_order) !== Number(b.sort_order) ||
+      a.pinned !== b.pinned ||
+      Number(a.pinned_order) !== Number(b.pinned_order) ||
+      a.titleZh !== b.titleZh ||
+      a.titleEn !== b.titleEn ||
+      a.date !== b.date ||
+      a.imageUrl !== b.imageUrl ||
+      JSON.stringify(a.contentZh) !== JSON.stringify(b.contentZh) ||
+      JSON.stringify(a.contentEn) !== JSON.stringify(b.contentEn)
+    );
+  }
+
+  /** Persist only overrides (custom rows + modified bundled rows), not the full bundled catalog. */
+  function persistOverrides(merged) {
+    const removed = readRemovedBundledIdxSet();
+    const bundled = bundledIdxSet();
+    const toStore = [];
+    for (const item of merged) {
+      const idx = Number(item?.idx);
+      if (!Number.isFinite(idx) || removed.has(idx)) continue;
+      if (!bundled.has(idx) || itemDiffersFromBundled(item)) {
+        toStore.push(normalizeItem(item));
+      }
+    }
+    writeStored(toStore);
+  }
+
+  function allocateActivityIdx() {
+    const used = new Set();
+    readMergedRaw().forEach((item) => {
+      const n = Number(item?.idx);
+      if (Number.isFinite(n)) used.add(n);
+    });
+    let candidate = 0;
+    while (used.has(candidate)) candidate += 1;
+    return candidate;
   }
 
   function writeStored(items) {
@@ -215,10 +433,72 @@
     return cloneMergedForMutation();
   }
 
+  function compareForDisplay(a, b) {
+    const aPub = a.status === "published";
+    const bPub = b.status === "published";
+    if (aPub && bPub) {
+      const orderDiff = Number(a.sort_order) - Number(b.sort_order);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.updated_at || b.date || 0) - new Date(a.updated_at || a.date || 0);
+    }
+    if (aPub !== bPub) return aPub ? -1 : 1;
+    return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+  }
+
+  function promotePinnedToTop(items, pinnedIdx) {
+    const now = new Date().toISOString();
+    const target = items.find((it) => Number(it.idx) === Number(pinnedIdx));
+    if (!target || !isPublishedItem(target)) return;
+    target.pinned = true;
+    target.pinned_at = now;
+
+    const otherPinned = items
+      .filter((it) => isPublishedItem(it) && asPinnedFlag(it.pinned) && Number(it.idx) !== Number(pinnedIdx))
+      .sort((a, b) => {
+        const orderDiff = Number(a.pinned_order) - Number(b.pinned_order);
+        if (orderDiff !== 0) return orderDiff;
+        return new Date(b.pinned_at || b.updated_at || 0) - new Date(a.pinned_at || a.updated_at || 0);
+      });
+
+    target.pinned_order = 1;
+    otherPinned.forEach((it, i) => {
+      it.pinned_order = i + 2;
+    });
+  }
+
+  function reindexPublishedOrder(items) {
+    const published = items.filter(isPublishedItem);
+    const pinned = published.filter((it) => asPinnedFlag(it.pinned));
+    const unpinned = published.filter((it) => !asPinnedFlag(it.pinned));
+
+    pinned.sort((a, b) => {
+      const orderDiff = Number(a.pinned_order) - Number(b.pinned_order);
+      if (orderDiff !== 0) return orderDiff;
+      return new Date(b.pinned_at || b.updated_at || 0) - new Date(a.pinned_at || a.updated_at || 0);
+    });
+
+    unpinned.sort((a, b) => {
+      const byDate = new Date(b.date || 0) - new Date(a.date || 0);
+      if (byDate !== 0) return byDate;
+      return new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+    });
+
+    pinned.forEach((it, i) => {
+      it.pinned_order = i + 1;
+      it.sort_order = i + 1;
+    });
+    unpinned.forEach((it, i) => {
+      it.pinned_order = 0;
+      it.sort_order = pinned.length + i + 1;
+    });
+  }
+
   function listAll() {
-    return readMergedRaw()
-      .map(normalizeItem)
-      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || Number(a.idx) - Number(b.idx));
+    const items = readMergedRaw().map(normalizeItem);
+    reindexPublishedOrder(items);
+    const sorted = items.slice().sort(compareForDisplay);
+    if (window.activityPages) window.activityPages.activities = sorted;
+    return sorted;
   }
 
   function listRawAll() {
@@ -228,7 +508,9 @@
   }
 
   function listPublished() {
-    return listAll().filter((x) => x.status === "published");
+    return listAll()
+      .filter(isPublishedItem)
+      .sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
   }
 
   function getByIdx(idx) {
@@ -243,6 +525,7 @@
       items.map((x) => Number(x.idx)).filter((n) => Number.isFinite(n))
     );
 
+    const wantPinned = asPinnedFlag(partial.pinned);
     const normalized = normalizeItem(partial);
     const idx = normalized.idx;
     if (!Number.isFinite(idx)) {
@@ -252,12 +535,31 @@
     const pos = items.findIndex((x) => Number(x.idx) === idx);
     const now = new Date().toISOString();
     normalized.updated_at = now;
+    normalized.pinned = wantPinned;
     if (pos >= 0) {
       normalized.created_at = items[pos].created_at || normalized.created_at;
       items[pos] = normalized;
     } else {
       normalized.created_at = normalized.created_at || now;
       items.push(normalized);
+    }
+
+    const target = items.find((x) => Number(x.idx) === idx);
+    const nowPublished = isPublishedItem(normalized);
+    if (target) {
+      target.pinned = wantPinned;
+      if (nowPublished) {
+        if (wantPinned) {
+          promotePinnedToTop(items, idx);
+        } else {
+          target.pinned_order = 0;
+          target.pinned_at = "";
+        }
+        reindexPublishedOrder(items);
+      } else {
+        target.pinned_order = 0;
+        target.pinned_at = "";
+      }
     }
 
     const keysAfter = new Set(
@@ -269,10 +571,8 @@
       }
     }
 
-    writeStored(items.map(normalizeItem));
-    // Keep window.activityPages synced.
-    if (window.activityPages) window.activityPages.activities = listAll();
-    return normalized;
+    persistOverrides(items);
+    return listAll().find((x) => Number(x.idx) === idx) || normalized;
   }
 
   function removeItemByIdx(idx) {
@@ -282,7 +582,8 @@
 
     const items = getItemsForMutation();
     const next = items.filter((x) => Number(x.idx) !== idxNum);
-    writeStored(next.map(normalizeItem));
+    persistOverrides(next);
+    removeImage(idxNum);
 
     if (wasBundled) {
       const skip = readRemovedBundledIdxSet();
@@ -308,9 +609,8 @@
   }
 
   function seedOverrideToPages() {
-    const base = readMergedRaw();
     if (!window.activityPages) window.activityPages = { activities: [] };
-    window.activityPages.activities = base.map(normalizeItem);
+    window.activityPages.activities = listAll();
   }
 
   /** Remove saved overrides so list falls back to bundled 活動集錦 (activity-pages.js). */
@@ -318,6 +618,7 @@
     try {
       localStorage.removeItem(STORAGE_KEY);
       localStorage.removeItem(REMOVED_DEFAULTS_KEY);
+      localStorage.removeItem(IMAGES_KEY);
     } catch (e) {
       /* ignore */
     }
@@ -329,13 +630,21 @@
 
   window.ActivityStore = {
     STORAGE_KEY,
+    DEFAULT_ACTIVITY_FALLBACK,
     listAll,
     listPublished,
     listRawAll,
     getByIdx,
+    allocateActivityIdx,
     saveItem,
     removeItemByIdx,
     resetToBundledActivities,
+    persistImageUrl,
+    resolveImageUrl,
+    getDisplayImageUrl,
+    applyActivityImage,
+    attachImage,
+    removeImage,
     login,
     logout,
     isAuthed

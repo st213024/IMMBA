@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品交易平台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">
+        <a class="logo-mark-link" href="index.html" aria-label="回首頁">
+          <img class="logo-mark" src="assets/fjcu-logo.svg" alt="FJCU imMBA logo">
+        </a>
+        <div class="logo-text">
+          <span class="logo-main">輔仁大學國際經營管理碩士班（imMBA）</span>
+          <span class="logo-sub">商品交易平台</span>
+        </div>
+      </div>
+      <div class="header-top-right">
+        <span id="marketplace-user-email" class="top-link"></span>
+        <span id="marketplace-role-badge" class="top-link"></span>
+        <button id="marketplace-logout-btn" class="btn btn-outline" style="display:none;color:#003366;border-color:#003366;" type="button">登出</button>
+        <a class="top-link" href="index.html">回首頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section alt">
+    <div class="section-title">
+      <h2>商品交易平台</h2>
+    </div>
+    <p class="section-intro" style="text-align:center;max-width:960px;margin:0 auto 16px;">
+      本頁列出目前狀態為「上架中」的物品。實際交易請由買賣雙方自行聯繫與約定，本平台僅提供資訊陳列。
+    </p>
+    <section class="admin-panel" style="max-width:960px;margin:0 auto;">
+      <h3>平台入口</h3>
+      <p class="admin-note">
+        註冊與登入使用本站後台同一組 Supabase 帳密（對應 /admin/register、/admin/login）。
+      </p>
+      <div id="marketplace-guest-actions" class="admin-actions" style="margin-top:12px;">
+        <a class="btn btn-primary" href="login.html?platform=marketplace&next=marketplace.html">會員登入</a>
+        <a class="btn btn-outline" style="color:#003366;border-color:#003366;" href="login.html?platform=marketplace&next=marketplace.html">會員註冊</a>
+      </div>
+      <p id="marketplace-login-note" class="admin-note" style="display:none;margin-top:12px;">
+        你已登入會員，可於下方會員中心切換「買家 / 賣家」模式。
+      </p>
+    </section>
+
+    <section id="member-center-panel" class="admin-panel" style="max-width:960px;margin:20px auto 0;display:none;">
+      <h3>會員中心</h3>
+      <p class="admin-note">可切換買家 / 賣家模式；上架與賣家訂單管理限已核准管理員。</p>
+      <div class="admin-form-row" style="align-items:center;gap:16px;">
+        <label><input id="mode-buyer-radio" type="radio" name="market-mode" value="buyer" checked> 買家模式</label>
+        <label><input id="mode-seller-radio" type="radio" name="market-mode" value="seller"> 賣家模式</label>
+      </div>
+      <p id="member-mode-note" class="admin-note"></p>
+      <div class="admin-actions" style="margin-top:8px;">
+        <button id="open-member-center-btn" class="btn btn-outline" style="color:#003366;border-color:#003366;" type="button">會員中心</button>
+        <a id="platform-overview-link" class="btn btn-outline" style="display:none;color:#003366;border-color:#003366;" href="marketplace-admin.html">平台交易總覽</a>
+        <a id="admin-review-link" class="btn btn-outline" style="display:none;color:#003366;border-color:#003366;" href="admin-users.html">後台：審核管理員</a>
+        <button id="open-listing-form-btn" class="btn btn-primary" style="display:none;" type="button">新增物品</button>
+      </div>
+    </section>
+
+    <section class="admin-panel" style="max-width:960px;margin:20px auto 0;">
+      <h3>註冊身分與系統權限規範</h3>
+      <ul class="admin-note" style="padding-left:20px;">
+        <li>超級管理員（Super Admin）：學程主任等最高權限帳號，可使用後台管理網站內容與審核管理員。</li>
+        <li>管理員（Admin）：管理網站內容角色；市集買賣不再限定管理員，所有登入會員都可切換買家與賣家模式。</li>
+        <li>一般使用者（Pending / User）：一般會員可於會員中心切換買家 / 賣家模式並使用對應功能。</li>
+      </ul>
+      <p class="admin-note">一般使用者可瀏覽與下單；管理員可上架、管理賣家訂單與帳務。</p>
+    </section>
+
+    <section id="listing-form-panel" class="admin-panel" style="max-width:960px;margin:20px auto 0;display:none;">
+      <h3>新增上架商品</h3>
+      <form id="listing-form" class="admin-form">
+        <div class="admin-form-row">
+          <label>商品名稱<input id="listing-title" class="admin-input" type="text" required></label>
+          <label>價格（NT$）<input id="listing-price" class="admin-input" type="number" min="1" required></label>
+        </div>
+        <div class="admin-form-row">
+          <label>庫存<input id="listing-stock" class="admin-input" type="number" min="1" value="1" required></label>
+          <label>圖片網址<input id="listing-image" class="admin-input" type="url" placeholder="https://..."></label>
+        </div>
+        <div class="admin-form-row">
+          <label>商品描述<textarea id="listing-description" class="admin-input" rows="3"></textarea></label>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-primary" type="submit">新增物品</button>
+        </div>
+      </form>
+      <p id="listing-form-message" class="admin-note"></p>
+    </section>
+
+    <section class="admin-panel" style="max-width:1080px;margin:20px auto 0;">
+      <h3>上架中的物品</h3>
+      <div id="marketplace-items-grid" class="cards-3" style="margin-top:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;"></div>
+      <p id="marketplace-empty-text" class="admin-note" style="display:none;margin-top:10px;">目前尚無上架中的物品。</p>
+    </section>
+
+    <section class="admin-panel" style="max-width:960px;margin:20px auto 0;">
+      <h3>會員購物車</h3>
+      <p id="marketplace-cart-login-hint" class="admin-note">請先登入會員後，才可加入商品並結帳。</p>
+      <p id="marketplace-cart-empty-text" class="admin-note" style="display:none;">購物車目前沒有商品。</p>
+      <div id="marketplace-cart-list" style="display:none;"></div>
+      <div id="marketplace-delivery-method" style="display:none;margin-top:12px;">
+        <p class="admin-note" style="margin-bottom:6px;">運送方式</p>
+        <label style="margin-right:12px;"><input type="radio" name="delivery-method" value="meetup" checked> 面交（免運）</label>
+        <label><input type="radio" name="delivery-method" value="shipping"> 宅配（運費 NT$ 80）</label>
+      </div>
+      <div id="marketplace-cart-summary" class="admin-note" style="display:none;margin-top:10px;"></div>
+      <div id="marketplace-cart-actions" class="admin-actions" style="display:none;margin-top:10px;">
+        <button id="marketplace-checkout-btn" class="btn btn-primary" type="button">送出訂單</button>
+      </div>
+      <p id="marketplace-checkout-message" class="admin-note"></p>
+    </section>
+
+    <section id="seller-dashboard-panel" class="admin-panel" style="max-width:1080px;margin:20px auto 0;display:none;">
+      <h3>賣家訂單管理</h3>
+      <div class="cards-3" style="margin-top:10px;">
+        <article class="card"><h3>我的上架商品數</h3><p id="seller-stat-listings" style="font-size:28px;font-weight:700;color:#003366;">0</p></article>
+        <article class="card"><h3>已售出數</h3><p id="seller-stat-sold" style="font-size:28px;font-weight:700;color:#003366;">0</p></article>
+        <article class="card"><h3>目前模式</h3><p id="seller-stat-mode" style="font-size:22px;font-weight:700;color:#003366;">買家模式</p></article>
+      </div>
+
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>待收款項</h3>
+        <div id="seller-orders-pending-payment"></div>
+      </div>
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>待出貨品項</h3>
+        <div id="seller-orders-pending-shipment"></div>
+      </div>
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>已完成的訂單</h3>
+        <div id="seller-orders-completed"></div>
+      </div>
+
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>帳務管理（月報）</h3>
+        <div class="admin-actions" style="justify-content:space-between;">
+          <label>月份篩選
+            <select id="seller-month-filter" class="admin-input" style="min-width:160px;"></select>
+          </label>
+          <button id="seller-export-csv-btn" class="btn btn-outline" style="color:#003366;border-color:#003366;" type="button">匯出 CSV</button>
+        </div>
+        <p id="seller-monthly-summary" class="admin-note"></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="marketplace.js"></script>
+</body>
+</html>

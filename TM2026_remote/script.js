@@ -11,31 +11,70 @@
     });
   })();
 
-  // Dropdown menu (matches official imMBA nav: hassub + submenu)
-  document.querySelectorAll(".nav-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const item = btn.closest(".nav-item");
-      document.querySelectorAll(".nav-item.open").forEach((node) => {
-        if (node !== item) {
-          node.classList.remove("open");
-          const ob = node.querySelector(".nav-btn");
-          if (ob) ob.setAttribute("aria-expanded", "false");
-        }
-      });
-      const willOpen = !item.classList.contains("open");
-      item.classList.toggle("open");
-      btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  // Dropdown menu: hover to open (desktop); tap to toggle on touch devices
+  const canHoverNav = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+
+  function closeAllNavMenus(exceptItem) {
+    document.querySelectorAll(".nav-item.open").forEach((item) => {
+      if (exceptItem && item === exceptItem) return;
+      item.classList.remove("open");
+      const btn = item.querySelector(".nav-btn");
+      if (btn) btn.setAttribute("aria-expanded", "false");
+    });
+  }
+
+  function openNavMenu(item, btn) {
+    closeAllNavMenus(item);
+    item.classList.add("open");
+    btn.setAttribute("aria-expanded", "true");
+  }
+
+  function closeNavMenu(item, btn) {
+    item.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+  }
+
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const btn = item.querySelector(".nav-btn");
+    const submenu = item.querySelector(".submenu");
+    if (!btn || !submenu) return;
+
+    item.addEventListener("mouseenter", () => {
+      if (!canHoverNav) return;
+      openNavMenu(item, btn);
+    });
+
+    item.addEventListener("mouseleave", () => {
+      if (!canHoverNav) return;
+      closeNavMenu(item, btn);
+    });
+
+    btn.addEventListener("click", (event) => {
+      if (canHoverNav) {
+        event.preventDefault();
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
+      if (item.classList.contains("open")) {
+        closeNavMenu(item, btn);
+      } else {
+        openNavMenu(item, btn);
+      }
+    });
+
+    submenu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => closeNavMenu(item, btn));
     });
   });
 
   document.addEventListener("click", (event) => {
-    if (!event.target.closest(".nav-item")) {
-      document.querySelectorAll(".nav-item.open").forEach((item) => {
-        item.classList.remove("open");
-        const b = item.querySelector(".nav-btn");
-        if (b) b.setAttribute("aria-expanded", "false");
-      });
-    }
+    if (canHoverNav) return;
+    if (!event.target.closest(".nav-item")) closeAllNavMenus();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeAllNavMenus();
   });
 
   // Feature cards hover reveal (also for keyboard focus)
@@ -46,41 +85,72 @@
 
   // Render published news list from local NewsStore (see news-store.js)
   // 首頁 #news-list 僅顯示 5 則；完整列表見 news-list.html
-  (function renderNewsList() {
+  (function initNewsList() {
     const list = document.getElementById("news-list");
     if (!list || !window.NewsStore) return;
-    const homeNewsLimit = 5;
-    const published = window.NewsStore.listPublished();
-    const newsItems = published.slice(0, homeNewsLimit);
-    const fallbackImage = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=70";
 
-    if (!newsItems.length) {
-      list.innerHTML = '<li class="empty-news">目前沒有可顯示的消息。</li>';
-      return;
+    function renderNewsList() {
+      const homeNewsLimit = 5;
+      const published = window.NewsStore.listPublished();
+      const newsItems = published.slice(0, homeNewsLimit);
+      const fallbackImage = window.NewsStore.DEFAULT_NEWS_FALLBACK;
+
+      list.replaceChildren();
+
+      if (!newsItems.length) {
+        const empty = document.createElement("li");
+        empty.className = "empty-news";
+        empty.textContent = "目前沒有可顯示的消息。";
+        list.appendChild(empty);
+        return;
+      }
+
+      newsItems.forEach((item) => {
+        const li = document.createElement("li");
+        const main = document.createElement("div");
+        main.className = "news-item-main";
+
+        const img = document.createElement("img");
+        img.className = "news-thumb";
+        img.alt = item.title || "";
+        img.loading = "lazy";
+        img.decoding = "async";
+        window.NewsStore.applyNewsImage(img, item.image_url, fallbackImage);
+
+        const text = document.createElement("div");
+        text.className = "news-text";
+        const internalUrl = `news-detail.html?id=${encodeURIComponent(item.id)}`;
+        const link = document.createElement("a");
+        if (item.external_url) {
+          link.href = item.external_url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+        } else {
+          link.href = internalUrl;
+          link.className = "news-title-no-link";
+        }
+        link.textContent = item.title || "";
+        text.appendChild(link);
+
+        main.appendChild(img);
+        main.appendChild(text);
+
+        const time = document.createElement("time");
+        time.textContent = item.date || "";
+
+        li.appendChild(main);
+        li.appendChild(time);
+        list.appendChild(li);
+      });
     }
 
-    list.innerHTML = newsItems
-      .map((item) => {
-        const safeTitle = item.title;
-        const safeDate = item.date;
-        const safeUrl = item.external_url;
-        const safeImage = item.image_url || fallbackImage;
-        const internalUrl = `news-detail.html?id=${encodeURIComponent(item.id)}`;
-        const titleNode = safeUrl
-          ? `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`
-          : `<a href="${internalUrl}" class="news-title-no-link">${safeTitle}</a>`;
-
-        return `<li>
-          <div class="news-item-main">
-            <img class="news-thumb" src="${safeImage}" alt="${safeTitle}">
-            <div class="news-text">
-              ${titleNode}
-            </div>
-          </div>
-          <time>${safeDate}</time>
-        </li>`;
-      })
-      .join("");
+    renderNewsList();
+    window.addEventListener("immba-news-updated", renderNewsList);
+    window.addEventListener("storage", (e) => {
+      const key = window.NewsStore?.STORAGE_KEY;
+      const imagesKey = window.NewsStore?.IMAGES_KEY;
+      if (e.key === key || e.key === imagesKey) renderNewsList();
+    });
   })();
 
   // Render activity highlights from external source content
@@ -209,6 +279,7 @@
       Array.isArray(pageActivityItems) && pageActivityItems.length
         ? pageActivityItems
             .filter((x) => (x.status ?? "published") === "published")
+            .sort((a, b) => Number(a.sort_order) - Number(b.sort_order))
             .map((a) => ({
               idx: a.idx,
               title: isEn ? a.titleEn || a.titleZh || a.title : a.titleZh || a.title,
@@ -228,8 +299,8 @@
                     : Array.isArray(a.paragraphs)
                       ? a.paragraphs.join(" ")
                       : ""),
-              image: a.imageUrl || a.imageSrc,
-              imageSrc: a.imageUrl || a.imageSrc,
+              image: window.ActivityStore?.getDisplayImageUrl?.(a.imageUrl || a.imageSrc) || a.imageUrl || a.imageSrc,
+              imageSrc: window.ActivityStore?.getDisplayImageUrl?.(a.imageUrl || a.imageSrc) || a.imageUrl || a.imageSrc,
               href: isEn
                 ? `activity-detail-en.html?idx=${encodeURIComponent(a.idx)}`
                 : `activity-detail.html?idx=${encodeURIComponent(a.idx)}`

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的購物車｜imMBA 商品交易平台</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../marketplace.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">
+        <a class="logo-mark-link" href="/marketplace.html" aria-label="返回賣場">
+          <img class="logo-mark" src="../images/logo-immba-icon.svg" alt="FJCU imMBA logo">
+        </a>
+        <div class="logo-text">
+          <span class="logo-main">輔仁大學國際經營管理碩士班（imMBA）</span>
+          <span class="logo-sub">我的購物車</span>
+        </div>
+      </div>
+      <div class="header-top-right">
+        <a class="mp-cart-link mp-cart-link--active" href="cart.html" aria-label="我的購物車">
+          <svg class="mp-cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.2 14h9.7c.8 0 1.5-.5 1.8-1.2l2.4-6.4A1 1 0 0 0 20.1 4H6.3L5.8 2H2v2h2l3.6 12.6c.1.3.4.4.6.4z"/></svg>
+          <span id="header-cart-count" class="mp-cart-badge" hidden>0</span>
+        </a>
+        <span id="cart-header-email" class="top-link"></span>
+        <button id="cart-logout-btn" class="btn btn-outline" style="display:none;" type="button">登出</button>
+        <a id="cart-back-marketplace" class="btn btn-outline" href="/marketplace.html">返回賣場</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section alt">
+    <div class="section-title">
+      <h2>🛒 我的購物車</h2>
+    </div>
+
+    <section class="admin-panel" style="max-width:960px;margin:0 auto;">
+      <p id="cart-login-hint" class="admin-note" style="display:none;">
+        請先 <a href="login.html?next=/marketplace/cart.html">登入賣場會員</a> 後，才可查看購物車並結帳。
+      </p>
+      <p id="cart-empty" class="admin-note" style="display:none;">購物車目前沒有商品。<a href="/marketplace.html">前往選購</a></p>
+      <div id="cart-table-wrap"></div>
+
+      <div id="cart-delivery-wrap" style="display:none;margin-top:16px;">
+        <p class="admin-note" style="margin-bottom:6px;">運送方式</p>
+        <label style="margin-right:12px;"><input type="radio" name="delivery-method" value="meetup" checked> 面交（免運）</label>
+        <label><input type="radio" name="delivery-method" value="shipping"> 宅配（運費 NT$ 80）</label>
+      </div>
+
+      <div class="mp-cart-footer">
+        <div class="mp-cart-notice">
+          <h4>購買須知</h4>
+          <ul>
+            <li>實際交易請由買賣雙方自行聯繫與約定。</li>
+            <li>送出訂單後，賣家會先安排出貨；出貨後再依約完成付款。</li>
+            <li>面交免運；宅配運費 NT$ 80（每筆訂單）。</li>
+          </ul>
+        </div>
+        <div class="mp-cart-summary-box">
+          <div id="cart-summary" class="admin-note"></div>
+          <button id="cart-checkout-btn" class="btn btn-primary mp-cart-checkout-btn" type="button" disabled>送出訂單</button>
+          <p id="cart-message" class="admin-note" style="margin-top:10px;"></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase-config.js"></script>
+  <script src="marketplace-auth.js"></script>
+  <script src="marketplace-store.js"></script>
+  <script src="cart-page.js"></script>
+</body>
+</html>

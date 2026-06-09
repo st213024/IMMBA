@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>海洋手作課程體驗 DM 模擬頁</title>
+  <style>
+    :root {
+      --blue-900: #0f4a7a;
+      --blue-700: #1f6ea8;
+      --blue-500: #3b95cb;
+      --blue-100: #eaf6ff;
+      --line: #cfe7f8;
+      --text: #23445e;
+      --muted: #5f7c91;
+      --paper: #fbfdff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #eef4f9;
+      color: var(--text);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      padding: 24px;
+    }
+
+    .dm {
+      max-width: 1180px;
+      margin: 0 auto;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(24, 83, 128, 0.1);
+    }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: 2.2fr 1.2fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      color: var(--blue-900);
+      font-size: 52px;
+      line-height: 1.05;
+      letter-spacing: 1px;
+    }
+    .title-wrap h2 {
+      margin: 6px 0 10px;
+      color: var(--blue-700);
+      font-size: 34px;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.7;
+      font-size: 15px;
+      max-width: 90%;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+      max-width: 440px;
+    }
+    .circle {
+      aspect-ratio: 1 / 1;
+      border-radius: 999px;
+      border: 4px solid #fff;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.35), transparent 35%),
+        linear-gradient(180deg, #0f8ed9 0%, #0a6eb8 55%, #d9c39b 56%, #e9d8ba 100%);
+    }
+    .wave {
+      position: absolute;
+      left: -6%;
+      right: -6%;
+      top: 48%;
+      height: 20%;
+      background: rgba(255,255,255,.8);
+      filter: blur(1px);
+      transform: rotate(-8deg);
+      border-radius: 999px;
+    }
+    .circle span {
+      position: absolute;
+      bottom: 20%;
+      width: 100%;
+      text-align: center;
+      font-weight: 700;
+      color: #0a4f85;
+      letter-spacing: 1px;
+    }
+
+    .feature-list, .notice-list, .tips-list {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      line-height: 1.75;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .panel h3 {
+      margin: 0;
+      color: var(--blue-700);
+      font-size: 20px;
+      border-bottom: 1px dashed var(--line);
+      padding-bottom: 6px;
+    }
+
+    .materials {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .material-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--blue-100);
+    }
+    .material-item::before {
+      content: "◯";
+      display: block;
+      font-size: 16px;
+      color: var(--blue-700);
+      margin-bottom: 3px;
+    }
+
+    .section-title {
+      margin: 0 0 8px;
+      display: inline-block;
+      background: var(--blue-100);
+      border: 1px solid var(--line);
+      color: var(--blue-700);
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-weight: 700;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .step-head {
+      background: linear-gradient(90deg, #f6fbff, #e8f5ff);
+      border-bottom: 1px solid var(--line);
+      padding: 8px;
+      font-weight: 700;
+      color: var(--blue-700);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-size: 13px;
+    }
+    .num {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      display: inline-grid;
+      place-items: center;
+      background: var(--blue-500);
+      color: #fff;
+      font-size: 12px;
+      flex: 0 0 auto;
+    }
+    .thumb {
+      height: 86px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.4), transparent 35%),
+        linear-gradient(180deg, #6bc6f4 0%, #2592d0 68%, #efd9b8 68%, #efd9b8 100%);
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+    .thumb::after {
+      content: "";
+      position: absolute;
+      left: 8%;
+      right: 8%;
+      top: 54%;
+      height: 14%;
+      background: rgba(255,255,255,.78);
+      border-radius: 999px;
+      transform: rotate(-7deg);
+    }
+    .step p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #456178;
+      padding: 8px;
+      min-height: 72px;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.2fr 1.1fr 1fr;
+      gap: 12px;
+    }
+    .examples {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .examples .circle {
+      width: 86px;
+      height: 86px;
+      flex: 0 0 auto;
+    }
+
+    .footer {
+      margin-top: 14px;
+      text-align: center;
+      color: var(--blue-700);
+      font-weight: 600;
+      border-top: 1px dashed var(--line);
+      padding-top: 10px;
+      letter-spacing: .5px;
+    }
+    .brand {
+      float: right;
+      color: var(--blue-900);
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+  </style>
+</head>
+<body>
+  <main class="dm">
+    <section class="grid-top">
+      <div class="panel">
+        <div class="title-wrap">
+          <h1>把海風帶回家</h1>
+          <h2>海洋樹脂杯墊手作體驗</h2>
+          <p class="subtitle">
+            在海風與夕陽之間，用雙手封存專屬自己的海洋。透過吹塑海浪與層次調色，
+            做出每一片都不同的療癒系杯墊，初學者也能完成。
+          </p>
+        </div>
+        <div class="hero">
+          <div class="circle"><div class="wave"></div></div>
+          <div class="circle"><div class="wave"></div><span>SEA YOU</span></div>
+        </div>
+      </div>
+
+      <div style="display:grid; gap:12px;">
+        <div class="panel">
+          <h3>作品特色</h3>
+          <ul class="feature-list">
+            <li>吹塑專屬海浪，每片作品都獨一無二</li>
+            <li>透明防水封層，色澤飽和且耐用</li>
+            <li>可當杯墊、擺飾，送禮也很有溫度</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>材料介紹</h3>
+          <div class="materials">
+            <div class="material-item">環氧樹脂</div>
+            <div class="material-item">色膏</div>
+            <div class="material-item">沙材</div>
+            <div class="material-item">杯墊模具</div>
+            <div class="material-item">量杯</div>
+            <div class="material-item">攪拌棒</div>
+            <div class="material-item">熱風槍</div>
+            <div class="material-item">裝飾貝殼</div>
+            <div class="material-item">吸管</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <h3 class="section-title">製作流程（詳細步驟）</h3>
+    <section class="steps">
+      <article class="step"><div class="step-head"><span class="num">1</span>調配樹脂</div><div class="thumb"></div><p>依比例混合 A/B 劑，攪拌約 3-5 分鐘至透明。</p></article>
+      <article class="step"><div class="step-head"><span class="num">2</span>調色</div><div class="thumb"></div><p>取部分樹脂加藍色系色膏，做出海水層次。</p></article>
+      <article class="step"><div class="step-head"><span class="num">3</span>倒入底層</div><div class="thumb"></div><p>先倒入深淺藍，建立海洋的深度與流動感。</p></article>
+      <article class="step"><div class="step-head"><span class="num">4</span>吹塑海浪</div><div class="thumb"></div><p>加入白色樹脂後，用吸管或熱風輕推浪花線條。</p></article>
+      <article class="step"><div class="step-head"><span class="num">5</span>沙灘效果</div><div class="thumb"></div><p>可加入沙材與貝殼，塑造更自然的岸邊質地。</p></article>
+      <article class="step"><div class="step-head"><span class="num">6</span>消泡處理</div><div class="thumb"></div><p>以熱風槍快速掃過，移除表面微小氣泡。</p></article>
+      <article class="step"><div class="step-head"><span class="num">7</span>靜置固化</div><div class="thumb"></div><p>保持平放，等待第一層固化約 6-8 小時。</p></article>
+      <article class="step"><div class="step-head"><span class="num">8</span>封層</div><div class="thumb"></div><p>再覆蓋透明樹脂，提升亮度與保護效果。</p></article>
+      <article class="step"><div class="step-head"><span class="num">9</span>脫模修邊</div><div class="thumb"></div><p>固化後脫模，檢查邊緣並進行細部修整。</p></article>
+      <article class="step"><div class="step-head"><span class="num">10</span>完成</div><div class="thumb"></div><p>你的海洋杯墊完成，可自用或當作手作禮物。</p></article>
+    </section>
+
+    <section class="bottom">
+      <article class="panel">
+        <h3>吹塑海浪小技巧</h3>
+        <ul class="tips-list">
+          <li>吸管與表面約 45 度角，浪線更自然。</li>
+          <li>白色樹脂少量多次，層次會更乾淨。</li>
+          <li>每次吹塑都不同，享受海浪的隨機美感。</li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h3>作品範例</h3>
+        <div class="examples">
+          <div class="circle"><div class="wave"></div></div>
+          <div class="circle"><div class="wave"></div></div>
+          <div class="circle"><div class="wave"></div><span>SEA YOU</span></div>
+          <div class="circle"><div class="wave"></div></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <h3>注意事項</h3>
+        <ul class="notice-list">
+          <li>操作過程請保持桌面平穩與通風。</li>
+          <li>樹脂與色膏避免接觸眼睛與口鼻。</li>
+          <li>建議由老師引導使用熱風工具。</li>
+        </ul>
+      </article>
+    </section>
+
+    <div class="footer">
+      在創作的過程中，感受海浪的節奏，讓心一起療癒。
+      <span class="brand">SEA YOU AGAIN</span>
+    </div>
+  </main>
+</body>
+</html>

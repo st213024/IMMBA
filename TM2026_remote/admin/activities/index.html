@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -7,17 +7,17 @@
   <link rel="stylesheet" href="../admin-shell.css" />
   <style>
     :root {
-      --line: #c9d0dc;
+      --line: #bae6fd;
       --text: #1a2332;
       --muted: #5a6575;
-      --primary-deep: #24303d;
-      --primary: #4a5f72;
+      --primary-deep: #075985;
+      --primary: #0ea5e9;
       --panel: #ffffff;
       --danger: #b65e5e;
-      --surface: #f0f4fa;
+      --surface: #f0f9ff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
-    body { margin: 0; background: #e8ebf0; color: var(--text); }
+    body { margin: 0; background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); color: var(--text); }
     .admin-main__inner { max-width: 1080px; }
     .card {
       background: var(--panel);
@@ -28,7 +28,7 @@
       margin-bottom: 14px;
     }
     h1 { font-size: 26px; color: var(--primary-deep); margin-bottom: 10px; }
-    h2 { font-size: 20px; color: #0f3460; margin-bottom: 10px; }
+    h2 { font-size: 20px; color: #0369a1; margin-bottom: 10px; }
     .hint { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
@@ -64,7 +64,7 @@
       display: inline-block;
       text-align: center;
     }
-    .btn.secondary { background: var(--surface); color: #243652; border: 1px solid var(--line); }
+    .btn.secondary { background: var(--surface); color: #075985; border: 1px solid var(--line); }
     .btn.danger { background: var(--danger); }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
     th, td { border-top: 1px solid #dde3ec; padding: 10px 6px; text-align: left; vertical-align: top; font-size: 14px; }
@@ -86,7 +86,7 @@
       padding: 10px 12px;
       border-radius: 10px;
       background: #e8f2fc;
-      color: #0f3460;
+      color: #0369a1;
       font-size: 14px;
       border: 1px solid #b8d4f0;
     }
@@ -99,7 +99,7 @@
       font-weight: 700;
       border: 1px solid var(--line);
       background: var(--surface);
-      color: #0f3460;
+      color: #0369a1;
     }
     .status-badge.is-published {
       background: #e8f8ef;
@@ -139,7 +139,7 @@
       margin-bottom: 0;
     }
     .lang-panel--en {
-      border-left: 4px solid #3d6b58;
+      border-left: 4px solid #0ea5e9;
     }
     .lang-panel--en .field:last-of-type {
       margin-bottom: 0;
@@ -190,6 +190,15 @@
           <p class="hint" style="margin-top:6px; margin-bottom:0;">點選欄位會開啟瀏覽器月曆。儲存時會轉成前台慣用的 YYYY/MM/DD 顯示格式。</p>
         </div>
 
+        <div class="field-full field">
+          <label>排序方式</label>
+          <label class="inline" style="margin-top:6px;">
+            <input id="activity-pinned" name="activity-pinned" type="checkbox" value="1" />
+            置頂顯示
+          </label>
+          <p class="hint" style="margin-top:6px; margin-bottom:0;">勾選「置頂」的活動會排在前台最前面；之後若有另一篇也置頂，較早置頂的會自動往後移。未勾選則為非置頂，依發布日期排序。</p>
+        </div>
+
         <div class="bilingual-edit" aria-label="中英文編輯區">
           <div class="lang-panel lang-panel--zh">
             <h3>中文</h3>
@@ -217,21 +226,21 @@
         </div>
 
         <div class="field-full field" style="margin-top:14px; margin-bottom:0;">
-          <label for="activity-image">上傳/更換封面圖片（共用）</label>
-          <input id="activity-image" type="text" placeholder="" />
+          <label for="activity-image-file">上傳/更換封面圖片（共用）</label>
+          <input id="activity-image-file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+          <p class="hint" style="margin-top:6px; margin-bottom:0;">可上傳 jpg、png、webp；亦可於下方填入公開圖片網址。</p>
           <div class="inline" style="margin-top:10px;">
             <img id="activity-image-preview" class="thumb" src="" alt="封面預覽" />
           </div>
           <div class="field" style="margin-top:10px; margin-bottom:0;">
-            <label for="activity-image-file" class="hint">圖片上傳（僅用於預覽；保存只使用 imageUrl）</label>
-            <input id="activity-image-file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+            <label for="activity-image">圖片網址（選填）</label>
+            <input id="activity-image" type="text" placeholder="https://… 或留空使用上傳圖片" autocomplete="off" />
           </div>
         </div>
 
         <div class="actions" style="margin-top:8px; flex-wrap:wrap;">
           <button class="btn secondary" id="save-draft-btn" type="button">儲存草稿</button>
           <button class="btn" id="publish-btn" type="button">發布文章</button>
-          <button class="btn secondary" id="new-btn" type="button">新增新活動（清空）</button>
         </div>
         <p class="hint" style="margin-top:10px; line-height:1.6;">
           儲存草稿：內容會寫入列表（顯示為草稿），下次登入可繼續編輯，<strong>不會</strong>顯示在前台。<br />
@@ -250,6 +259,8 @@
               <th>中文活動名稱</th>
               <th>英文活動名稱</th>
               <th>圖片</th>
+              <th>置頂</th>
+              <th>排序</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -263,13 +274,13 @@
   </div>
 
   <script src="../../activity-pages.js"></script>
-  <script src="../../activity-store.js"></script>
+  <script src="../../activity-store.js?v=20260609-act2"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../supabase-config.js"></script>
   <script src="../supabase-auth.js"></script>
   <script src="../require-auth.js"></script>
-  <script src="../admin-sidebar.js"></script>
-  <script src="../admin-readonly.js"></script>
+  <script src="../admin-sidebar.js?v=7"></script>
+  <script src="../admin-readonly.js?v=3"></script>
   <script>
     const tbody = document.getElementById("activity-tbody");
     const noticeEl = document.getElementById("form-notice");
@@ -313,17 +324,103 @@
       return t;
     }
 
+    let storedImageRef = "";
+    let pendingImageData = "";
+
     const inputs = {
       idx: document.getElementById("activity-idx"),
       sort_order: document.getElementById("activity-sort"),
       date: document.getElementById("activity-date"),
       imageSrc: document.getElementById("activity-image"),
       imageFile: document.getElementById("activity-image-file"),
+      imagePreview: document.getElementById("activity-image-preview"),
       title: document.getElementById("activity-title-zh"),
       titleEn: document.getElementById("activity-title-en"),
       paragraphs: document.getElementById("activity-paragraphs-zh"),
-      paragraphsEn: document.getElementById("activity-paragraphs-en")
+      paragraphsEn: document.getElementById("activity-paragraphs-en"),
+      pinnedCheckbox: document.getElementById("activity-pinned")
     };
+
+    function readPinnedFromForm() {
+      return Boolean(inputs.pinnedCheckbox?.checked);
+    }
+
+    function getFallbackImage() {
+      return window.ActivityStore?.DEFAULT_ACTIVITY_FALLBACK ||
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=70";
+    }
+
+    function updateImagePreview() {
+      const raw = pendingImageData || storedImageRef || String(inputs.imageSrc.value || "").trim();
+      if (window.ActivityStore?.applyActivityImage) {
+        window.ActivityStore.applyActivityImage(inputs.imagePreview, raw, getFallbackImage());
+      } else {
+        inputs.imagePreview.src = raw || getFallbackImage();
+      }
+    }
+
+    function ensureActivityIdx() {
+      const current = String(inputs.idx.value ?? "").trim();
+      if (current !== "") return Number(current);
+      const next = window.ActivityStore?.allocateActivityIdx?.() ?? 0;
+      inputs.idx.value = String(next);
+      return next;
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("讀取圖片失敗。"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function compressDataUrl(dataUrl) {
+      const img = await new Promise((resolve, reject) => {
+        const el = new Image();
+        el.onload = () => resolve(el);
+        el.onerror = () => reject(new Error("無法解析圖片，請改用 JPG 或 PNG。"));
+        el.src = dataUrl;
+      });
+      const maxSide = 900;
+      let w = img.naturalWidth || img.width;
+      let h = img.naturalHeight || img.height;
+      const scale = Math.min(1, maxSide / Math.max(w, h, 1));
+      w = Math.max(1, Math.round(w * scale));
+      h = Math.max(1, Math.round(h * scale));
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("無法處理圖片。");
+      ctx.drawImage(img, 0, 0, w, h);
+      let quality = 0.82;
+      let result = canvas.toDataURL("image/jpeg", quality);
+      while (result.length > 280000 && quality > 0.4) {
+        quality -= 0.08;
+        result = canvas.toDataURL("image/jpeg", quality);
+      }
+      if (result.length > 520000) {
+        throw new Error("圖片壓縮後仍過大，請改用較小或較低解析度的照片。");
+      }
+      return result;
+    }
+
+    function isAllowedImageFile(file) {
+      if (!file) return false;
+      const allow = ["image/jpeg", "image/png", "image/webp", "image/pjpeg"];
+      if (allow.includes(file.type)) return true;
+      const name = String(file.name || "").toLowerCase();
+      return /\.(jpe?g|png|webp)$/i.test(name);
+    }
+
+    async function processImageFile(file) {
+      if (!file) return "";
+      if (file.size > 8 * 1024 * 1024) throw new Error("圖片超過 8MB，請先縮小後再上傳。");
+      const dataUrl = await readFileAsDataUrl(file);
+      return compressDataUrl(dataUrl);
+    }
 
     function showNotice(text) {
       noticeEl.textContent = text;
@@ -336,35 +433,43 @@
       inputs.sort_order.value = "1";
       inputs.date.value = "";
       inputs.imageSrc.value = "";
-      if (document.getElementById("activity-image-preview")) {
-        document.getElementById("activity-image-preview").src = "";
-      }
+      storedImageRef = "";
+      pendingImageData = "";
+      if (inputs.imageFile) inputs.imageFile.value = "";
+      updateImagePreview();
+      if (inputs.pinnedCheckbox) inputs.pinnedCheckbox.checked = false;
       inputs.title.value = "";
       inputs.titleEn.value = "";
       inputs.paragraphs.value = "";
       inputs.paragraphsEn.value = "";
-      if (inputs.imageFile) inputs.imageFile.value = "";
       setStatusBadge(null);
       showNotice("已清除表單");
     }
 
-    inputs.imageFile?.addEventListener("change", () => {
+    inputs.imageFile?.addEventListener("change", async (ev) => {
       const file = inputs.imageFile?.files?.[0];
       if (!file) return;
-      const preview = document.getElementById("activity-image-preview");
-      if (preview) preview.src = URL.createObjectURL(file);
-      showNotice("已載入圖片預覽；請記得在 imageUrl 欄位填入可公開存取的圖片 URL。");
+      if (!isAllowedImageFile(file)) {
+        showNotice("請上傳 jpg、png 或 webp 格式的圖片。");
+        ev.target.value = "";
+        return;
+      }
+      try {
+        const dataUrl = await processImageFile(file);
+        const idx = ensureActivityIdx();
+        pendingImageData = dataUrl;
+        storedImageRef = window.ActivityStore.attachImage(idx, dataUrl) || "";
+        pendingImageData = "";
+        inputs.imageSrc.value = "";
+        updateImagePreview();
+        showNotice("封面已上傳，請記得按「儲存草稿」或「發布文章」。");
+      } catch (err) {
+        showNotice(err?.message || "上傳失敗");
+        ev.target.value = "";
+      }
     });
 
-    function computeNextIdx() {
-      const list = window.ActivityStore?.listAll?.() || [];
-      let max = -1;
-      list.forEach((x) => {
-        const n = Number(x.idx);
-        if (Number.isFinite(n) && n > max) max = n;
-      });
-      return max + 1;
-    }
+    inputs.imageSrc?.addEventListener("input", () => updateImagePreview());
 
     async function translateZhToEn(text) {
       const q = String(text ?? "").trim();
@@ -459,38 +564,51 @@
       inputs.sort_order.value = String(item.sort_order ?? 1);
       inputs.date.value = dateStrToInputValue(item.date ?? "");
       inputs.imageSrc.value = String(item.imageUrl ?? item.imageSrc ?? "");
+      storedImageRef = String(item.imageUrl ?? item.imageSrc ?? "");
+      pendingImageData = "";
+      if (inputs.imageFile) inputs.imageFile.value = "";
+      updateImagePreview();
       inputs.title.value = String(item.titleZh ?? item.title ?? "");
       inputs.titleEn.value = String(item.titleEn ?? "");
       inputs.paragraphs.value = Array.isArray(item.contentZh) ? item.contentZh.join("\n\n") : Array.isArray(item.paragraphs) ? item.paragraphs.join("\n\n") : "";
       inputs.paragraphsEn.value = Array.isArray(item.contentEn) ? item.contentEn.join("\n\n") : Array.isArray(item.paragraphsEn) ? item.paragraphsEn.join("\n\n") : "";
-      if (document.getElementById("activity-image-preview")) {
-        document.getElementById("activity-image-preview").src = inputs.imageSrc.value || "";
-      }
+      if (inputs.pinnedCheckbox) inputs.pinnedCheckbox.checked = Boolean(item.pinned);
       setStatusBadge(item.status === "published" ? "published" : "draft");
       showNotice("已載入選取活動");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function renderTable() {
+      const viewer = window.ImmbaAdminReadonly?.isViewer?.();
       const items = window.ActivityStore?.listAll?.() || [];
-      const fallbackImg = "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=70";
+      const fallbackImg = getFallbackImage();
       tbody.innerHTML = items.map((item) => {
         const titleZh = item.titleZh || item.title || "(無標題)";
         const titleEn = item.titleEn || item.titleZh || item.title || "(No title)";
         const stLabel = item.status === "published" ? "已發布" : "草稿";
+        const imgSrc = window.ActivityStore.getDisplayImageUrl(item.imageUrl || item.imageSrc, fallbackImg);
+        const pinLabel =
+          item.status === "published"
+            ? item.pinned
+              ? "置頂"
+              : "非置頂"
+            : item.pinned
+              ? "置頂（草稿）"
+              : "—";
+        const sortLabel = item.status === "published" ? String(item.sort_order ?? "—") : "—";
         return `
           <tr>
             <td>${stLabel}</td>
             <td>${item.date || "—"}</td>
             <td>${titleZh}</td>
             <td>${titleEn}</td>
-            <td><img class="thumb" src="${item.imageUrl || item.imageSrc || fallbackImg}" alt="${titleZh}"></td>
-            <td>
-              <div class="actions">
+            <td><img class="thumb" src="${imgSrc}" alt="${titleZh}" onerror="this.src='${fallbackImg}'"></td>
+            <td>${pinLabel}</td>
+            <td>${sortLabel}</td>
+            <td>${viewer ? "—" : `<div class="actions">
                 <button class="btn secondary edit-btn" data-idx="${item.idx}" type="button">編輯</button>
                 <button class="btn danger del-btn" data-idx="${item.idx}" type="button">刪除</button>
-              </div>
-            </td>
+              </div>`}</td>
           </tr>
         `;
       }).join("");
@@ -505,6 +623,7 @@
 
       document.querySelectorAll(".del-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
+          if (window.ImmbaAdminReadonly?.isViewer?.()) return;
           const idx = Number(btn.getAttribute("data-idx"));
           if (!confirm("確定刪除此活動？刪除後前台會立刻同步更新。")) return;
           window.ActivityStore.removeItemByIdx(idx);
@@ -512,24 +631,35 @@
           clearForm();
         });
       });
+
+      if (window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.refresh("#activities-admin-main");
     }
 
-    function buildPayloadFromForm(status) {
+    function buildPayloadFromForm(status, prevImageUrl) {
       const idxRaw = String(inputs.idx.value ?? "").trim();
       let idx;
       if (!idxRaw) {
-        idx = computeNextIdx();
+        idx = window.ActivityStore?.allocateActivityIdx?.() ?? 0;
+        inputs.idx.value = String(idx);
       } else {
         const parsed = Number(idxRaw);
-        idx = Number.isFinite(parsed) ? parsed : computeNextIdx();
+        idx = Number.isFinite(parsed) ? parsed : window.ActivityStore?.allocateActivityIdx?.() ?? 0;
       }
       const st = status === "published" ? "published" : "draft";
+      const urlInput = String(inputs.imageSrc.value ?? "").trim();
+      const imageCandidate = pendingImageData || storedImageRef || urlInput;
+      let imageUrl = "";
+      try {
+        imageUrl = window.ActivityStore.persistImageUrl(idx, imageCandidate, prevImageUrl || "");
+      } catch (err) {
+        throw err;
+      }
       return {
         idx,
-        sort_order: Number(inputs.sort_order.value ?? 1),
         date: inputValueToStoredDate(inputs.date.value),
         status: st,
-        imageUrl: String(inputs.imageSrc.value ?? "").trim(),
+        pinned: readPinnedFromForm(),
+        imageUrl,
         titleZh: String(inputs.title.value ?? "").trim(),
         titleEn: String(inputs.titleEn.value ?? "").trim(),
         contentZh: String(inputs.paragraphs.value ?? ""),
@@ -550,7 +680,6 @@
     }
 
     document.getElementById("reset-form-btn").addEventListener("click", clearForm);
-    document.getElementById("new-btn").addEventListener("click", clearForm);
 
     document.getElementById("reset-bundled-btn").addEventListener("click", () => {
       if (
@@ -566,14 +695,53 @@
       showNotice("已還原為內建活動集錦；請重新整理首頁／活動集錦頁確認。");
     });
 
+    function saveFromForm(status) {
+      if (window.ImmbaAdminReadonly?.isViewer?.()) {
+        showNotice("僅檢視權限，無法儲存或發布。");
+        return;
+      }
+      const wasNew = !String(inputs.idx.value ?? "").trim();
+      const wantPinned = readPinnedFromForm();
+      const prevIdx = String(inputs.idx.value ?? "").trim();
+      const prevItem = prevIdx
+        ? window.ActivityStore.listAll().find((x) => Number(x.idx) === Number(prevIdx))
+        : null;
+      const payload = buildPayloadFromForm(status, prevItem?.imageUrl || prevItem?.imageSrc || "");
+      if (status === "published" && !validatePublish(payload)) return;
+      const saved = window.ActivityStore.saveItem(payload);
+      renderTable();
+      storedImageRef = "";
+      pendingImageData = "";
+      if (wasNew) {
+        clearForm();
+        const pinHint = saved.pinned
+          ? status === "published"
+            ? `（已置頂，排序 ${saved.sort_order || 1}）`
+            : "（已勾選置頂，發布後生效）"
+          : "";
+        showNotice(
+          status === "published"
+            ? `新活動已發布，前台活動集錦已同步。${pinHint}`
+            : `草稿已儲存。下次可從列表點「編輯」繼續。${pinHint}`
+        );
+      } else {
+        if (saved) fillForm(saved);
+        if (status === "published" && wantPinned && !saved.pinned) {
+          showNotice("置頂儲存失敗，請重新整理頁面後再試一次。");
+          return;
+        }
+        const pinHint = saved.pinned
+          ? status === "published"
+            ? `（已置頂，排序 ${saved.sort_order || 1}）`
+            : "（已勾選置頂，發布後生效）"
+          : "";
+        showNotice(status === "published" ? `已發布，前台活動集錦已同步。${pinHint}` : `草稿已儲存。${pinHint}`);
+      }
+    }
+
     document.getElementById("save-draft-btn").addEventListener("click", () => {
       try {
-        const payload = buildPayloadFromForm("draft");
-        window.ActivityStore.saveItem(payload);
-        renderTable();
-        const saved = window.ActivityStore.listAll().find((x) => Number(x.idx) === Number(payload.idx));
-        if (saved) fillForm(saved);
-        showNotice("草稿已儲存。下次登入可從下方列表點「編輯」繼續；前台不會顯示。");
+        saveFromForm("draft");
       } catch (err) {
         console.error(err);
         showNotice(err?.message || "儲存失敗");
@@ -582,13 +750,7 @@
 
     document.getElementById("publish-btn").addEventListener("click", () => {
       try {
-        const payload = buildPayloadFromForm("published");
-        if (!validatePublish(payload)) return;
-        window.ActivityStore.saveItem(payload);
-        renderTable();
-        const saved = window.ActivityStore.listAll().find((x) => Number(x.idx) === Number(payload.idx));
-        if (saved) fillForm(saved);
-        showNotice("已發布，前台活動集錦已同步。");
+        saveFromForm("published");
       } catch (err) {
         console.error(err);
         showNotice(err?.message || "發布失敗");
@@ -601,6 +763,7 @@
       document.getElementById("activities-admin-root").classList.remove("shell-hide");
       if (window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.applyIfViewer("#activities-admin-main");
       renderTable();
+      updateImagePreview();
     })();
   </script>
 </body>

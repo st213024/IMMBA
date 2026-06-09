@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <style>
     .page-wrap-2col {
@@ -54,14 +54,14 @@
     }
 
     .side-card a:hover {
-      background: #F4F8FF;
+      background: #f0f9ff;
       border-color: var(--line);
       color: var(--primary-deep);
     }
 
     .side-card a.is-active {
-      background: #EAF3FF;
-      border-color: #C7D9F5;
+      background: #e0f2fe;
+      border-color: #bae6fd;
       color: var(--primary-deep);
     }
 
@@ -76,7 +76,7 @@
     .content-header {
       padding: 14px 16px;
       border-bottom: 1px solid var(--line);
-      background: #F4F8FF;
+      background: #f0f9ff;
       color: var(--text);
       font-weight: 800;
     }
@@ -122,7 +122,7 @@
       border-radius: 10px;
       overflow: hidden;
       border: 1px solid var(--line);
-      background: #e8eef6;
+      background: #e0f2fe;
       width: 100%;
       max-width: 332px;
       aspect-ratio: 332 / 217;
@@ -165,7 +165,7 @@
     .activity-row .excerpt {
       font-size: 15px;
       line-height: 1.75;
-      color: #334a70;
+      color: #0369a1;
       margin: 0;
     }
 
@@ -191,8 +191,8 @@
     }
 
     .activity-row:hover .activity-readmore {
-      background: linear-gradient(180deg, #3d6b58 0%, #2a4a3e 55%, #1e3a30 100%);
-      color: #f4faf7;
+      background: linear-gradient(180deg, #38bdf8 0%, #0ea5e9 55%, #0284c7 100%);
+      color: #f0f9ff;
       border-color: rgba(255, 255, 255, 0.18);
       box-shadow:
         0 4px 12px rgba(30, 58, 48, 0.35),
@@ -240,7 +240,7 @@
           title="Double-click to open admin"
           aria-label="Program mark. Double-click to open admin."
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a
@@ -266,22 +266,22 @@
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Overview</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">Features and Rankings</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">Regulations and Procedures</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">Learning Environment</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Admissions</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA Admissions</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">Scholarships and Financial Aid</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Academics</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">Curriculum and Degree Requirements</a>
         </div>
       </div>
       <div class="nav-item"><a class="nav-link" href="teacher-en.html">Faculty</a></div>
@@ -301,7 +301,7 @@
   </main>
 
   <script src="activity-pages.js"></script>
-  <script src="activity-store.js"></script>
+  <script src="activity-store.js?v=20260609-act2"></script>
   <script src="script.js"></script>
   <script>
     (function () {
@@ -330,7 +330,9 @@
         return { shown, truncated };
       }
 
-      const published = items.filter((x) => (x.status ?? "published") === "published");
+      const published = items
+        .filter((x) => (x.status ?? "published") === "published")
+        .sort((a, b) => Number(a.sort_order) - Number(b.sort_order));
 
       container.innerHTML = published
         .map((item) => {
@@ -349,9 +351,9 @@
           const safeTitle = escapeHtml(title);
           const safeDate = escapeHtml(date);
           const safeShown = escapeHtml(shown);
-          const imgSrc =
-            item.imageUrl ||
-            item.imageSrc ||
+          const imgSrc = window.ActivityStore?.getDisplayImageUrl?.(
+            item.imageUrl || item.imageSrc
+          ) || item.imageUrl || item.imageSrc ||
             "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80";
 
           return `

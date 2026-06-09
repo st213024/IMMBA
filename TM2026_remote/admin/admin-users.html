@@ -132,8 +132,8 @@
       background: #1d4ed8;
     }
     .um-btn-save {
-      background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%);
-      color: #f4faf7;
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #f0f9ff;
       border-color: #1a3329;
     }
     .um-btn-save:hover:not(:disabled) {
@@ -344,6 +344,32 @@
       padding: 40px 16px;
     }
     .shell-hide { display: none !important; }
+    .um-tabs {
+      display: flex;
+      gap: 8px;
+      padding: 12px 22px 0;
+      border-bottom: 1px solid #e8ecf2;
+      background: #fafbfc;
+    }
+    .um-tab {
+      border: 0;
+      border-radius: 8px 8px 0 0;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+    }
+    .um-tab--active {
+      color: #0f172a;
+      background: #fff;
+      border-color: #e8ecf2;
+      border-bottom-color: #fff;
+    }
   </style>
 </head>
 <body data-admin-page="admin-users">
@@ -355,10 +381,15 @@
           <header class="um-head">
             <h1 class="um-title">管理員權限管理</h1>
             <div class="um-meta">
-              全部 <strong id="um-total-count">0</strong> 筆<span class="um-meta-sep">·</span>待審核
-              <strong id="um-pending-count">0</strong>
+              <span id="um-meta-admin">全部 <strong id="um-total-count">0</strong> 筆<span class="um-meta-sep">·</span>待審核
+              <strong id="um-pending-count">0</strong></span>
+              <span id="um-meta-marketplace" hidden>賣場會員 <strong id="um-mp-total-count">0</strong> 筆</span>
             </div>
           </header>
+          <div class="um-tabs" role="tablist">
+            <button type="button" class="um-tab um-tab--active" id="um-tab-admin" role="tab">後台管理者</button>
+            <button type="button" class="um-tab" id="um-tab-marketplace" role="tab">賣場會員</button>
+          </div>
           <div class="um-toolbar">
             <button type="button" class="um-icon-btn" id="um-filter-btn" title="篩選（聚焦搜尋）" aria-label="篩選">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -372,6 +403,7 @@
               <input type="search" id="um-q" placeholder="搜尋 Email" autocomplete="off" />
             </div>
             <button type="button" class="um-btn um-btn-save" id="um-save" disabled>儲存變更</button>
+            <button type="button" class="um-btn um-btn--primary" id="um-mp-sync" hidden>從 Auth 同步會員</button>
             <button type="button" class="um-btn um-btn--primary" id="um-refresh">重新整理</button>
           </div>
           <div id="um-banner" class="um-banner" role="status"></div>
@@ -402,13 +434,17 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-config.js?v=5"></script>
-  <script src="supabase-auth.js?v=5"></script>
+  <script src="supabase-auth.js?v=9"></script>
   <script src="require-auth.js?v=5"></script>
-  <script src="admin-sidebar.js?v=5"></script>
+  <script src="admin-sidebar.js?v=7"></script>
   <script>
     (function () {
       var LOCKED_EMAIL = "st213024@gmail.com";
+      var activeTab = "admin";
       var allRows = [];
+      var mpRows = [];
+      var mpLoadError = "";
+      var mpPendingEdits = {};
       var pendingEdits = {};
       var page = 1;
       var pageSize = 10;
@@ -458,7 +494,11 @@
         return null;
       }
       function syncSaveBtn() {
-        document.getElementById("um-save").disabled = Object.keys(pendingEdits).length === 0;
+        var has =
+          activeTab === "admin"
+            ? Object.keys(pendingEdits).length > 0
+            : Object.keys(mpPendingEdits).length > 0;
+        document.getElementById("um-save").disabled = !has;
       }
       function onDraftChange(rowEmail) {
         var k = normEmail(rowEmail);
@@ -565,7 +605,130 @@
         return snapshotFromRow(r);
       }
 
+      function renderMarketplace() {
+        var needle = q.trim().toLowerCase();
+        var arr = !needle
+          ? mpRows.slice()
+          : mpRows.filter(function (r) {
+              return String(r.email || "").toLowerCase().indexOf(needle) !== -1;
+            });
+        document.getElementById("um-mp-total-count").textContent = String(mpRows.length);
+        var tp = totalPages(arr.length);
+        document.getElementById("um-page-num").textContent = String(page);
+        document.getElementById("um-prev").disabled = page <= 1;
+        document.getElementById("um-next").disabled = page >= tp;
+        var slice = slicePage(arr);
+        var wrap = document.getElementById("um-table-wrap");
+        if (!slice.length) {
+          var emptyMsg = mpRows.length
+            ? "無符合搜尋結果。"
+            : mpLoadError ||
+              "尚無賣場會員。若會員已在賣場註冊但仍空白，請按上方「從 Auth 同步會員」；若按鈕失敗，請在 Supabase SQL Editor 執行 marketplace-members-schema.sql 與 supabase-marketplace-isolation-v1.sql。";
+          wrap.innerHTML =
+            '<table class="um-table"><tbody><tr class="um-empty"><td colspan="6">' +
+            esc(emptyMsg) +
+            "</td></tr></tbody></table>";
+          return;
+        }
+        var html =
+          '<table class="um-table"><thead><tr>' +
+          "<th>Email</th><th>顯示名稱</th><th>狀態</th><th>可賣商品</th><th>註冊時間</th><th>操作</th>" +
+          "</tr></thead><tbody>";
+        slice.forEach(function (r) {
+          var k = normEmail(r.email);
+          var draft = mpPendingEdits[k] || {
+            status: r.status || "active",
+            seller_enabled: r.seller_enabled !== false
+          };
+          html +=
+            '<tr data-mp-email="' + esc(k) + '">' +
+            "<td>" + esc(r.email) + "</td>" +
+            "<td>" + esc(r.display_name || "—") + "</td>" +
+            '<td><select class="um-sel-mp-status" data-mp-email="' + esc(k) + '">' +
+            '<option value="active"' + (draft.status === "active" ? " selected" : "") + ">啟用</option>" +
+            '<option value="suspended"' + (draft.status === "suspended" ? " selected" : "") + ">停權</option>" +
+            "</select></td>" +
+            '<td><select class="um-sel-mp-seller" data-mp-email="' + esc(k) + '">' +
+            '<option value="1"' + (draft.seller_enabled ? " selected" : "") + ">是</option>" +
+            '<option value="0"' + (!draft.seller_enabled ? " selected" : "") + ">否</option>" +
+            "</select></td>" +
+            "<td>" + esc((r.created_at || "").slice(0, 10) || "—") + "</td>" +
+            "<td>—</td></tr>";
+        });
+        html += "</tbody></table>";
+        wrap.innerHTML = html;
+      }
+
+      function onMpDraftChange(emailKey) {
+        var k = normEmail(emailKey);
+        var r = mpRows.find(function (x) { return normEmail(x.email) === k; });
+        if (!r) {
+          delete mpPendingEdits[k];
+          syncSaveBtn();
+          return;
+        }
+        var tr = document.querySelector('tr[data-mp-email="' + k.replace(/"/g, "\\\"") + '"]');
+        if (!tr) return;
+        var stSel = tr.querySelector(".um-sel-mp-status");
+        var sellerSel = tr.querySelector(".um-sel-mp-seller");
+        if (!stSel || !sellerSel) return;
+        var status = stSel.value;
+        var sellerEnabled = sellerSel.value === "1";
+        if (status === (r.status || "active") && sellerEnabled === (r.seller_enabled !== false)) {
+          delete mpPendingEdits[k];
+        } else {
+          mpPendingEdits[k] = { status: status, seller_enabled: sellerEnabled };
+        }
+        syncSaveBtn();
+      }
+
+      async function fetchMarketplaceMembers() {
+        var A = window.AdminAuth;
+        if (!A || typeof A.listMarketplaceMembers !== "function") {
+          throw new Error("請強制重新整理以載入 supabase-auth.js?v=6。");
+        }
+        return await A.listMarketplaceMembers();
+      }
+
+      async function loadMarketplaceOnly() {
+        try {
+          mpRows = await fetchMarketplaceMembers();
+          mpLoadError = "";
+        } catch (mpErr) {
+          mpRows = [];
+          mpLoadError = (mpErr && mpErr.message) || String(mpErr);
+          setBanner(mpLoadError, false);
+        }
+        Object.keys(mpPendingEdits).forEach(function (key) {
+          if (!mpRows.find(function (r) { return normEmail(r.email) === key; })) delete mpPendingEdits[key];
+        });
+        if (activeTab === "marketplace") renderMarketplace();
+      }
+
+      function setActiveTab(tab) {
+        activeTab = tab === "marketplace" ? "marketplace" : "admin";
+        document.getElementById("um-tab-admin").classList.toggle("um-tab--active", activeTab === "admin");
+        document.getElementById("um-tab-marketplace").classList.toggle("um-tab--active", activeTab === "marketplace");
+        document.getElementById("um-meta-admin").hidden = activeTab !== "admin";
+        document.getElementById("um-meta-marketplace").hidden = activeTab !== "marketplace";
+        document.getElementById("um-mp-sync").hidden = activeTab !== "marketplace";
+        page = 1;
+        q = "";
+        document.getElementById("um-q").value = "";
+        document.getElementById("um-q").placeholder = activeTab === "admin" ? "搜尋 Email" : "搜尋賣場會員 Email";
+        syncSaveBtn();
+        if (activeTab === "admin") {
+          render();
+        } else {
+          loadMarketplaceOnly();
+        }
+      }
+
       function render() {
+        if (activeTab === "marketplace") {
+          renderMarketplace();
+          return;
+        }
         var arr = filtered();
         var pendN = 0;
         for (var pi = 0; pi < allRows.length; pi++) {
@@ -674,10 +837,14 @@
       }
 
       async function loadAll(clearDraft) {
-        if (clearDraft !== false && Object.keys(pendingEdits).length) {
+        var hasDraft = Object.keys(pendingEdits).length || Object.keys(mpPendingEdits).length;
+        if (clearDraft !== false && hasDraft) {
           if (!confirm("有未儲存的變更，確定要重新載入並捨棄？")) return;
         }
-        if (clearDraft !== false) pendingEdits = {};
+        if (clearDraft !== false) {
+          pendingEdits = {};
+          mpPendingEdits = {};
+        }
         syncSaveBtn();
         var wrap = document.getElementById("um-table-wrap");
         wrap.innerHTML = '<p style="margin:0;padding:24px 22px;color:#64748b;">讀取中…</p>';
@@ -685,6 +852,17 @@
           allRows = await fetchAllMembers();
           Object.keys(pendingEdits).forEach(function (key) {
             if (!findRowByEmail(key)) delete pendingEdits[key];
+          });
+          try {
+            mpRows = await fetchMarketplaceMembers();
+            mpLoadError = "";
+          } catch (mpErr) {
+            mpRows = [];
+            mpLoadError = (mpErr && mpErr.message) || String(mpErr);
+            if (activeTab === "marketplace") setBanner(mpLoadError, false);
+          }
+          Object.keys(mpPendingEdits).forEach(function (key) {
+            if (!mpRows.find(function (r) { return normEmail(r.email) === key; })) delete mpPendingEdits[key];
           });
           page = 1;
           render();
@@ -697,9 +875,31 @@
       }
 
       async function saveChanges() {
+        var A = window.AdminAuth;
+        if (activeTab === "marketplace") {
+          var mpKeys = Object.keys(mpPendingEdits);
+          if (!mpKeys.length) return;
+          if (typeof A.saveMarketplaceMemberRow !== "function") {
+            setBanner("請重新整理以載入 supabase-auth.js?v=6。", false);
+            return;
+          }
+          try {
+            for (var j = 0; j < mpKeys.length; j++) {
+              var mk = mpKeys[j];
+              var mpe = mpPendingEdits[mk];
+              await A.saveMarketplaceMemberRow(mk, mpe.status, mpe.seller_enabled);
+            }
+            mpPendingEdits = {};
+            syncSaveBtn();
+            setBanner("賣場會員設定已儲存。", true);
+            await loadAll(false);
+          } catch (e) {
+            setBanner((e && e.message) || "儲存失敗", false);
+          }
+          return;
+        }
         var keys = Object.keys(pendingEdits);
         if (!keys.length) return;
-        var A = window.AdminAuth;
         if (typeof A.saveAdminRow !== "function") {
           setBanner("請重新整理以載入最新 supabase-auth.js（需含 saveAdminRow）。", false);
           return;
@@ -718,6 +918,43 @@
           setBanner((e && e.message) || "儲存失敗", false);
         }
       }
+
+      document.getElementById("um-tab-admin").addEventListener("click", function () {
+        setBanner("", false);
+        setActiveTab("admin");
+      });
+      document.getElementById("um-tab-marketplace").addEventListener("click", function () {
+        setBanner("", false);
+        setActiveTab("marketplace");
+      });
+
+      document.getElementById("um-mp-sync").addEventListener("click", function () {
+        var A = window.AdminAuth;
+        if (!A || typeof A.syncMarketplaceFromAuth !== "function") {
+          setBanner("請強制重新整理以載入 supabase-auth.js?v=7。", false);
+          return;
+        }
+        var btn = document.getElementById("um-mp-sync");
+        btn.disabled = true;
+        setBanner("正在從 Supabase Auth 同步賣場會員…", true);
+        A.syncMarketplaceFromAuth()
+          .then(function (res) {
+            var n = Number(res && res.synced != null ? res.synced : 0);
+            setBanner(
+              n > 0
+                ? "已同步 " + n + " 筆賣場會員。"
+                : "同步完成，沒有需要補登的新會員（可能已在列表中，或 Auth 尚無非後台帳號）。",
+              true
+            );
+            return loadMarketplaceOnly();
+          })
+          .catch(function (e) {
+            setBanner((e && e.message) || "同步失敗", false);
+          })
+          .finally(function () {
+            btn.disabled = false;
+          });
+      });
 
       document.getElementById("um-filter-btn").addEventListener("click", function () {
         document.getElementById("um-q").focus();
@@ -757,6 +994,11 @@
       var tableWrap = document.getElementById("um-table-wrap");
       tableWrap.addEventListener("change", function (ev) {
         var t = ev.target;
+        if (t.classList.contains("um-sel-mp-status") || t.classList.contains("um-sel-mp-seller")) {
+          var mtr = t.closest("tr[data-mp-email]");
+          if (mtr) onMpDraftChange(mtr.getAttribute("data-mp-email"));
+          return;
+        }
         if (!t.classList.contains("um-sel-role") && !t.classList.contains("um-sel-active")) return;
         var tr = t.closest("tr[data-row-email]");
         if (!tr) return;
@@ -786,6 +1028,10 @@
         if (!ok) return;
         document.getElementById("admin-root").classList.remove("shell-hide");
         await loadAll(false);
+        try {
+          var tab = new URLSearchParams(window.location.search).get("tab");
+          if (tab === "marketplace") setActiveTab("marketplace");
+        } catch (_) {}
       })();
     })();
   </script>

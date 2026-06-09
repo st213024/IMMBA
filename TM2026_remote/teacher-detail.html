@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -37,7 +37,7 @@
           title="連按兩下滑鼠左鍵可開啟後台管理"
           aria-label="系所識別標誌。連按兩下可開啟後台管理。"
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a class="topbar-name" href="index.html" title="回到首頁" aria-label="回到首頁：輔仁大學國際經營管理碩士班 (imMBA)">
@@ -109,7 +109,7 @@
   </footer>
 
   <script src="script.js"></script>
-  <script src="teacher-data.js"></script>
+  <script src="teacher-data.js?v=20260609-photo1"></script>
   <script>
     function escapeHtml(s) {
       return String(s ?? "")
@@ -134,7 +134,7 @@
       missing.classList.remove("hide");
     } else {
       const zh = t.zh;
-      const photo = t.photo || "images/avatar-placeholder.svg";
+      const photo = window.TeacherData.getDisplayPhotoUrl(t.photo);
       const deptBlock = zh.dept ? `<p class="teacher-card-dept">${escapeHtml(zh.dept)}</p>` : "";
 
       const eduBlock = zh.education

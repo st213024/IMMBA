@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品交易平台後台</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-requires-auth="true" data-requires-super-admin="true" data-auth-platform="marketplace">
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">
+        <a class="logo-mark-link" href="admin-home.html" aria-label="管理後台首頁">
+          <img class="logo-mark" src="assets/fjcu-logo.svg" alt="FJCU imMBA logo">
+        </a>
+        <div class="logo-text">
+          <span class="logo-main">FJCU imMBA Marketplace</span>
+          <span class="logo-sub">商品交易平台後台</span>
+        </div>
+      </div>
+      <div class="header-top-right">
+        <span id="admin-user-email" class="top-link"></span>
+        <span id="admin-role-badge" class="top-link"></span>
+        <button class="btn btn-outline admin-logout" style="color:#003366;border-color:#003366;" type="button">登出</button>
+        <a class="top-link" href="index.html">回網站首頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section alt">
+    <div class="section-title">
+      <h2>平台所有交易</h2>
+    </div>
+    <section class="admin-panel" style="max-width:1080px;margin:0 auto;">
+      <h3>平台交易費設定（每筆）</h3>
+      <div class="admin-actions">
+        <input id="platform-fee-input" class="admin-input" type="number" min="0" style="max-width:140px;" value="4">
+        <button id="save-platform-fee-btn" class="btn btn-outline" style="color:#003366;border-color:#003366;" type="button">儲存平台費</button>
+      </div>
+      <p id="platform-fee-msg" class="admin-note"></p>
+    </section>
+
+    <section class="admin-panel" style="max-width:1080px;margin:16px auto 0;">
+      <div class="cards-3">
+        <article class="card"><h3>交易筆數</h3><p id="platform-order-count" style="font-size:32px;font-weight:700;color:#003366;">0</p></article>
+        <article class="card"><h3>交易總金額</h3><p id="platform-total-amount" style="font-size:32px;font-weight:700;color:#003366;">NT$ 0</p></article>
+        <article class="card"><h3>平台交易總額</h3><p id="platform-fee-total" style="font-size:32px;font-weight:700;color:#003366;">NT$ 0</p></article>
+      </div>
+    </section>
+
+    <section class="admin-panel" style="max-width:1080px;margin:16px auto 0;">
+      <h3>訂單總覽</h3>
+      <div id="platform-orders-list"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="auth.js"></script>
+  <script src="marketplace-admin.js"></script>
+</body>
+</html>

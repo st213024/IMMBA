@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <style>
     .news-archive-lead {
@@ -62,7 +62,7 @@
           title="Double-click to open admin"
           aria-label="Program mark. Double-click to open admin."
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a
@@ -88,22 +88,22 @@
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Overview</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">特色與排名</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">本單位規定及辦法</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">學習環境</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=33" target="_blank" rel="noopener noreferrer">Features and Rankings</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=98" target="_blank" rel="noopener noreferrer">Regulations and Procedures</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/profile.php?IID=123" target="_blank" rel="noopener noreferrer">Learning Environment</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Admissions</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA招生資訊</a>
-          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">MBA Admissions</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">Scholarships and Financial Aid</a>
         </div>
       </div>
       <div class="nav-item">
         <button type="button" class="nav-btn" aria-expanded="false" aria-haspopup="true">Academics</button>
         <div class="submenu">
-          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">課程與修業規則</a>
+          <a href="https://www.management.fju.edu.tw/subweb/immba/class.php?CID=20" target="_blank" rel="noopener noreferrer">Curriculum and Degree Requirements</a>
         </div>
       </div>
       <div class="nav-item"><a class="nav-link" href="teacher-en.html">Faculty</a></div>
@@ -124,7 +124,7 @@
     </section>
   </main>
 
-  <script src="news-store.js"></script>
+  <script src="news-store.js?v=20260609-img3"></script>
   <script src="script.js"></script>
   <script>
     (function () {
@@ -145,38 +145,67 @@
           .replace(/"/g, "&quot;");
       }
 
-      const newsItems = window.NewsStore.listPublished();
-      const fallbackImage =
-        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=300&q=70";
+      const fallbackImage = window.NewsStore.DEFAULT_NEWS_FALLBACK;
 
-      if (!newsItems.length) {
-        list.innerHTML = '<li class="empty-news">No announcements to display.</li>';
-        return;
+      function renderPageNews() {
+        const newsItems = window.NewsStore.listPublished();
+        list.replaceChildren();
+
+        if (!newsItems.length) {
+          const empty = document.createElement("li");
+          empty.className = "empty-news";
+          empty.textContent = "No announcements to display.";
+          list.appendChild(empty);
+          return;
+        }
+
+        newsItems.forEach((item) => {
+          const li = document.createElement("li");
+          const main = document.createElement("div");
+          main.className = "news-item-main";
+
+          const img = document.createElement("img");
+          img.className = "news-thumb";
+          img.alt = item.title || "";
+          img.loading = "lazy";
+          img.decoding = "async";
+          window.NewsStore.applyNewsImage(img, item.image_url, fallbackImage);
+
+          const text = document.createElement("div");
+          text.className = "news-text";
+          const ext = (item.external_url || "").trim();
+          const link = document.createElement("a");
+          if (ext) {
+            link.href = ext;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+          } else {
+            link.href = `news-detail.html?id=${encodeURIComponent(item.id)}`;
+            link.className = "news-title-no-link";
+          }
+          link.textContent = item.title || "";
+          text.appendChild(link);
+
+          main.appendChild(img);
+          main.appendChild(text);
+
+          const time = document.createElement("time");
+          time.dateTime = item.date || "";
+          time.textContent = item.date || "";
+
+          li.appendChild(main);
+          li.appendChild(time);
+          list.appendChild(li);
+        });
       }
 
-      list.innerHTML = newsItems
-        .map((item) => {
-          const safeTitle = escapeHtml(item.title || "");
-          const safeDate = escapeHtml(item.date || "");
-          const ext = (item.external_url || "").trim();
-          const imgSrc = (item.image_url || "").trim() || fallbackImage;
-          const safeImg = escapeAttr(imgSrc);
-          const internalUrl = `news-detail.html?id=${encodeURIComponent(item.id)}`;
-          const titleNode = ext
-            ? `<a href="${escapeAttr(ext)}" target="_blank" rel="noopener noreferrer">${safeTitle}</a>`
-            : `<a href="${internalUrl}" class="news-title-no-link">${safeTitle}</a>`;
-
-          return `<li>
-          <div class="news-item-main">
-            <img class="news-thumb" src="${safeImg}" alt="${safeTitle}" loading="lazy" decoding="async" />
-            <div class="news-text">
-              ${titleNode}
-            </div>
-          </div>
-          <time datetime="${escapeAttr(item.date || "")}">${safeDate}</time>
-        </li>`;
-        })
-        .join("");
+      renderPageNews();
+      window.addEventListener("immba-news-updated", renderPageNews);
+      window.addEventListener("storage", (e) => {
+        const key = window.NewsStore?.STORAGE_KEY;
+        const imagesKey = window.NewsStore?.IMAGES_KEY;
+        if (e.key === key || e.key === imagesKey) renderPageNews();
+      });
     })();
   </script>
 </body>

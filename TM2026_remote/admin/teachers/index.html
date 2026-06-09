@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -7,17 +7,17 @@
   <link rel="stylesheet" href="../admin-shell.css" />
   <style>
     :root {
-      --line: #c9d0dc;
+      --line: #bae6fd;
       --text: #1a2332;
       --muted: #5a6575;
-      --primary-deep: #24303d;
-      --primary: #4a5f72;
+      --primary-deep: #075985;
+      --primary: #0ea5e9;
       --panel: #ffffff;
       --danger: #b65e5e;
-      --surface: #f0f4fa;
+      --surface: #f0f9ff;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
-    body { margin: 0; background: #e8ebf0; color: var(--text); }
+    body { margin: 0; background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%); color: var(--text); }
     .admin-main__inner { max-width: 1180px; }
     .card {
       background: var(--panel);
@@ -28,7 +28,7 @@
       margin-bottom: 14px;
     }
     h1 { font-size: 26px; color: var(--primary-deep); margin-bottom: 10px; }
-    h2 { font-size: 19px; color: #0f3460; margin-bottom: 12px; }
+    h2 { font-size: 19px; color: #0369a1; margin-bottom: 12px; }
     .hint { color: var(--muted); font-size: 14px; margin-bottom: 8px; line-height: 1.65; }
     .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
@@ -55,7 +55,7 @@
       text-align: center;
       font-size: 14px;
     }
-    .btn.secondary { background: var(--surface); color: #243652; border: 1px solid var(--line); }
+    .btn.secondary { background: var(--surface); color: #075985; border: 1px solid var(--line); }
     .btn.danger { background: var(--danger); }
     .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; }
@@ -77,7 +77,7 @@
       padding: 12px 14px;
       border-radius: 10px;
       background: #e8f2fc;
-      color: #0f3460;
+      color: #0369a1;
       font-size: 14px;
       border: 1px solid #b8d4f0;
     }
@@ -97,7 +97,7 @@
       min-width: 0;
     }
     .lang-panel--zh { border-left: 4px solid #4a6fa5; }
-    .lang-panel--en { border-left: 4px solid #3d6b58; }
+    .lang-panel--en { border-left: 4px solid #0ea5e9; }
     .lang-panel h3 { font-size: 15px; font-weight: 800; margin-bottom: 12px; color: var(--primary-deep); }
     @media (max-width: 920px) {
       .row { grid-template-columns: 1fr; }
@@ -135,7 +135,7 @@
       <h2>編輯內容</h2>
       <p class="hint" id="edit-mode-hint">新增模式中。儲存後會出現在下方列表與前台師資頁。</p>
 
-      <div class="row">
+      <div class="row" style="grid-template-columns: 1fr 1fr;">
         <div class="field">
           <label for="f-id">ID（英數／連字，網址用）</label>
           <input id="f-id" type="text" class="mono" placeholder="例：tu-yining" autocomplete="off" />
@@ -147,9 +147,13 @@
             <option value="parttime">兼任教師</option>
           </select>
         </div>
-        <div class="field">
-          <label for="f-photo">照片網址</label>
-          <input id="f-photo" type="text" placeholder="https://… 或 images/…" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="f-photo-file">照片</label>
+        <input id="f-photo-file" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" />
+        <span class="hint" style="margin:0;">可上傳 jpg、png、webp；未上傳則保留原有照片或顯示預設圖。</span>
+        <div style="margin-top:8px;">
+          <img id="f-photo-preview" class="thumb" alt="照片預覽" style="width:96px;height:96px;" />
         </div>
       </div>
 
@@ -203,13 +207,13 @@
     </div>
   </div>
 
-  <script src="../../teacher-data.js"></script>
+  <script src="../../teacher-data.js?v=20260609-photo1"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../supabase-config.js"></script>
   <script src="../supabase-auth.js"></script>
   <script src="../require-auth.js"></script>
-  <script src="../admin-sidebar.js"></script>
-  <script src="../admin-readonly.js"></script>
+  <script src="../admin-sidebar.js?v=7"></script>
+  <script src="../admin-readonly.js?v=3"></script>
   <script>
     (function () {
       const tbody = document.getElementById("tbody");
@@ -221,6 +225,10 @@
       let teachers = [];
       /** @type {string|null} id being edited; null = new */
       let editingId = null;
+      let storedPhotoRef = "";
+      let pendingImageData = "";
+      const photoFile = document.getElementById("f-photo-file");
+      const photoPreview = document.getElementById("f-photo-preview");
 
       function showNotice(msg, isWarn) {
         notice.textContent = msg;
@@ -247,13 +255,90 @@
           .slice(0, 48) || "teacher-" + Math.random().toString(36).slice(2, 8);
       }
 
+      function ensureTeacherId() {
+        const current = document.getElementById("f-id").value.trim();
+        if (current) return current;
+        const fromName = slugify(
+          document.getElementById("f-zh-name").value || document.getElementById("f-en-name").value
+        );
+        document.getElementById("f-id").value = fromName;
+        return fromName;
+      }
+
+      function updatePhotoPreview() {
+        const raw = pendingImageData || storedPhotoRef || "";
+        if (window.TeacherData?.applyTeacherPhoto) {
+          window.TeacherData.applyTeacherPhoto(photoPreview, raw, "../../images/avatar-placeholder.svg");
+        } else {
+          photoPreview.src = "../../images/avatar-placeholder.svg";
+        }
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(String(reader.result || ""));
+          reader.onerror = () => reject(new Error("讀取圖片失敗。"));
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function compressDataUrl(dataUrl) {
+        const img = await new Promise((resolve, reject) => {
+          const el = new Image();
+          el.onload = () => resolve(el);
+          el.onerror = () => reject(new Error("無法解析圖片，請改用 JPG 或 PNG。"));
+          el.src = dataUrl;
+        });
+        const maxSide = 720;
+        let w = img.naturalWidth || img.width;
+        let h = img.naturalHeight || img.height;
+        const scale = Math.min(1, maxSide / Math.max(w, h, 1));
+        w = Math.max(1, Math.round(w * scale));
+        h = Math.max(1, Math.round(h * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) throw new Error("無法處理圖片。");
+        ctx.drawImage(img, 0, 0, w, h);
+        let quality = 0.82;
+        let result = canvas.toDataURL("image/jpeg", quality);
+        while (result.length > 280000 && quality > 0.4) {
+          quality -= 0.08;
+          result = canvas.toDataURL("image/jpeg", quality);
+        }
+        if (result.length > 520000) {
+          throw new Error("圖片壓縮後仍過大，請改用較小或較低解析度的照片。");
+        }
+        return result;
+      }
+
+      function isAllowedImageFile(file) {
+        if (!file) return false;
+        const allow = ["image/jpeg", "image/png", "image/webp", "image/pjpeg"];
+        if (allow.includes(file.type)) return true;
+        const name = String(file.name || "").toLowerCase();
+        return /\.(jpe?g|png|webp)$/i.test(name);
+      }
+
+      async function processImageFile(file) {
+        if (!file) return "";
+        if (file.size > 8 * 1024 * 1024) throw new Error("圖片超過 8MB，請先縮小後再上傳。");
+        const dataUrl = await readFileAsDataUrl(file);
+        return compressDataUrl(dataUrl);
+      }
+
       function clearForm() {
         editingId = null;
         editHint.textContent = "新增模式中。儲存後會出現在列表與前台。";
         document.getElementById("f-id").value = "";
         document.getElementById("f-id").removeAttribute("readonly");
         document.getElementById("f-group").value = "fulltime";
-        document.getElementById("f-photo").value = "";
+        storedPhotoRef = "";
+        pendingImageData = "";
+        photoFile.value = "";
+        updatePhotoPreview();
         ["zh", "en"].forEach((lang) => {
           ["name", "dept", "title", "education", "specialties", "website", "tel", "email"].forEach((k) => {
             const el = document.getElementById(`f-${lang}-${k}`);
@@ -267,7 +352,6 @@
         const idRaw = document.getElementById("f-id").value.trim();
         const id = idRaw || slugify(document.getElementById("f-zh-name").value || document.getElementById("f-en-name").value);
         const group = document.getElementById("f-group").value === "parttime" ? "parttime" : "fulltime";
-        const photo = document.getElementById("f-photo").value.trim();
         const zh = {
           name: document.getElementById("f-zh-name").value.trim(),
           dept: document.getElementById("f-zh-dept").value.trim(),
@@ -288,7 +372,7 @@
           tel: document.getElementById("f-en-tel").value.trim(),
           email: document.getElementById("f-en-email").value.trim()
         };
-        return { id, group, photo, zh, en };
+        return { id, group, zh, en };
       }
 
       function fillForm(t) {
@@ -297,7 +381,10 @@
         document.getElementById("f-id").value = t.id;
         document.getElementById("f-id").readOnly = true;
         document.getElementById("f-group").value = t.group === "parttime" ? "parttime" : "fulltime";
-        document.getElementById("f-photo").value = t.photo || "";
+        storedPhotoRef = t.photo || "";
+        pendingImageData = "";
+        photoFile.value = "";
+        updatePhotoPreview();
         const z = t.zh || {};
         const e = t.en || {};
         document.getElementById("f-zh-name").value = z.name || "";
@@ -321,6 +408,7 @@
       }
 
       function renderTable() {
+        const viewer = window.ImmbaAdminReadonly?.isViewer?.();
         const sorted = teachers.slice().sort((a, b) => {
           const g = (a.group === b.group ? 0 : a.group === "fulltime" ? -1 : 1);
           if (g !== 0) return g;
@@ -328,21 +416,23 @@
         });
         tbody.innerHTML = sorted
           .map((t) => {
-            const ph = t.photo || "";
+            const ph = window.TeacherData.getDisplayPhotoUrl(t.photo, "../../images/avatar-placeholder.svg");
             const gLabel = t.group === "parttime" ? "兼任" : "專任";
+            const actions = viewer
+              ? "—"
+              : `<button class="btn secondary btn-edit" type="button" data-id="${escapeAttr(t.id)}">編輯</button>
+                <button class="btn danger btn-del" type="button" data-id="${escapeAttr(t.id)}">刪除</button>`;
             return `<tr>
               <td><img class="thumb" src="${escapeAttr(ph)}" alt="" loading="lazy" onerror="this.src='../../images/avatar-placeholder.svg'" /></td>
               <td><span class="badge">${gLabel}</span></td>
               <td>${escapeHtml(t.zh.name || "—")}</td>
               <td>${escapeHtml((t.zh.title || "").slice(0, 48))}${(t.zh.title || "").length > 48 ? "…" : ""}</td>
               <td class="mono">${escapeHtml(t.id)}</td>
-              <td class="actions">
-                <button class="btn secondary btn-edit" type="button" data-id="${escapeAttr(t.id)}">編輯</button>
-                <button class="btn danger btn-del" type="button" data-id="${escapeAttr(t.id)}">刪除</button>
-              </td>
+              <td class="actions">${actions}</td>
             </tr>`;
           })
           .join("");
+        if (window.ImmbaAdminReadonly) window.ImmbaAdminReadonly.refresh("#teachers-admin-main");
       }
 
       function escapeHtml(s) {
@@ -364,6 +454,7 @@
       }
 
       tbody.addEventListener("click", (ev) => {
+        if (window.ImmbaAdminReadonly?.isViewer?.()) return;
         const editBtn = ev.target.closest(".btn-edit");
         const delBtn = ev.target.closest(".btn-del");
         if (editBtn) {
@@ -376,15 +467,61 @@
           const id = delBtn.getAttribute("data-id");
           if (!confirm(`確定刪除「${id}」？`)) return;
           teachers = teachers.filter((x) => x.id !== id);
+          window.TeacherData.removePhoto(id);
           persistAndRefresh("已刪除並儲存。");
           if (editingId === id) clearForm();
         }
       });
 
+      photoFile.addEventListener("change", async (ev) => {
+        const file = ev.target.files?.[0];
+        if (!file) return;
+        if (!isAllowedImageFile(file)) {
+          showNotice("請上傳 jpg、png 或 webp 格式的圖片。", true);
+          ev.target.value = "";
+          return;
+        }
+        const nameForId =
+          document.getElementById("f-zh-name").value.trim() ||
+          document.getElementById("f-en-name").value.trim();
+        if (!document.getElementById("f-id").value.trim() && !nameForId) {
+          showNotice("請先填寫姓名或 ID，再上傳照片。", true);
+          ev.target.value = "";
+          return;
+        }
+        try {
+          const dataUrl = await processImageFile(file);
+          const tid = ensureTeacherId();
+          pendingImageData = dataUrl;
+          storedPhotoRef = window.TeacherData.attachPhoto(tid, dataUrl) || "";
+          pendingImageData = "";
+          updatePhotoPreview();
+          showNotice("照片已上傳，請記得按「儲存此位教師」。");
+        } catch (e) {
+          showNotice("上傳失敗：" + (e.message || String(e)), true);
+          ev.target.value = "";
+        }
+      });
+
       document.getElementById("save-btn").addEventListener("click", () => {
+        if (window.ImmbaAdminReadonly?.isViewer?.()) {
+          showNotice("僅檢視權限，無法儲存。", true);
+          return;
+        }
         const rec = formToRecord();
         if (!rec.zh.name && !rec.en.name) {
           showNotice("請至少填寫中文或英文姓名。", true);
+          return;
+        }
+        const prevPhoto = editingId ? (teachers.find((t) => t.id === editingId)?.photo || "") : "";
+        try {
+          rec.photo = window.TeacherData.persistPhotoUrl(
+            rec.id,
+            storedPhotoRef || "",
+            prevPhoto
+          );
+        } catch (e) {
+          showNotice(e.message || String(e), true);
           return;
         }
         const dupIndex = teachers.findIndex((t) => t.id === rec.id);
@@ -398,6 +535,8 @@
           teachers[dupIndex] = rec;
         }
         persistAndRefresh("已儲存。");
+        storedPhotoRef = "";
+        pendingImageData = "";
         clearForm();
       });
 

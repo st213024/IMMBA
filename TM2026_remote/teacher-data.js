@@ -3,6 +3,148 @@
 (function () {
   const placeholder = "images/avatar-placeholder.svg";
   const STORAGE_KEY = "immba_teacher_store_v1";
+  const IMAGES_KEY = "immba_teacher_images_v1";
+  const IMAGE_REF_PREFIX = "teacherimg:";
+
+  function isLikelyBase64Image(url) {
+    return typeof url === "string" && url.startsWith("data:image/");
+  }
+
+  function readImageMap() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(IMAGES_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  function writeImageMap(map) {
+    try {
+      localStorage.setItem(IMAGES_KEY, JSON.stringify(map));
+    } catch (err) {
+      if (err && (err.name === "QuotaExceededError" || String(err).toLowerCase().includes("quota"))) {
+        throw new Error("圖片儲存空間不足，請改用較小的圖片後再試。");
+      }
+      throw err;
+    }
+  }
+
+  function attachPhoto(teacherId, dataUrl) {
+    const id = String(teacherId || "").trim();
+    if (!id || !isLikelyBase64Image(dataUrl)) return "";
+    const map = readImageMap();
+    map[id] = dataUrl;
+    writeImageMap(map);
+    return `${IMAGE_REF_PREFIX}${id}`;
+  }
+
+  function imageRefExists(ref) {
+    const url = String(ref || "").trim();
+    if (!url.startsWith(IMAGE_REF_PREFIX)) return false;
+    const id = url.slice(IMAGE_REF_PREFIX.length);
+    return Boolean(readImageMap()[id]);
+  }
+
+  function resolvePhotoUrl(raw) {
+    const url = String(raw || "").trim();
+    if (!url) return "";
+    if (url.startsWith(IMAGE_REF_PREFIX)) {
+      const id = url.slice(IMAGE_REF_PREFIX.length);
+      return readImageMap()[id] || "";
+    }
+    if (url.startsWith("blob:")) return "";
+    if (isLikelyBase64Image(url)) return url;
+    return url;
+  }
+
+  function getDisplayPhotoUrl(raw, fallback) {
+    const resolved = resolvePhotoUrl(raw);
+    if (resolved) return resolved;
+    return fallback || placeholder;
+  }
+
+  function applyTeacherPhoto(img, raw, fallback) {
+    if (!img) return;
+    const fb = fallback || placeholder;
+    const resolved = resolvePhotoUrl(raw);
+    const chain = resolved ? [resolved, fb] : [fb];
+    let step = 0;
+    const loadNext = () => {
+      if (step >= chain.length) {
+        img.onerror = null;
+        return;
+      }
+      img.src = chain[step++];
+    };
+    img.onload = () => {
+      img.onerror = null;
+    };
+    img.onerror = () => loadNext();
+    loadNext();
+  }
+
+  function persistPhotoUrl(teacherId, imageUrl, prevUrl) {
+    const id = String(teacherId || "").trim();
+    const incoming = String(imageUrl || "").trim();
+    const prev = String(prevUrl || "").trim();
+    if (incoming) {
+      if (incoming.startsWith(IMAGE_REF_PREFIX)) {
+        const refId = incoming.slice(IMAGE_REF_PREFIX.length);
+        const map = readImageMap();
+        if (refId !== id && map[refId] && id) {
+          return attachPhoto(id, map[refId]);
+        }
+        if (refId === id && map[refId]) return incoming;
+        return imageRefExists(incoming) ? incoming : prev || placeholder;
+      }
+      if (isLikelyBase64Image(incoming)) {
+        const ref = attachPhoto(teacherId, incoming);
+        if (!ref) throw new Error("圖片儲存失敗，請重新上傳。");
+        return ref;
+      }
+      if (incoming.startsWith("blob:")) return prev || placeholder;
+      if (/^https?:\/\//i.test(incoming) || incoming.startsWith("images/")) return incoming;
+      return prev || placeholder;
+    }
+    if (prev) return prev;
+    return placeholder;
+  }
+
+  function removePhoto(teacherId) {
+    const map = readImageMap();
+    if (!map[teacherId]) return;
+    delete map[teacherId];
+    writeImageMap(map);
+  }
+
+  function sanitizeTeacherPhotos(items) {
+    const map = readImageMap();
+    let mapChanged = false;
+    const next = items.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const t = { ...item };
+      const raw = String(t.photo || "").trim();
+      if (isLikelyBase64Image(raw)) {
+        if (!map[t.id]) {
+          map[t.id] = raw;
+          mapChanged = true;
+        }
+        t.photo = `${IMAGE_REF_PREFIX}${t.id}`;
+      } else if (raw.startsWith("blob:")) {
+        t.photo = placeholder;
+      }
+      return t;
+    });
+    if (mapChanged) {
+      try {
+        writeImageMap(map);
+      } catch (e) {
+        console.warn("TeacherData image map write failed", e);
+      }
+    }
+    return next;
+  }
 
   /** @type {{id:string, group:'fulltime'|'parttime', photo:string, zh:any, en:any}[]} */
   const TEACHERS_BUNDLED = [
@@ -504,7 +646,7 @@
       if (!raw) return null;
       const p = JSON.parse(raw);
       if (!Array.isArray(p) || p.length === 0) return null;
-      return p.map(normalizeTeacher);
+      return sanitizeTeacherPhotos(p).map(normalizeTeacher);
     } catch {
       return null;
     }
@@ -540,7 +682,7 @@
     /** 後台：取代全部並寫入 localStorage */
     saveAll(list) {
       if (!Array.isArray(list)) return;
-      ACTIVE_TEACHERS = list.map(normalizeTeacher);
+      ACTIVE_TEACHERS = sanitizeTeacherPhotos(list).map(normalizeTeacher);
       persist();
     },
     resetToBundled() {
@@ -549,6 +691,12 @@
       } catch (_) {}
       ACTIVE_TEACHERS = deepClone(TEACHERS_BUNDLED);
     },
+    persistPhotoUrl,
+    resolvePhotoUrl,
+    getDisplayPhotoUrl,
+    applyTeacherPhoto,
+    attachPhoto,
+    removePhoto,
     exportJson() {
       return JSON.stringify(ACTIVE_TEACHERS, null, 2);
     },

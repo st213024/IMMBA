@@ -1,3 +1,4 @@
+// 後台側欄 v7：不含商品交易平台（賣場為官網 marketplace.html 獨立入口）
 (function () {
   function mount() {
     var mountEl = document.getElementById("admin-sidebar-mount");
@@ -17,6 +18,7 @@
     ];
 
     var items = allItems.filter(function (it) {
+      if (it.id === "marketplace") return false;
       return !it.superOnly || isSuper;
     });
 

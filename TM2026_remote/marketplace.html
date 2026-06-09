@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品交易平台</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="marketplace.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-top">
+      <div class="logo">
+        <a class="logo-mark-link" href="index.html" aria-label="回首頁">
+          <img class="logo-mark" src="images/logo-immba-icon.svg" alt="FJCU imMBA logo">
+        </a>
+        <div class="logo-text">
+          <span class="logo-main">輔仁大學國際經營管理碩士班（imMBA）</span>
+          <span class="logo-sub">商品交易平台</span>
+        </div>
+      </div>
+      <div class="header-top-right">
+        <a id="marketplace-cart-link" class="mp-cart-link" href="marketplace/cart.html" aria-label="我的購物車" style="display:none;">
+          <svg class="mp-cart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zM7.2 14h9.7c.8 0 1.5-.5 1.8-1.2l2.4-6.4A1 1 0 0 0 20.1 4H6.3L5.8 2H2v2h2l3.6 12.6c.1.3.4.4.6.4z"/></svg>
+          <span id="marketplace-cart-count" class="mp-cart-badge" hidden>0</span>
+        </a>
+        <a id="marketplace-ship-alert" class="mp-ship-link" href="#seller-pending-shipment-section" aria-label="待出貨訂單" style="display:none;" hidden>
+          <svg class="mp-ship-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 18.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-12 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM17 12V9H5.5L4.1 5H2v2h1.6l2.4 8.2c.2.6.8 1 1.4 1H18v-2h-9.5l-.5-2H17zm1.5-5H19l1.5 4H17V7z"/></svg>
+          <span id="marketplace-ship-count" class="mp-ship-badge">0</span>
+        </a>
+        <span id="marketplace-user-email" class="top-link"></span>
+        <span id="marketplace-role-badge" class="top-link"></span>
+        <button id="marketplace-logout-btn" class="btn btn-outline" style="display:none;" type="button">登出</button>
+        <a class="top-link" href="index.html">回首頁</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="section alt">
+    <div class="section-title">
+      <h2>商品交易平台</h2>
+    </div>
+    <p class="section-intro">
+      本頁列出目前狀態為「上架中」的物品。實際交易請由買賣雙方自行聯繫與約定，本平台僅提供資訊陳列。
+    </p>
+
+    <section class="admin-panel" style="max-width:960px;margin:0 auto;">
+      <h3>平台入口</h3>
+      <p class="admin-note">
+        賣場會員帳號與後台管理<strong>完全分離</strong>，請使用下方專用入口註冊／登入（<code>marketplace/login.html</code>）。
+      </p>
+      <div id="marketplace-guest-actions" class="admin-actions" style="margin-top:12px;">
+        <a class="btn btn-primary" href="marketplace/login.html?next=/marketplace.html">會員登入</a>
+        <a class="btn btn-outline" href="marketplace/login.html?next=/marketplace.html">會員註冊</a>
+      </div>
+      <p id="marketplace-login-note" class="admin-note" style="display:none;margin-top:12px;">
+        你已登入，可於下方會員中心切換「買家」或「賣家」。
+      </p>
+    </section>
+
+    <section id="member-center-panel" class="admin-panel" style="max-width:960px;margin:20px auto 0;display:none;">
+      <h3>會員中心</h3>
+      <p class="admin-note">登入後可切換身分：<strong>買家</strong>（瀏覽與下單）或 <strong>賣家</strong>（上架與訂單管理）。</p>
+      <div class="admin-form-row" style="align-items:flex-end;gap:12px;">
+        <label style="flex:0 0 auto;min-width:200px;">
+          切換身分
+          <select id="market-mode-select" class="admin-input" style="margin-top:6px;min-width:160px;">
+            <option value="buyer" selected>買家</option>
+            <option value="seller">賣家</option>
+          </select>
+        </label>
+      </div>
+      <p id="member-mode-note" class="admin-note"></p>
+      <div class="admin-actions" style="margin-top:8px;">
+        <a id="open-member-center-btn" class="btn btn-outline" href="marketplace/member-center.html">會員中心</a>
+        <button id="open-listing-form-btn" class="btn btn-primary" style="display:none;" type="button">新增物品</button>
+      </div>
+    </section>
+
+    <section class="admin-panel" style="max-width:960px;margin:20px auto 0;">
+      <h3>身分說明</h3>
+      <ul class="admin-note" style="padding-left:20px;">
+        <li><strong>買家</strong>：瀏覽商品、加入購物車、下單結帳。</li>
+        <li><strong>賣家</strong>：上架商品、管理訂單、匯出帳務報表。</li>
+      </ul>
+      <p class="admin-note">註冊並完成信箱驗證後，可於會員中心隨時切換買家／賣家身分。</p>
+    </section>
+
+    <section class="admin-panel" style="max-width:1080px;margin:20px auto 0;">
+      <h3>商品列表</h3>
+      <div id="marketplace-items-grid" class="cards-3" style="margin-top:12px;"></div>
+      <p id="marketplace-empty-text" class="admin-note" style="display:none;margin-top:10px;">目前尚無商品。</p>
+    </section>
+
+    <section id="seller-dashboard-panel" class="admin-panel" style="max-width:1080px;margin:20px auto 0;display:none;">
+      <h3>賣家訂單管理</h3>
+      <div class="cards-3" style="margin-top:10px;">
+        <article class="card">
+          <h3>我的上架商品數</h3>
+          <p id="seller-stat-listings" style="font-size:28px;font-weight:700;color:var(--primary);">0</p>
+        </article>
+        <article class="card">
+          <h3>已售出數</h3>
+          <p id="seller-stat-sold" style="font-size:28px;font-weight:700;color:var(--primary);">0</p>
+        </article>
+        <article class="card">
+          <h3>目前身分</h3>
+          <p id="seller-stat-mode" style="font-size:22px;font-weight:700;color:var(--primary);">買家</p>
+        </article>
+      </div>
+
+      <div id="seller-pending-shipment-section" class="admin-panel" style="margin-top:12px;">
+        <h3>待出貨品項</h3>
+        <p class="admin-note">買家下單後會自動出現在此，請安排出貨。</p>
+        <div id="seller-orders-pending-shipment"></div>
+      </div>
+      <div id="seller-pending-payment-section" class="admin-panel" style="margin-top:12px;">
+        <h3>待收款項</h3>
+        <p class="admin-note">標記已出貨後，訂單會移至此處等待收款。</p>
+        <div id="seller-orders-pending-payment"></div>
+      </div>
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>已完成的訂單</h3>
+        <div id="seller-orders-completed"></div>
+      </div>
+
+      <div class="admin-panel" style="margin-top:12px;">
+        <h3>帳務管理（月報）</h3>
+        <div class="admin-actions" style="justify-content:space-between;">
+          <label>月份篩選
+            <select id="seller-month-filter" class="admin-input" style="min-width:160px;"></select>
+          </label>
+          <button id="seller-export-csv-btn" class="btn btn-outline" type="button">匯出 CSV</button>
+        </div>
+        <p id="seller-monthly-summary" class="admin-note"></p>
+      </div>
+    </section>
+  </main>
+
+  <div id="product-editor-modal" class="mp-modal" hidden aria-hidden="true">
+    <div class="mp-modal__backdrop" data-close-modal></div>
+    <div class="mp-modal__panel" role="dialog" aria-modal="true" aria-labelledby="product-editor-title">
+      <h3 id="product-editor-title">新增上架商品</h3>
+      <form id="product-editor-form" class="admin-form">
+        <input type="hidden" id="product-editor-id" value="">
+        <div class="admin-form-row">
+          <label>商品名稱<input id="product-editor-name" class="admin-input" type="text" required></label>
+          <label>價格（NT$）<input id="product-editor-price" class="admin-input" type="number" min="1" required></label>
+        </div>
+        <div class="admin-form-row">
+          <label>庫存<input id="product-editor-stock" class="admin-input" type="number" min="0" value="1" required></label>
+        </div>
+        <div class="admin-form-row">
+          <label>商品描述<textarea id="product-editor-description" class="admin-input" rows="3"></textarea></label>
+        </div>
+        <div class="admin-form-row">
+          <label>商品照片
+            <input id="product-editor-image-file" class="admin-input" type="file" accept="image/*" style="padding:6px;">
+          </label>
+        </div>
+        <div id="product-editor-image-preview-wrap" class="mp-image-preview-wrap" style="display:none;">
+          <img id="product-editor-image-preview" class="mp-image-preview" alt="商品照片預覽">
+        </div>
+        <input type="hidden" id="product-editor-image-url" value="">
+        <p class="admin-note">可上傳 JPG／PNG（建議 8MB 以內），照片會壓縮後儲存於本機瀏覽器；不選新圖則沿用目前圖片。</p>
+        <p id="product-editor-message" class="admin-note"></p>
+        <div class="admin-actions">
+          <button class="btn btn-primary" id="product-editor-submit" type="submit">儲存</button>
+          <button class="btn btn-outline" type="button" data-close-modal>取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="marketplace/marketplace-auth.js"></script>
+  <script src="marketplace.js"></script>
+</body>
+</html>

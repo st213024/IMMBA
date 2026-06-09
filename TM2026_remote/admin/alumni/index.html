@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
@@ -8,14 +8,14 @@
   <style>
     .admin-main__inner { max-width: 1280px; }
     .head { margin-bottom: 16px; }
-    .head h1 { font-size: 22px; font-weight: 800; color: #14212f; margin: 0 0 6px; }
+    .head h1 { font-size: 22px; font-weight: 800; color: #075985; margin: 0 0 6px; }
     .head p { margin: 0; font-size: 14px; color: var(--admin-muted); line-height: 1.55; }
     .card { background: #fff; border: 1px solid var(--admin-line); border-radius: 12px; padding: 16px 18px; box-shadow: 0 2px 8px rgba(15, 52, 96, 0.06); }
     .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 12px; }
     .btn { border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: var(--admin-font); }
     .btn:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn.primary { background: linear-gradient(180deg, #2a4a3e 0%, #1e3a30 100%); color: #f4faf7; }
-    .btn.muted { background: #eef1f6; color: #243652; border: 1px solid var(--admin-line); }
+    .btn.primary { background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); color: #f0f9ff; }
+    .btn.muted { background: #e0f2fe; color: #075985; border: 1px solid var(--admin-line); }
     .wrap { overflow-x: auto; margin-top: 8px; }
     table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1100px; }
     th, td { border-top: 1px solid #e2e8f0; padding: 10px 8px; text-align: left; vertical-align: top; }
@@ -32,7 +32,7 @@
     .overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.45); z-index: 80; align-items: center; justify-content: center; padding: 20px; }
     .overlay.open { display: flex; }
     .modal { background: #fff; border-radius: 14px; max-width: 720px; width: 100%; max-height: 92vh; overflow: auto; padding: 20px 22px; box-shadow: 0 20px 50px rgba(0,0,0,.2); }
-    .modal h2 { margin: 0 0 14px; font-size: 18px; color: #14212f; }
+    .modal h2 { margin: 0 0 14px; font-size: 18px; color: #075985; }
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
     @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
     .field { display: flex; flex-direction: column; gap: 6px; }
@@ -59,6 +59,7 @@
           <button class="btn primary" id="newBtn" type="button">??</button>
           <button class="btn muted" id="importBtn" type="button">?? CSV</button>
           <button class="btn muted" id="downloadTemplateBtn" type="button">??CSV??</button>
+          <button class="btn muted" id="exportCsvBtn" type="button">??CSV</button>
           <button class="btn primary" id="saveBtn" type="button" disabled>????</button>
           <button class="btn muted" id="reloadBtn" type="button">????</button>
           <input id="fileInput" class="hide" type="file" accept=".csv,text/csv" />
@@ -109,8 +110,8 @@
   <script src="../supabase-config.js"></script>
   <script src="../supabase-auth.js"></script>
   <script src="../require-auth.js"></script>
-  <script src="../admin-readonly.js"></script>
-  <script src="../admin-sidebar.js"></script>
+  <script src="../admin-readonly.js?v=3"></script>
+  <script src="../admin-sidebar.js?v=7"></script>
   <script>
     (function () {
       var TEXT = {
@@ -140,6 +141,55 @@
       function normalizeRow(raw,id){
         return { id:id||raw.id||idGen(), name:n(raw.name), student_id:n(raw.student_id), department:n(raw.department), program:n(raw.program), enroll_year:n(raw.enroll_year), grad_year:n(raw.grad_year), email:low(raw.email), phone:n(raw.phone), company:n(raw.company), job_title:n(raw.job_title), remarks:n(raw.remarks), created_at:raw.created_at||now(), updated_at:now() };
       }
+      function pick(newVal, oldVal){ return n(newVal)!=="" ? n(newVal) : n(oldVal); }
+      function csvCell(v){
+        var s = String(v == null ? "" : v);
+        if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+        return s;
+      }
+      function exportCsv(rows){
+        var headers = ["\u59d3\u540d","\u5b78\u865f","\u7cfb\u6240","\u5b78\u5236","\u5165\u5b78\u5e74\u5ea6","\u7562\u696d\u5e74\u5ea6","\u96fb\u5b50\u90f5\u4ef6","\u96fb\u8a71","\u73fe\u8077\u516c\u53f8","\u8077\u7a31","\u5099\u8a3b"];
+        var lines = [headers.join(",")];
+        rows.forEach(function(r){
+          lines.push([r.name,r.student_id,r.department,r.program,r.enroll_year,r.grad_year,r.email,r.phone,r.company,r.job_title,r.remarks].map(csvCell).join(","));
+        });
+        // Use UTF-8 BOM + CRLF for Excel on Windows.
+        var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "alumni-merged-export.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }
+      function downloadTemplateCsv(){
+        var headers = ["\u59d3\u540d","\u5b78\u865f","\u7cfb\u6240","\u5b78\u5236","\u5165\u5b78\u5e74\u5ea6","\u7562\u696d\u5e74\u5ea6","\u96fb\u5b50\u90f5\u4ef6","\u96fb\u8a71","\u73fe\u8077\u516c\u53f8","\u8077\u7a31","\u5099\u8a3b"];
+        var sample1 = ["\u738b\u5c0f\u660e","11010001","\u570b\u969b\u7d93\u71df","\u78a9\u58eb\u73ed","114","116","ming@example.com","0912-345-678","\u7bc4\u4f8b\u79d1\u6280","\u5c08\u6848\u7d93\u7406","\u53ef\u7559\u7a7a"];
+        var sample2 = ["\u674e\u5c0f\u83ef","10920002","\u4f01\u696d\u7ba1\u7406","\u5927\u5b78\u90e8","110","","hua@example.com","0377777777","","",""];
+        var lines = [
+          headers.map(csvCell).join(","),
+          sample1.map(csvCell).join(","),
+          sample2.map(csvCell).join(",")
+        ];
+        var blob = new Blob(["\uFEFF" + lines.join("\r\n")], { type: "text/csv;charset=utf-8" });
+        var a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "alumni-import-template.csv";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(a.href);
+      }
+      function mergedRowsForExport(){
+        var merged = clone(window.AlumniStore && window.AlumniStore.listAll ? window.AlumniStore.listAll() : []);
+        var byId = {};
+        merged.forEach(function(r){ byId[r.id] = r; });
+        draftRows.forEach(function(r){
+          if (r && r.id) byId[r.id] = r;
+        });
+        return sortRows(Object.keys(byId).map(function(id){ return byId[id]; }));
+      }
 
       function applyStaticZh() {
         document.title = TEXT.title;
@@ -154,6 +204,7 @@
         if (e("importBtn")) e("importBtn").textContent = "\u532f\u5165 CSV";
         if (e("saveBtn")) e("saveBtn").textContent = "\u5132\u5b58\u8b8a\u66f4";
         if (e("downloadTemplateBtn")) e("downloadTemplateBtn").textContent = "\u4e0b\u8f09CSV\u7bc4\u672c";
+        if (e("exportCsvBtn")) e("exportCsvBtn").textContent = "\u4e0b\u8f09\u6821\u53cb\u8cc7\u6599\u5eab\u540d\u55ae";
         if (e("reloadBtn")) e("reloadBtn").textContent = "\u91cd\u65b0\u8f09\u5165";
         if (e("modalTitle")) e("modalTitle").textContent = "\u65b0\u589e\u6821\u53cb";
         if (e("cancelBtn")) e("cancelBtn").textContent = "\u53d6\u6d88";
@@ -219,29 +270,92 @@
         }
         row.push(cur); if(row.some(function(v){ return v!==""; })) rows.push(row); return rows;
       }
+      var CSV_TEMPLATE_HEADERS = ["\u59d3\u540d","\u5b78\u865f","\u7cfb\u6240","\u5b78\u5236","\u5165\u5b78\u5e74\u5ea6","\u7562\u696d\u5e74\u5ea6","\u96fb\u5b50\u90f5\u4ef6","\u96fb\u8a71","\u73fe\u8077\u516c\u53f8","\u8077\u7a31","\u5099\u8a3b"];
+      var CSV_FIELD_ALIASES = {
+        name: ["name", "\u59d3\u540d", "\u59d3\u540d *"],
+        student_id: ["student id", "student_id", "studentid", "\u5b78\u865f", "\u5b66\u53f7"],
+        department: ["department", "dept", "\u7cfb\u6240", "\u7cfb\u5225"],
+        program: ["program", "\u5b78\u5236", "\u5b78\u5236 *", "\u5b66\u5236", "degree", "program type", "program_type"],
+        enroll_year: ["enroll year", "enrollment year", "enroll_year", "\u5165\u5b78\u5e74\u5ea6", "\u5165\u5b66\u5e74\u5ea6"],
+        grad_year: ["grad year", "graduation year", "grad_year", "\u7562\u696d\u5e74\u5ea6", "\u6bd5\u4e1a\u5e74\u5ea6"],
+        email: ["email", "e-mail", "e mail", "\u96fb\u5b50\u90f5\u4ef6", "\u7535\u5b50\u90ae\u4ef6", "\u4fe1\u7bb1"],
+        phone: ["phone", "tel", "telephone", "\u96fb\u8a71", "\u7535\u8bdd", "\u624b\u6a5f"],
+        company: ["company", "employer", "\u73fe\u8077\u516c\u53f8", "\u73b0\u804c\u516c\u53f8", "\u516c\u53f8"],
+        job_title: ["job title", "job_title", "title", "\u8077\u7a31", "\u804c\u79f0", "\u8077\u52d9"],
+        remarks: ["remarks", "remark", "notes", "note", "\u5099\u8a3b", "\u5907\u6ce8"]
+      };
+      var CSV_REQUIRED_LABELS = {
+        name: "\u59d3\u540d",
+        student_id: "\u5b78\u865f",
+        department: "\u7cfb\u6240",
+        program: "\u5b78\u5236",
+        enroll_year: "\u5165\u5b78\u5e74\u5ea6",
+        email: "\u96fb\u5b50\u90f5\u4ef6"
+      };
+
       function normalizeHeader(v){
-        return n(v).replace(/^\uFEFF/, "").replace(/\s+/g, " ").trim().toLowerCase();
-      }
-      function firstIndex(header, names){ for(var i=0;i<names.length;i++){ var idx=header.indexOf(names[i]); if(idx>=0) return idx; } return -1; }
-      function importCsv(text){
-        var parsed=parseCsv(String(text||"")); if(!parsed.length) throw new Error("CSV \u5167\u5bb9\u70ba\u7a7a\u3002");
-        var h=parsed[0].map(normalizeHeader);
-        var map={
-          name:firstIndex(h,["name","\u59d3\u540d"]),
-          student_id:firstIndex(h,["student id","student_id","\u5b78\u865f"]),
-          department:firstIndex(h,["department","\u7cfb\u6240"]),
-          program:firstIndex(h,["program","\u5b78\u5236"]),
-          enroll_year:firstIndex(h,["enroll year","enrollment year","enroll_year","\u5165\u5b78\u5e74\u5ea6"]),
-          grad_year:firstIndex(h,["grad year","graduation year","grad_year","\u7562\u696d\u5e74\u5ea6"]),
-          email:firstIndex(h,["email","e-mail","\u96fb\u5b50\u90f5\u4ef6"]),
-          phone:firstIndex(h,["phone","\u96fb\u8a71"]),
-          company:firstIndex(h,["company","\u73fe\u8077\u516c\u53f8"]),
-          job_title:firstIndex(h,["job title","job_title","\u8077\u7a31"]),
-          remarks:firstIndex(h,["remarks","remark","\u5099\u8a3b"])
+        var s = n(v).replace(/^\uFEFF/, "").replace(/^["']+|["']+$/g, "").replace(/\s+/g, " ").trim().toLowerCase();
+        var fold = {
+          "\u5b66\u5236": "\u5b78\u5236",
+          "\u5b66\u53f7": "\u5b78\u865f",
+          "\u5165\u5b66\u5e74\u5ea6": "\u5165\u5b78\u5e74\u5ea6",
+          "\u6bd5\u4e1a\u5e74\u5ea6": "\u7562\u696d\u5e74\u5ea6",
+          "\u7535\u5b50\u90ae\u4ef6": "\u96fb\u5b50\u90f5\u4ef6",
+          "\u7535\u8bdd": "\u96fb\u8a71",
+          "\u73b0\u804c\u516c\u53f8": "\u73fe\u8077\u516c\u53f8",
+          "\u804c\u79f0": "\u8077\u7a31",
+          "\u5907\u6ce8": "\u5099\u8a3b"
         };
+        return fold[s] || s;
+      }
+      function buildColumnMap(headerRow){
+        var h = headerRow.map(normalizeHeader);
+        var indexByKey = {};
+        h.forEach(function(key, i){
+          if (key && !(key in indexByKey)) indexByKey[key] = i;
+        });
+        var map = {};
+        Object.keys(CSV_FIELD_ALIASES).forEach(function(field){
+          map[field] = -1;
+          var aliases = CSV_FIELD_ALIASES[field];
+          for (var j = 0; j < aliases.length; j++) {
+            var key = normalizeHeader(aliases[j]);
+            if (key in indexByKey) {
+              map[field] = indexByKey[key];
+              break;
+            }
+          }
+        });
+        if (h.length >= CSV_TEMPLATE_HEADERS.length) {
+          var orderOk = true;
+          for (var i = 0; i < CSV_TEMPLATE_HEADERS.length; i++) {
+            if (normalizeHeader(h[i]) !== normalizeHeader(CSV_TEMPLATE_HEADERS[i])) {
+              orderOk = false;
+              break;
+            }
+          }
+          if (orderOk) {
+            map.name = 0;
+            map.student_id = 1;
+            map.department = 2;
+            map.program = 3;
+            map.enroll_year = 4;
+            map.grad_year = 5;
+            map.email = 6;
+            map.phone = 7;
+            map.company = 8;
+            map.job_title = 9;
+            map.remarks = 10;
+          }
+        }
+        return map;
+      }
+      function importCsv(text){
+        var parsed=parseCsv(String(text||"").replace(/^\uFEFF/, "")); if(!parsed.length) throw new Error("CSV \u5167\u5bb9\u70ba\u7a7a\u3002");
+        var map = buildColumnMap(parsed[0]);
         var required=["name","student_id","department","program","enroll_year","email"];
         var missing=required.filter(function(k){ return map[k] < 0; });
-        if(missing.length) throw new Error("CSV \u7f3a\u5c11\u6b04\u4f4d\uff1a"+missing.join("\u3001"));
+        if(missing.length) throw new Error("CSV \u7f3a\u5c11\u6b04\u4f4d\uff1a"+missing.map(function(k){ return CSV_REQUIRED_LABELS[k] || k; }).join("\u3001"));
         var work=clone(draftRows), add=0, upd=0;
         for(var i=1;i<parsed.length;i++){
           var r=parsed[i]; if(!r || r.every(function(v){ return n(v)===""; })) continue;
@@ -258,10 +372,33 @@
             job_title: map.job_title >= 0 ? r[map.job_title] : "",
             remarks: map.remarks >= 0 ? r[map.remarks] : ""
           });
-          validate(rec);
           var ex=work.find(function(x){ return n(x.student_id)===rec.student_id; });
-          if(ex){ rec.id=ex.id; rec.created_at=ex.created_at||rec.created_at; work[work.findIndex(function(x){ return x.id===ex.id; })]=rec; upd++; }
-          else { if(dupSid(work,rec.student_id,rec.id)) throw new Error("\u5b78\u865f\u91cd\u8907\uff1a"+rec.student_id); work.push(rec); add++; }
+          if(ex){
+            var merged=normalizeRow({
+              id: ex.id,
+              name: pick(rec.name, ex.name),
+              student_id: pick(rec.student_id, ex.student_id),
+              department: pick(rec.department, ex.department),
+              program: pick(rec.program, ex.program),
+              enroll_year: pick(rec.enroll_year, ex.enroll_year),
+              grad_year: pick(rec.grad_year, ex.grad_year),
+              email: pick(rec.email, ex.email),
+              phone: pick(rec.phone, ex.phone),
+              company: pick(rec.company, ex.company),
+              job_title: pick(rec.job_title, ex.job_title),
+              remarks: pick(rec.remarks, ex.remarks),
+              created_at: ex.created_at
+            }, ex.id);
+            validate(merged);
+            work[work.findIndex(function(x){ return x.id===ex.id; })]=merged;
+            upd++;
+          }
+          else {
+            validate(rec);
+            if(dupSid(work,rec.student_id,rec.id)) throw new Error("\u5b78\u865f\u91cd\u8907\uff1a"+rec.student_id);
+            work.push(rec);
+            add++;
+          }
         }
         draftRows=work; render(); sync(); setMsg("CSV \u532f\u5165\u5b8c\u6210\uff1a\u65b0\u589e "+add+" \u7b46\u3001\u66f4\u65b0 "+upd+" \u7b46\uff08\u50c5\u8349\u7a3f\uff09\u3002", true);
       }
@@ -273,14 +410,8 @@
       e("reloadBtn").addEventListener("click", function(){ if(dirty() && !confirm("\u8981\u6368\u68c4\u5c1a\u672a\u5132\u5b58\u7684\u8349\u7a3f\u4e26\u91cd\u65b0\u8f09\u5165\u55ce\uff1f")) return; baseRows=window.AlumniStore.listAll(); draftRows=clone(baseRows); render(); sync(); setMsg("", true); });
       e("saveBtn").addEventListener("click", function(){ if(ro()) return; try{ window.AlumniStore.replaceAll(draftRows); baseRows=window.AlumniStore.listAll(); draftRows=clone(baseRows); render(); sync(); setMsg("\u5132\u5b58\u5b8c\u6210\u3002", true); } catch(err){ setMsg((err&&err.message)||"\u5132\u5b58\u5931\u6557\u3002", false); } });
       e("importBtn").addEventListener("click", function(){ if(!ro()) e("fileInput").click(); });
-      e("downloadTemplateBtn").addEventListener("click", function(){
-        var a = document.createElement("a");
-        a.href = "./alumni-import-template.csv";
-        a.download = "alumni-import-template.csv";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      });
+      e("downloadTemplateBtn").addEventListener("click", function(){ downloadTemplateCsv(); });
+      e("exportCsvBtn").addEventListener("click", function(){ exportCsv(mergedRowsForExport()); });
       e("fileInput").addEventListener("change", async function(ev){ var f=ev.target.files&&ev.target.files[0]; ev.target.value=""; if(!f) return; try{ importCsv(await f.text()); } catch(err){ setMsg((err&&err.message)||"CSV \u532f\u5165\u5931\u6557\u3002", false); } });
       e("form").addEventListener("submit", function(ev){
         ev.preventDefault(); if(ro()) return;

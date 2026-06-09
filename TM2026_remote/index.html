@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="icon" href="images/logo-immba-icon.png" type="image/png" />
+  <link rel="icon" href="images/logo-immba-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -37,7 +37,7 @@
           title="連按兩下滑鼠左鍵可開啟後台管理"
           aria-label="系所識別標誌。連按兩下可開啟後台管理。"
         >
-          <img class="topbar-logo" src="images/logo-immba-icon.png" width="55" height="55" alt="" decoding="async" />
+          <img class="topbar-logo" src="images/logo-immba-icon.svg" width="55" height="55" alt="imMBA 國際地球標誌" decoding="async" />
           <span class="topbar-logo-wordmark">imMBA</span>
         </span>
         <a
@@ -86,18 +86,25 @@
       <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=79" target="_blank" rel="noopener noreferrer">跨國雙碩士</a></div>
       <div class="nav-item"><a class="nav-link" href="https://www.management.fju.edu.tw/subweb/immba/subedit.php?EID=142" target="_blank" rel="noopener noreferrer">海外交換</a></div>
       <div class="nav-item"><a class="nav-link" href="activity-list.html">活動集錦</a></div>
+      <div class="nav-item"><a class="nav-link" href="marketplace.html">商品交易平台</a></div>
     </div>
   </nav>
 
-  <main class="container">
-    <section class="hero">
+  <section class="hero" aria-label="首頁主視覺">
+    <div class="hero-inner">
       <div class="hero-box">
         <p class="hero-kicker">International MBA Program</p>
         <h2>培育具國際視野與管理實務之專業人才</h2>
         <p>本網站為輔仁大學國際經營管理碩士班（imMBA）官方資訊平台，提供招生、課程、公告與活動等正式訊息。</p>
+        <div class="hero-actions">
+          <a class="hero-btn hero-btn--primary" href="#apply">立即報名</a>
+          <a class="hero-btn hero-btn--secondary" href="marketplace.html">商品交易平台</a>
+        </div>
       </div>
-    </section>
+    </div>
+  </section>
 
+  <main class="container">
     <section class="section" id="news">
       <h3 class="section-title">最新公告</h3>
       <ul class="news-list" id="news-list"></ul>
@@ -168,6 +175,20 @@
       <div id="activity-list" class="activity-list" aria-live="polite"></div>
       <button id="activity-toggle" class="activity-toggle-btn" type="button">更多公告</button>
     </section>
+
+    <section class="apply-section" id="apply" aria-labelledby="apply-heading">
+      <h3 class="apply-title" id="apply-heading">立即報名</h3>
+      <p class="apply-desc">歡迎有志進修國際經營管理碩士班之人士提出申請。請先確認招生資格、申請時程與應備文件，再前往官方招生系統完成線上報名。</p>
+      <ul class="apply-list">
+        <li>招生資格、申請流程與重要日期以官方公告為準</li>
+        <li>獎助學金與外國學生入學資訊可於招生專區查詢</li>
+        <li>如有疑問，請透過系所聯絡管道洽詢</li>
+      </ul>
+      <div class="apply-actions">
+        <a class="hero-btn hero-btn--primary" href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=26" target="_blank" rel="noopener noreferrer">前往線上報名</a>
+        <a class="hero-btn hero-btn--secondary" href="https://www.management.fju.edu.tw/subweb/immba/enroll.php?IID=29" target="_blank" rel="noopener noreferrer">獎助學金資訊</a>
+      </div>
+    </section>
   </main>
 
   <footer class="footer">
@@ -183,10 +204,10 @@
     </div>
   </footer>
 
-  <script src="news-store.js"></script>
+  <script src="news-store.js?v=20260609-img3"></script>
   <script src="activity-pages.js"></script>
-  <script src="activity-store.js"></script>
-  <script src="script.js"></script>
+  <script src="activity-store.js?v=20260609-act2"></script>
+  <script src="script.js?v=20260609-img3"></script>
 </body>
 </html>
 

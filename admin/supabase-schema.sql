@@ -214,6 +214,18 @@ begin
     return json_build_object('ok', true, 'existed', true);
   end if;
 
+  if exists (
+    select 1 from information_schema.tables
+    where table_schema = 'public' and table_name = 'marketplace_members'
+  ) and exists (
+    select 1 from public.marketplace_members mm
+    where mm.user_id = auth.uid() or lower(trim(mm.email)) = em
+  ) then
+    raise exception
+      '此帳號為商品交易平台會員，無法登入後台管理。如需後台權限，請聯絡超級管理員在「管理員權限管理」預先新增您的 Email，再使用「登入」（請勿在後台重複註冊）。'
+      using errcode = 'P0001';
+  end if;
+
   select count(*) into n from public.admin_users;
 
   if n = 0 then
