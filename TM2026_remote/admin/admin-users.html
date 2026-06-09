@@ -403,7 +403,6 @@
               <input type="search" id="um-q" placeholder="搜尋 Email" autocomplete="off" />
             </div>
             <button type="button" class="um-btn um-btn-save" id="um-save" disabled>儲存變更</button>
-            <button type="button" class="um-btn um-btn--primary" id="um-mp-sync" hidden>從 Auth 同步會員</button>
             <button type="button" class="um-btn um-btn--primary" id="um-refresh">重新整理</button>
           </div>
           <div id="um-banner" class="um-banner" role="status"></div>
@@ -623,7 +622,7 @@
           var emptyMsg = mpRows.length
             ? "無符合搜尋結果。"
             : mpLoadError ||
-              "尚無賣場會員。若會員已在賣場註冊但仍空白，請按上方「從 Auth 同步會員」；若按鈕失敗，請在 Supabase SQL Editor 執行 marketplace-members-schema.sql 與 supabase-marketplace-isolation-v1.sql。";
+              "尚無賣場會員。若會員已在賣場註冊但仍空白，請在 Supabase SQL Editor 執行 marketplace-members-schema.sql 與 supabase-marketplace-isolation-v1.sql 後按「重新整理」。";
           wrap.innerHTML =
             '<table class="um-table"><tbody><tr class="um-empty"><td colspan="6">' +
             esc(emptyMsg) +
@@ -711,7 +710,6 @@
         document.getElementById("um-tab-marketplace").classList.toggle("um-tab--active", activeTab === "marketplace");
         document.getElementById("um-meta-admin").hidden = activeTab !== "admin";
         document.getElementById("um-meta-marketplace").hidden = activeTab !== "marketplace";
-        document.getElementById("um-mp-sync").hidden = activeTab !== "marketplace";
         page = 1;
         q = "";
         document.getElementById("um-q").value = "";
@@ -926,34 +924,6 @@
       document.getElementById("um-tab-marketplace").addEventListener("click", function () {
         setBanner("", false);
         setActiveTab("marketplace");
-      });
-
-      document.getElementById("um-mp-sync").addEventListener("click", function () {
-        var A = window.AdminAuth;
-        if (!A || typeof A.syncMarketplaceFromAuth !== "function") {
-          setBanner("請強制重新整理以載入 supabase-auth.js?v=7。", false);
-          return;
-        }
-        var btn = document.getElementById("um-mp-sync");
-        btn.disabled = true;
-        setBanner("正在從 Supabase Auth 同步賣場會員…", true);
-        A.syncMarketplaceFromAuth()
-          .then(function (res) {
-            var n = Number(res && res.synced != null ? res.synced : 0);
-            setBanner(
-              n > 0
-                ? "已同步 " + n + " 筆賣場會員。"
-                : "同步完成，沒有需要補登的新會員（可能已在列表中，或 Auth 尚無非後台帳號）。",
-              true
-            );
-            return loadMarketplaceOnly();
-          })
-          .catch(function (e) {
-            setBanner((e && e.message) || "同步失敗", false);
-          })
-          .finally(function () {
-            btn.disabled = false;
-          });
       });
 
       document.getElementById("um-filter-btn").addEventListener("click", function () {

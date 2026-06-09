@@ -649,7 +649,7 @@
           "無法讀取賣場會員。\n" +
             "① 請在 Supabase SQL Editor 執行 admin/supabase-marketplace-isolation-v1.sql（建立查詢功能）\n" +
             "② 執行後到 Dashboard → Project Settings → API → Reload schema（或等 1～2 分鐘）\n" +
-            "③ 再按「從 Auth 同步會員」\n" +
+            "③ 再按「重新整理」\n" +
             "技術訊息 RPC：" + rpcMsg + (tblMsg ? "\n資料表：" + tblMsg : "")
         );
       }
